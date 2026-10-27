@@ -3,15 +3,25 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Drizzle schema, SQL migrations, RLS, seed loader. Built in WP-03.",
+  "description": "Drizzle schema, SQL migrations, RLS, withHouseholdTx, seed loader (WP-03).",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests",
-    "migrate": "node ../../tooling/scripts/not-yet.mjs db:migrate WP-03 migrations",
-    "seed": "node ../../tooling/scripts/not-yet.mjs db:seed WP-03 migrations",
-    "test:rls": "node ../../tooling/scripts/not-yet.mjs test:rls WP-03 migrations"
+    "test": "vitest run",
+    "test:rls": "vitest run --config vitest.rls.config.ts",
+    "migrate": "tsx src/cli/migrate.ts",
+    "seed": "tsx src/cli/seed.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.4",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@mp/format": "workspace:^",
+    "@testcontainers/postgresql": "^12.2.1",
+    "@types/pg": "^8.23.1",
+    "testcontainers": "^12.2.1"
   }
 }

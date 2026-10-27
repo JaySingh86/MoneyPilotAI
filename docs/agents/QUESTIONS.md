@@ -14,6 +14,45 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-013 · WP-03 · Masked-email hint for a mismatched invite vs. invites RLS
+- Asked by: wp-builder/wp/03-db-foundation · 2026-10-27
+- Where: BACKEND_PLAN §6 (Invites, step 2); WORK_PLAN WP-05 acceptance
+- Question: `POST /invites/accept` must answer a signed-in user whose email does not match with 403 and a "sign in with {masked email}" hint. Under the WP-03 policies, a non-member sees only unaccepted invites addressed to their own email, so mp_api cannot read a mismatched invite at all. How should the API find it?
+- Options considered: (a) a `app.invite_token_hash` session variable plus a policy `token_hash = app_invite_token_hash()` (possession of the emailed token grants read access to that one invite); (b) a SECURITY DEFINER lookup returning only status + masked email for a token hash; (c) return a generic `not_found` for mismatches.
+- Blocking: no for WP-03 (no policy added for this case). WP-05 needs the answer for that acceptance item.
+- Answer: SECURITY DEFINER `app_invite_lookup(token_hash bytea)` returning only `status` (valid / expired / revoked / accepted / mismatch) and the masked invited email, using the same rule as `@mp/format` `maskEmail` (at most 3 characters, always hide one). EXECUTE to mp_api only. (tech lead, 2026-10-27) Implemented in `202610271600_wp03_g1-hardening.sql` (`app_invite_lookup`, `app_mask_email`); tests in `packages/db/test/rls/g1-hardening.test.ts`, including parity with `maskEmail`.
+
+## Q-012 · WP-03 · Who may UPDATE/DELETE audit_events for retention and deletion tombstones?
+- Asked by: wp-builder/wp/03-db-foundation · 2026-10-27
+- Where: BACKEND_PLAN §5.3 (audit_events insert-only for app roles), §7.11 (retention 2 years; tombstones after household deletion)
+- Question: `retention.purge` must delete audit events older than 2 years, and household deletion keeps "only a tombstone" (strip metadata). Both need UPDATE/DELETE, which §5.3 revokes from app roles. WP-03 implements the revoke strictly. Which role performs these?
+- Options considered: (a) a dedicated maintenance role (e.g. `mp_maintenance`, created in init.sql/infra) with narrow DELETE/UPDATE policies (`created_at < now() - interval '2 years'`; tombstoning only where the household no longer exists); (b) SECURITY DEFINER purge/tombstone functions owned by mp_migrator, callable by mp_worker; (c) run them as the migrator.
+- Blocking: no for WP-03. Blocks WP-24 retention/tombstone work.
+- Answer: A narrow SECURITY DEFINER `app_purge_audit_events()` executable by mp_worker only: deletes rows older than 2 years and tombstones events of deleted households per BACKEND_PLAN §7.11. audit_events stays append-only for all app roles otherwise. (tech lead, 2026-10-27) Implemented in `202610271600_wp03_g1-hardening.sql`: tombstoning keeps household_id, action, actor_type and created_at, sets the new `tombstoned_at`, and tombstones are deleted 1 year after `tombstoned_at`. Tested in `packages/db/test/integration/audit-purge.test.ts` with backdated rows.
+
+## Q-011 · WP-03 · Confirm RLS design choices the spec leaves open (G1)
+- Asked by: wp-builder/wp/03-db-foundation · 2026-10-27
+- Where: BACKEND_PLAN §5.3 shows only the standard household policy; ADR-003
+- Question: Please confirm these choices at G1:
+  1. **Membership helpers are SECURITY DEFINER functions owned by mp_migrator** (`app_is_household_member`, `app_household_unclaimed_by_me`, `app_user_email`). A `household_members` policy cannot query `household_members` (Postgres reports infinite recursion), and FORCE RLS applies to the owner too, so mp_migrator has read-only `*_definer_read` SELECT policies on `users`, `households`, `household_members`. Alternative: a NOLOGIN BYPASSRLS function-owner role created by init.sql/infra.
+  2. **Bootstrap uses `app.auth_subject`**: mp_api may insert/read/update a `users` row only for the verified auth subject (or `app.user_id`). Partners see each other's users rows.
+  3. **Creating a household cannot use INSERT ... RETURNING** (the creator is not a member until the membership row exists in the same transaction); the API supplies the id.
+  4. **`households.plan` is not writable by mp_api**; only mp_worker (`billing.sync`) can set it. The seed sets it through mp_worker.
+  5. **Joining**: mp_api may insert only its own membership, either as creator of a household with no members, or as non-creator holding an open (unexpired, unrevoked, unaccepted) invite to its email.
+  6. **`webhook_events`** has forced RLS with allow-all policies for mp_api and mp_worker (no tenant data; webhooks arrive with no user context).
+  7. **Pre-context lookups** the worker will need (e.g. `forwarding_token` → household for `email.inbound`, WP-20) are not possible under these policies yet; WP-20 will need a narrow SECURITY DEFINER lookup.
+- Options considered: as listed per item.
+- Blocking: no (implemented as described; easy to change before merge).
+- Answer: Confirmed as built. Also recorded: data backfills in future migrations need an explicit mp_migrator policy, because FORCE RLS applies to the owner. (tech lead, 2026-10-27) The G1 review also replaced item 5's invite path with `app_accept_invite(token_hash)` (see `202610271600_wp03_g1-hardening.sql`).
+
+## Q-010 · WP-03 · Seed values missing from the golden fixture
+- Asked by: wp-builder/wp/03-db-foundation · 2026-10-27
+- Where: `design/fixtures/rivera-household.json` (`household`, `members`); BACKEND_PLAN §5.2 (`users.email`, `households.timezone` are NOT NULL)
+- Question: The fixture has no household timezone and no member emails. The seed needs both. What should they be? The timezone matters for later engine work (what "today" is).
+- Options considered: placeholders now: timezone `America/New_York` (the `users.timezone` default), emails `sam@rivera-household.example` / `jordan@rivera-household.example`, defined as constants in `packages/db/src/seed/rivera.ts`; or add `timezone` and member emails to the fixture (spec change).
+- Blocking: no (placeholders used; the fixture was not edited).
+- Answer: Fixture updated on main (93261bd): `household.timezone = "America/New_York"`, member emails `sam@rivera-household.example` and `jordan@rivera-household.example`. The seed now reads them from the fixture; the placeholders are gone. (tech lead, 2026-10-27)
+
 ## Q-009 · WP-02 · fast-check and vitest are blocked in engine tests by the dependency allowlist
 - Asked by: wp-builder/wp/02-engine-core · 2026-10-27
 - Where: BACKEND_PLAN §7.2 Tests ("Property (fast-check)"); `.dependency-cruiser.cjs` rule `engine-npm-allowlist`
