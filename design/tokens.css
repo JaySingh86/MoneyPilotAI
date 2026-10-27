@@ -1,0 +1,164 @@
+/*
+ * MoneyPilot AI design tokens v1.1, Harbor palette (MVP, light theme).
+ * Mirrors design/tokens.json exactly. Change both files together, plus docs/DESIGN_SPEC.md.
+ * Fonts: load Manrope 600/700/800 and Inter 400/500/600 (next/font or Google Fonts).
+ */
+:root {
+  /* Background */
+  --mp-bg-canvas: #F2F4F7;
+  --mp-bg-surface: #FFFFFF;
+  --mp-bg-subtle: #F6F8FA;
+  --mp-bg-muted: #F9FAFB;
+  --mp-bg-track: #E5EAF0;
+
+  /* Border */
+  --mp-border-default: #DFE4EB;
+  --mp-border-divider: #EDF0F4;
+  --mp-border-strong: #C9D1DC;
+  --mp-border-cell: #E6EAF0;
+
+  /* Text */
+  --mp-text-primary: #111C2B;
+  --mp-text-secondary: #334155;
+  --mp-text-muted: #566173;
+  --mp-text-disabled: #636E7E;
+  --mp-text-inverse: #FFFFFF;
+
+  /* Brand */
+  --mp-brand-default: #1F4E79;
+  --mp-brand-strong: #132F4C;
+  --mp-brand-soft: #E3ECF5;
+  --mp-brand-on-soft: #1A3F63;
+  --mp-brand-tint: #F3F7FB;
+  --mp-brand-on-strong-muted: #C9D8E8;
+  --mp-brand-on-strong-subtle: #DCE6F2;
+  --mp-brand-strong-divider: #2A4A6E;
+  --mp-brand-payday-border: #B9CCE0;
+
+  /* Attention: needs a decision, nothing else */
+  --mp-attention-text: #8F430C;
+  --mp-attention-soft: #FBEEE2;
+  --mp-attention-surface: #FFF8F1;
+  --mp-attention-border: #F0D9C4;
+  --mp-attention-chip-border: #E6BE98;
+  --mp-attention-mark: #C2691F;
+  --mp-attention-mark-on-strong: #F0A868;
+
+  /* Info */
+  --mp-info-text: #3E4C5E;
+  --mp-info-soft: #E8ECF1;
+  --mp-info-border: #7D8A9C;
+
+  /* Income */
+  --mp-income-text: #18794E;
+  --mp-income-soft: #E3F3EA;
+  --mp-income-on-soft: #146B44;
+  --mp-income-border: #A6D8BE;
+
+  /* People: A = household creator (teal), B = invited partner (plum) */
+  --mp-partner-a-mark: #0F7B6C;
+  --mp-partner-a-soft: #DDF1EE;
+  --mp-partner-a-text: #0B5A4F;
+  --mp-partner-b-mark: #8A4FB0;
+  --mp-partner-b-soft: #F0E6F6;
+  --mp-partner-b-text: #5E2F80;
+  --mp-both-mark: #1F4E79;
+
+  /* Chart */
+  --mp-chart-balance: #5F86AE;
+  --mp-chart-payday: #1F4E79;
+  --mp-chart-lowest: #C2691F;
+  --mp-chart-cushion: #C98A57;
+  --mp-chart-axis: #D3DAE3;
+  --mp-chart-bar-on-strong: #4C6E94;
+  --mp-chart-payday-on-strong: #C9D8E8;
+
+  /* Controls */
+  --mp-control-off: #B7C0CC;
+  --mp-control-radio-off: #8794A6;
+
+  /* Fonts */
+  --mp-font-display: Manrope, Inter, system-ui, sans-serif;
+  --mp-font-body: Inter, system-ui, sans-serif;
+
+  /* Type scale: size / line-height */
+  --mp-type-display-xl: 800 52px/52px var(--mp-font-display);
+  --mp-type-display-l: 800 44px/44px var(--mp-font-display);
+  --mp-type-amount-xl: 800 34px/38px var(--mp-font-display);
+  --mp-type-heading-1: 800 32px/37px var(--mp-font-display);
+  --mp-type-amount-l: 800 28px/34px var(--mp-font-display);
+  --mp-type-heading-1m: 800 26px/30px var(--mp-font-display);
+  --mp-type-heading-3: 800 22px/28px var(--mp-font-display);
+  --mp-type-heading-2: 700 18px/24px var(--mp-font-display);
+  --mp-type-heading-2m: 700 16px/22px var(--mp-font-display);
+  --mp-type-title: 600 15px/21px var(--mp-font-body);
+  --mp-type-body-l: 400 15px/22px var(--mp-font-body);
+  --mp-type-body: 400 14px/20px var(--mp-font-body);
+  --mp-type-small: 400 13px/19px var(--mp-font-body);
+  --mp-type-caption: 400 12px/17px var(--mp-font-body);
+  --mp-type-overline: 600 12px/16px var(--mp-font-body);
+  --mp-type-micro: 400 11px/14px var(--mp-font-body);
+  --mp-tracking-display-xl: -0.03em;
+  --mp-tracking-heading: -0.02em;
+  --mp-tracking-overline: 0.08em;
+  --mp-tracking-table-header: 0.06em;
+
+  /* Spacing */
+  --mp-space-0_5: 2px;
+  --mp-space-1: 4px;
+  --mp-space-1_5: 6px;
+  --mp-space-2: 8px;
+  --mp-space-2_5: 10px;
+  --mp-space-3: 12px;
+  --mp-space-3_5: 14px;
+  --mp-space-4: 16px;
+  --mp-space-5: 20px;
+  --mp-space-5_5: 22px;
+  --mp-space-6: 24px;
+  --mp-space-7: 28px;
+  --mp-space-10: 40px;
+  --mp-space-14: 56px;
+
+  /* Radius */
+  --mp-radius-xs: 6px;
+  --mp-radius-sm: 8px;
+  --mp-radius-md: 10px;
+  --mp-radius-lg: 12px;
+  --mp-radius-xl: 14px;
+  --mp-radius-2xl: 16px;
+  --mp-radius-3xl: 18px;
+  --mp-radius-4xl: 20px;
+  --mp-radius-full: 999px;
+
+  /* Elevation */
+  --mp-shadow-selected: 0 1px 2px rgba(17, 28, 43, 0.12);
+  --mp-shadow-overlay: 0 8px 24px rgba(17, 28, 43, 0.16);
+
+  /* Sizes */
+  --mp-touch-target: 44px;
+  --mp-sidebar-width: 240px;
+  --mp-content-max-width: 1160px;
+  --mp-mobile-gutter: 16px;
+  --mp-button-height-web: 40px;
+  --mp-button-height-mobile: 46px;
+  --mp-button-height-mobile-bar: 50px;
+  --mp-input-height: 44px;
+  --mp-segment-height: 36px;
+  --mp-focus-ring: 2px solid var(--mp-brand-default);
+  --mp-focus-offset: 2px;
+
+  /* Motion */
+  --mp-duration: 150ms;
+  --mp-easing: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Breakpoints (custom properties can't be used in media queries):
+ *   compact: max-width 799px   -> top bar + drawer, mobile patterns
+ *   wide:    min-width 1200px  -> two-column body
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mp-duration: 0ms;
+  }
+}

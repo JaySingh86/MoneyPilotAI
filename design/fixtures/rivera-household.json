@@ -1,0 +1,108 @@
+{
+  "$description": "Golden sample household used in every mockup. Load it in dev/storybook and in tests: with this data the screens must show the values under `expected`, matching the design canvas. All money is integer cents. Company names are fictional.",
+  "today": "2026-10-27",
+  "household": {
+    "id": "hh-rivera",
+    "name": "Rivera household",
+    "plan": "family_plus",
+    "cushionCents": 50000,
+    "primaryIncomeId": "inc-sam"
+  },
+  "members": [
+    { "id": "m-sam", "name": "Sam", "colorRole": "partnerA", "emailConnection": { "provider": "gmail", "maskedAddress": "sam•••@gmail.com", "status": "connected" } },
+    { "id": "m-jordan", "name": "Jordan", "colorRole": "partnerB", "emailConnection": null }
+  ],
+  "forwardingAddress": "rivera-7k2@in.moneypilot.app",
+  "balance": { "amountCents": 340000, "asOf": "2026-10-27", "source": "csv" },
+  "incomes": [
+    { "id": "inc-sam", "owner": "m-sam", "name": "Sam’s pay", "amountCents": 315000, "schedule": { "type": "biweekly", "anchor": "2026-11-06" } },
+    { "id": "inc-jordan", "owner": "m-jordan", "name": "Jordan’s pay", "amountCents": 290000, "schedule": { "type": "monthly_last_weekday", "weekday": "friday" } }
+  ],
+  "bills": [
+    { "id": "b-car", "name": "Car payment", "owner": "m-sam", "amountCents": 38900, "schedule": { "type": "monthly", "day": 29 } },
+    { "id": "b-phone", "name": "Phone plan", "owner": "m-jordan", "amountCents": 9500, "schedule": { "type": "monthly", "day": "last" } },
+    { "id": "b-rent", "name": "Rent", "owner": "m-jordan", "amountCents": 215000, "schedule": { "type": "monthly", "day": 1 } },
+    { "id": "b-daycare", "name": "Daycare", "owner": "m-sam", "amountCents": 124000, "schedule": { "type": "monthly", "day": 2 } },
+    { "id": "b-stream", "name": "Streaming bundle", "owner": "m-sam", "amountCents": 2299, "previousAmountCents": 1999, "priceChangedOn": "2026-09-28", "kind": "subscription", "schedule": { "type": "monthly", "day": 2 } },
+    { "id": "b-power", "name": "Electricity", "owner": "m-sam", "estimate": { "historyCents": [11800, 17100, 13700] }, "schedule": { "type": "monthly", "day": 3 } },
+    { "id": "b-carins", "name": "Car insurance renewal", "owner": "m-jordan", "amountCents": 68400, "kind": "insurance", "schedule": { "type": "every_n_months", "n": 6, "next": "2026-11-04" } },
+    { "id": "b-internet", "name": "Internet", "owner": "m-jordan", "amountCents": 7000, "schedule": { "type": "monthly", "day": 5 } },
+    { "id": "b-news", "name": "News", "owner": "m-jordan", "amountCents": 800, "kind": "subscription", "schedule": { "type": "monthly", "day": 8 } },
+    { "id": "b-cloud", "name": "Cloud storage", "owner": "m-sam", "amountCents": 299, "kind": "subscription", "schedule": { "type": "monthly", "day": 9 } },
+    { "id": "b-musicf", "name": "Music family plan", "owner": "m-jordan", "amountCents": 1699, "kind": "subscription", "schedule": { "type": "monthly", "day": 12 } },
+    { "id": "b-card", "name": "Credit card", "owner": "m-jordan", "estimate": { "fromLastStatementCents": 64000 }, "schedule": { "type": "monthly", "day": 15 } },
+    { "id": "b-fit", "name": "Fitness app", "owner": "m-sam", "amountCents": 1499, "kind": "subscription", "schedule": { "type": "monthly", "day": 17 } },
+    { "id": "b-water", "name": "Water & trash", "owner": "m-sam", "amountCents": 9600, "schedule": { "type": "every_n_months", "n": 3, "next": "2026-11-18" } },
+    { "id": "b-music2", "name": "Music (second service)", "owner": "m-sam", "amountCents": 1099, "kind": "subscription", "markedPossiblyUnused": true, "schedule": { "type": "monthly", "day": 21 } },
+    { "id": "b-kids", "name": "Kids learning app", "owner": "m-jordan", "amountCents": 799, "kind": "subscription", "schedule": { "type": "monthly", "day": 24 } }
+  ],
+  "plannedExpenses": [
+    { "id": "p-thanks", "name": "Thanksgiving", "owner": "both", "amountCents": 25000, "date": "2026-11-26" }
+  ],
+  "goals": [
+    { "id": "g-emergency", "name": "Emergency fund", "targetCents": 1000000, "savedCents": 640000, "monthlyCents": 30000 },
+    { "id": "g-tahoe", "name": "Lake Tahoe trip", "targetCents": 240000, "savedCents": 115000, "monthlyCents": 25000, "targetDate": "2027-03-01" },
+    { "id": "g-gifts", "name": "Holiday gifts", "type": "planned_expense", "targetCents": 80000, "savedCents": 42000, "targetDate": "2026-12-15" }
+  ],
+  "renewals": [
+    { "id": "r-car", "name": "Car insurance", "provider": "Lakeside Auto Insurance", "category": "insurance", "amountCents": 68400, "frequency": "6_months", "renewsOn": "2026-11-04", "owner": "m-jordan", "autoRenew": true, "source": "email+csv" },
+    { "id": "r-health", "name": "Health insurance", "provider": "Jordan’s employer plan", "category": "insurance", "amountCents": 24800, "frequency": "monthly_payroll", "renewsOn": "2027-01-01", "decisionBy": "2026-11-13", "owner": "m-jordan", "autoRenew": "rolls_over", "source": "email" },
+    { "id": "r-renters", "name": "Renters insurance", "provider": "Northgate Home Insurance", "category": "insurance", "amountCents": 16800, "previousAmountCents": 14900, "frequency": "yearly", "renewsOn": "2027-01-09", "owner": "m-sam", "autoRenew": true, "source": "email", "policyLast4": "4821" },
+    { "id": "r-moto", "name": "Motorcycle insurance", "provider": "Lakeside Auto Insurance", "category": "insurance", "amountCents": 31200, "frequency": "yearly", "renewsOn": "2027-03-15", "owner": "m-sam", "autoRenew": true, "source": "email" },
+    { "id": "r-life", "name": "Term life insurance", "provider": "Evergreen Life", "category": "insurance", "amountCents": 50400, "frequency": "yearly", "renewsOn": "2027-08-12", "owner": "m-sam", "autoRenew": true, "source": "csv" },
+    { "id": "r-av", "name": "Antivirus", "provider": "Yearly subscription", "category": "subscription", "amountCents": 4999, "frequency": "yearly", "renewsOn": "2026-12-01", "cancelBy": "2026-11-30", "owner": "m-sam", "autoRenew": true, "source": "email", "markedPossiblyUnused": true },
+    { "id": "r-shop", "name": "Shopping membership", "provider": "Yearly membership", "category": "membership", "amountCents": 13900, "frequency": "yearly", "renewsOn": "2026-12-18", "owner": "m-jordan", "autoRenew": true, "source": "email" },
+    { "id": "r-club", "name": "Warehouse club", "provider": "Yearly membership", "category": "membership", "amountCents": 6500, "frequency": "yearly", "renewsOn": "2027-02-02", "owner": "m-jordan", "autoRenew": true, "source": "csv" },
+    { "id": "r-reg", "name": "Car registration", "provider": "State DMV", "category": "vehicle_home", "amountCents": 18600, "frequency": "yearly", "renewsOn": "2027-01-31", "owner": "m-sam", "autoRenew": false, "source": "email" }
+  ],
+  "renewalsNote": "The 7 monthly subscriptions in `bills` (kind: subscription) also appear on the renewals screen. 16 items in total.",
+  "scenarios": {
+    "shortfall": {
+      "$description": "Same household plus one planned expense. Drives the shortfall boards.",
+      "addPlannedExpenses": [ { "id": "p-repair", "name": "Car repair", "owner": "both", "amountCents": 180000, "date": "2026-10-28" } ],
+      "expected": {
+        "runwayEndOfDayCents": {
+          "2026-10-27": 340000, "2026-10-28": 160000, "2026-10-29": 121100, "2026-10-30": 411100, "2026-10-31": 401600,
+          "2026-11-01": 186600, "2026-11-02": 60301, "2026-11-03": 46101, "2026-11-04": -22299, "2026-11-05": -29299, "2026-11-06": 285701
+        },
+        "lowest": { "date": "2026-11-05", "balanceCents": -29299 },
+        "safeToSpendCents": -79299,
+        "heroDisplay": "$793 short",
+        "belowCushionFrom": "2026-11-03",
+        "belowZeroDates": ["2026-11-04", "2026-11-05"],
+        "itemsBeforePayday": { "count": 9, "totalCents": 659299 },
+        "options": [
+          { "id": "move-from-emergency", "amountCents": 130000, "safeToSpendCents": 50701, "display": "$507 safe to spend", "emergencyReachMonth": "Mar 2028" },
+          { "id": "split-repair", "amountNowCents": 90000, "amountAfterPaydayCents": 90000, "safeToSpendCents": 10701, "display": "$107 safe to spend" },
+          { "id": "car-insurance-on-payday", "safeToSpendCents": -10899, "minBalanceCents": 39101, "display": "$109 short, never below $0" }
+        ]
+      }
+    }
+  },
+  "expected": {
+    "planningWindow": { "from": "2026-10-27", "to": "2026-11-06", "daysToPayday": 10 },
+    "runwayEndOfDayCents": {
+      "2026-10-27": 340000, "2026-10-28": 340000, "2026-10-29": 301100, "2026-10-30": 591100, "2026-10-31": 581600,
+      "2026-11-01": 366600, "2026-11-02": 240301, "2026-11-03": 226101, "2026-11-04": 157701, "2026-11-05": 150701, "2026-11-06": 465701
+    },
+    "lowest": { "date": "2026-11-05", "balanceCents": 150701 },
+    "safeToSpendCents": 100701,
+    "safeToSpendDisplay": "$1,007",
+    "perDayDisplay": "≈ $100 a day",
+    "billsBeforePayday": { "count": 8, "totalCents": 479299, "byOwner": { "m-sam": 179399, "m-jordan": 299900 } },
+    "safeToSpendIfCarInsuranceMovedToPaydayCents": 169101,
+    "safeToSpendAfterElectricityActual15137Cents": 99764,
+    "electricityEstimate": { "amountCents": 14200, "rangeDisplay": "±$30" },
+    "tahoeGoal": { "projectedByTargetCents": 215000, "gapCents": 25000, "suggestedMonthlyCents": 31300, "alternativeTargetDate": "2027-04-01" },
+    "november": { "incomeCents": 920000, "billsCount": 16, "billsCents": 559094, "goalsAndPlannedCents": 80000, "leftForEverydayCents": 280906 },
+    "renewals": { "count": 16, "yearlyCents": 678727, "bigRenewalsNext90DaysCents": 104099, "priceIncreaseYearlyCents": 5500, "couldSaveYearlyCents": 18187, "foundAutomatically": 16 },
+    "billsPage": { "rows": 18, "monthlyBillsAverageCents": 495694, "monthlyIncomeAverageCents": 972500, "leftAfterBillsCents": 476806, "estimatesToConfirm": 2 },
+    "goalsPage": {
+      "savingEachMonthCents": 55000, "savedSoFarCents": 797000, "effectOnSafeToSpendCents": 0,
+      "emergency": { "percent": 64, "status": "Reached in Oct 2027" },
+      "tahoe": { "percent": 48, "status": "$250 behind", "suggestedMonthlyCents": 31300 },
+      "gifts": { "percent": 53, "status": "$380 to set aside", "suggestedMonthlyCents": 19000 }
+    },
+    "tasks": { "dueThisWeek": 3, "later": 4, "done": 3, "navBadge": 3 }
+  }
+}
