@@ -1,6 +1,6 @@
 # MoneyPilot AI: instructions for coding agents
 
-MoneyPilot is a household financial planning assistant for US couples and families. It shows what is coming before payday, how much is safe to spend, who owns each bill, and what to decide this week. It is web first (Next.js); mobile (Expo) comes later. **It never moves money.**
+MoneyPilot is a household financial planning assistant for US couples and families. It shows what is coming before payday, how much is safe to spend, who owns each bill, and what to decide this week. It is web first (Next.js); mobile (React Native CLI, no Expo) comes later. **It never moves money.**
 
 This file is the operating manual for every coding agent working in this repo. Read it fully before your first change in a session.
 
@@ -22,7 +22,7 @@ This file is the operating manual for every coding agent working in this repo. R
 
 ```
 apps/web        Next.js App Router (UI only, calls api)
-apps/mobile     Expo React Native (later)
+apps/mobile     React Native CLI app, bare (later; ADR-016)
 apps/api        Fastify HTTP server: routes, auth, webhooks
 apps/worker     pg-boss jobs + cron
 packages/engine     Pure planning math. No I/O. Golden + property tests.

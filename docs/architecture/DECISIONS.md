@@ -23,6 +23,7 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 | 013 | Billing through an adapter (merchant of record proposed) | Proposed |
 | 014 | Agent-driven delivery: work packages, path ownership, CI as the contract | Accepted |
 | 015 | Timestamped SQL migrations, expand/contract | Accepted |
+| 016 | Mobile app on the React Native CLI (no Expo) | Accepted |
 
 ---
 
@@ -81,7 +82,7 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 **Status:** default accepted. Switching any route to a cheaper model (for example `claude-haiku-5-5` for extraction) is an owner decision, made after the eval gates in BACKEND_PLAN §7.9.
 
 ## ADR-011 Auth adapter (Proposed: Clerk)
-**Decision:** `apps/api/src/auth/provider.ts` defines `verifyToken`, `getUser` and `requireStepUp`. The first implementation is Clerk (MFA, passkeys, Expo SDK). Our `users` table is keyed by `auth_subject`.
+**Decision:** `apps/api/src/auth/provider.ts` defines `verifyToken`, `getUser` and `requireStepUp`. The first implementation is Clerk (MFA, passkeys). Its React Native SDK depends on Expo modules, which ADR-016 rules out, so mobile sign-in needs a plain React Native integration or a provider with a native RN SDK; settle this together with the provider choice. Our `users` table is keyed by `auth_subject`.
 **Alternative:** AWS Cognito, behind the same interface.
 
 ## ADR-012 Hosting (Proposed: AWS + CDK, Vercel for web)
@@ -103,3 +104,15 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 ## ADR-015 Migrations
 **Decision:** plain SQL migrations named `YYYYMMDDHHMM_<wp>_<slug>.sql` in `packages/db/migrations`, applied in name order by our runner. Drizzle schema files mirror them for typed queries. Changes are expand → deploy → contract. A merged migration is never edited.
 **Consequences:** parallel agents don’t collide on sequence numbers; rollbacks are forward fixes.
+
+## ADR-016 Mobile app on the React Native CLI (no Expo)
+**Context:** the mobile app (after web validation) needs the same TypeScript packages as the web app. The owner prefers full native control over the Expo managed toolchain.
+**Decision:** `apps/mobile` is a bare React Native app created and built with the React Native CLI, with no Expo SDK or Expo modules. It reuses `@mp/contracts` (generated API client), `@mp/format` and `@mp/ui/tokens`. Choices that previously assumed Expo:
+- **Navigation:** React Navigation.
+- **Secure token storage:** `react-native-keychain` (iOS Keychain, Android Keystore).
+- **Push:** Firebase Cloud Messaging through `@react-native-firebase/messaging`; iOS goes through APNs via FCM.
+- **Sign-in:** the provider's plain React Native integration, or a provider with a native RN SDK (see ADR-011).
+- **Builds and releases:** Xcode and Android Studio projects in the repo, Fastlane for signing and store uploads, CI on macOS runners for iOS.
+- **Tests:** Jest with React Native Testing Library; Detox for end-to-end.
+
+**Consequences:** full control over native code and dependencies, at the cost of maintaining the iOS and Android projects ourselves (upgrades with the React Native Upgrade Helper, signing, store builds). There are no over-the-air JS updates; every change ships through the app stores. Pin the React Native version in WP-30 and follow its upgrade guide for each release.

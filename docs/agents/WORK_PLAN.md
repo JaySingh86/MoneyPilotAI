@@ -47,7 +47,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-27 | P1 · Explain (AI text) + number validator | P1 | WP-11, WP-12 | M | G3 | todo |
 | WP-28 | P1 · Ask MoneyPilot (engine tools, SSE) | P1 | WP-27 | L | G3 | todo |
 | WP-29 | P1 · Realtime invalidation (SSE) | P1 | WP-12 | S | — | todo |
-| WP-30 | P1 · Mobile app (Expo) | P1 | WP-08, WP-04 | L | — | todo |
+| WP-30 | P1 · Mobile app (React Native CLI) | P1 | WP-08, WP-04 | L | — | todo |
 | WP-31 | P1 · Bank adapter (Plaid) in staging | P1 | WP-16 | M | G2 | todo |
 
 **Human gates:**
@@ -346,5 +346,5 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 - **WP-27 Explain:** AI text for decisions, cached per snapshot, plus a number validator (every amount and date in the text must exist in the snapshot) with a template fallback. Gate G3.
 - **WP-28 Ask MoneyPilot:** SSE endpoint, engine tools (`get_plan`, `what_if`, `goal_options`, `list_items`, `renewals_summary`) with strict schemas, validator, rate limits, entitlement. Gate G3.
 - **WP-29 Realtime:** Postgres LISTEN/NOTIFY → SSE `/events`; web query invalidation.
-- **WP-30 Mobile:** Expo app with the mobile screens from the canvas, using the same client and format packages; push via Expo.
+- **WP-30 Mobile:** React Native CLI app (no Expo; ADR-016) with the mobile screens from the canvas, using the same client, format and token packages; React Navigation, `react-native-keychain` for tokens, FCM push via `@react-native-firebase/messaging`; native builds and store releases through Fastlane.
 - **WP-31 Bank adapter:** Plaid in staging behind a flag; compare recurring streams with our detection; report the cost per household. Gate G2.

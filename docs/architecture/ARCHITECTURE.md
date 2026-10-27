@@ -42,7 +42,7 @@ flowchart TB
 flowchart LR
   subgraph Client
     WEB[apps/web<br/>Next.js on Vercel]
-    MOB[apps/mobile<br/>Expo, later]
+    MOB[apps/mobile<br/>React Native CLI, later]
   end
   subgraph AWS["AWS us-east-1"]
     ALB[ALB + WAF]

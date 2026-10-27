@@ -110,7 +110,7 @@ flowchart LR
 ```
 apps/
   web/                 Next.js (App Router). UI only; talks to api.
-  mobile/              Expo React Native (after web validation)
+  mobile/              React Native CLI app, no Expo (after web validation; ADR-016)
   api/                 Fastify server: routes, auth, validation, webhooks
   worker/              pg-boss workers + cron schedules
 packages/
@@ -149,11 +149,11 @@ Dependency rules, enforced with a lint rule:
 | Jobs / cron | pg-boss | Transactional enqueue, retries, cron, singleton keys, no extra infra | SQS + EventBridge when scale demands |
 | Dates | `@js-temporal/polyfill` (`PlainDate`, `ZonedDateTime`) | Date-only bill logic without timezone bugs | date-fns-tz |
 | Recurrence | RFC 5545 RRULE via the `rrule` library | Standard; covers all our schedules | Custom schedule JSON |
-| Auth | Clerk (MFA: TOTP and passkeys; React and Expo SDKs) | Fast to ship, MFA built in | AWS Cognito, Auth0 |
+| Auth | Clerk (MFA: TOTP and passkeys; React SDK). Mobile needs a plain React Native integration (ADR-016) | Fast to ship, MFA built in | Auth0 (react-native-auth0), AWS Cognito |
 | Files | S3 + SSE-KMS, presigned uploads | Standard, cheap, encrypted | — |
 | Email send | Amazon SES (transactional, with configuration sets for events) | Cheap; delivery events via SNS | Postmark |
 | Inbound email | SES receiving → S3 → SNS → worker | Same vendor, encrypted at rest | Postmark inbound |
-| Push (later) | Expo Push → APNs/FCM | Matches React Native | OneSignal |
+| Push (later) | Firebase Cloud Messaging via `@react-native-firebase/messaging` (FCM for Android, APNs through FCM for iOS) | No Expo dependency | Direct APNs + FCM from the worker, OneSignal |
 | AI | Anthropic Claude API (`@anthropic-ai/sdk`) | Structured outputs, tool use, Batch API, prompt caching | — |
 | Secrets / keys | AWS Secrets Manager + KMS | Envelope encryption for OAuth tokens | HashiCorp Vault |
 | IaC | AWS CDK (TypeScript) | One language across the stack | Terraform |
@@ -760,7 +760,7 @@ Extra rules:
   - Their audit history stays with the household.
   - If they were the last member, use delete instead.
 
-**Sessions on mobile:** Clerk Expo SDK. Tokens live in SecureStore, and the API stays the same.
+**Sessions on mobile:** the mobile app is a React Native CLI app without Expo (ADR-016). Clerk’s official React Native SDK depends on Expo modules, so H-01 decides between a plain-React-Native integration of the chosen provider and a provider with a native RN SDK (Auth0, Cognito). Tokens live in the iOS Keychain / Android Keystore via `react-native-keychain`. The API stays the same.
 
 ---
 
@@ -894,7 +894,7 @@ export interface PlanResult {
 - **Delivery tracking:** SES events (Delivery, Bounce, Complaint) arrive via SNS at `/webhooks/ses-events` and update delivery status. Hard bounces disable that email channel for the user and raise a `security`/`system` notification in the app.
 - **Cancel or reschedule:** when an occurrence is paid, moved or deleted, future scheduled notifications for it are cancelled and re-planned.
 - **Email content rules:** no amounts in subject lines (lock-screen privacy). Bodies are allowed to show amounts and link to the app. Sent from a dedicated subdomain with SPF, DKIM and DMARC set up. Transactional mail includes an unsubscribe link for non-essential categories.
-- **Push** (mobile phase): Expo push tokens in `devices`, the same notification rows, `channel = push`.
+- **Push** (mobile phase): FCM registration tokens in `devices` (APNs reached through FCM), the same notification rows, `channel = push`.
 
 ### 7.7 CSV import and recurring detection (FR-07, FR-09)
 
@@ -1370,7 +1370,7 @@ Every job handler:
 - Paid plans live; measure conversion and 30-day retention.
 - Explain (AI text for “Decide this week”) behind a flag, with the number validator.
 - Ask MoneyPilot (Premium test) with engine tools and validators.
-- Realtime SSE invalidation; Expo push groundwork for mobile.
+- Realtime SSE invalidation; push groundwork for mobile (FCM).
 - Complete CASA → move Gmail out of testing mode.
 - Plaid evaluation in staging: coverage, cost per household, recurring-streams quality vs our detection. **Go / no-go at Day 90.**
 
