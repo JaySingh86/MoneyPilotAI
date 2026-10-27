@@ -14,6 +14,60 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-009 · WP-02 · fast-check and vitest are blocked in engine tests by the dependency allowlist
+- Asked by: wp-builder/wp/02-engine-core · 2026-10-27
+- Where: BACKEND_PLAN §7.2 Tests ("Property (fast-check)"); `.dependency-cruiser.cjs` rule `engine-npm-allowlist`
+- Question: The allowlist applies to every file under `packages/engine`, including `*.test.ts`, and covers `npm-dev`. So engine tests can't import `fast-check` (or even `vitest`). Should the engine rules exempt test files (e.g. `pathNot: "\\.test\\.ts$"` on `from`), or should fast-check be added to the allowlist?
+- Options considered: (a) exempt test files from the engine npm rule; (b) add fast-check to the allowlist; (c) keep the current approach.
+- Current approach (WP-02): engine tests run with `vitest run --globals` (no `vitest` import), and property tests use a seeded generator in `packages/engine/src/testing/prng.ts` (300 fixed seeds per property, with non-vacuity checks). (The related `Temporal.Now` lint gap is closed on main by `eslint.config.js`.)
+- Blocking: no. If (a) or (b) is chosen, the property tests can move to fast-check without changing the properties.
+- Answer: (tech lead, 2026-10-27; spec commit ee8a55f) (a). `.dependency-cruiser.cjs` now exempts `*.test.ts` and `packages/engine/src/testing/**` from the engine npm allowlist, and a new rule `engine-testing-only-in-tests` stops production code importing `@mp/engine/testing`. fast-check is optional; WP-02 keeps the seeded generator.
+
+## Q-008 · WP-02 · What exactly counts in "Bills before payday"?
+- Asked by: wp-builder/wp/02-engine-core · 2026-10-27
+- Where: DESIGN_SPEC §5.1 Overview KPI tile; fixture `expected.billsBeforePayday` and `scenarios.shortfall.expected.itemsBeforePayday`
+- Question: The fixture fixes the totals but not these edges: (1) does a bill due on the payday itself count as "before payday"? (2) does a bill already marked paid (still due in the window) count? (3) planned expenses: the shortfall scenario's `itemsBeforePayday` (9 items, $6,592.99) includes the car repair, so they seem to count, but the key name differs from `billsBeforePayday`; (4) how should `byOwner` treat Both/Split items (own key, or 50/50 between partners)?
+- Options considered: as implemented, or the alternatives in each sub-question.
+- Current behavior (WP-02): money out due from today through the day before payday; planned expenses included; paid occurrences still listed; skipped and payroll-paid items left out; `byOwner` uses the raw owner key (`both`, `split`, or a member id). All fixture values pass under this reading.
+- Blocking: no.
+- Answer: (tech lead, 2026-10-27) Accepted as built.
+
+## Q-007 · WP-02 · Planning window when today is payday
+- Asked by: wp-builder/wp/02-engine-core · 2026-10-27
+- Where: DESIGN_SPEC §6 rules 1, 3, 5; BACKEND_PLAN §7.2 `planningWindow` ("on or after asOf")
+- Question: When today is the primary payday, the window is a single day (`daysToPayday` 0). Rule 3 excludes the final payday from the lowest point, which leaves no days, and rule 5 divides by 0. Should the window instead run to the following payday on payday itself?
+- Options considered: (a) keep the single-day window, take the lowest point over that day (including the pay) and show no per-day amount; (b) on payday, plan to the next payday.
+- Current behavior (WP-02): (a). `perDayCents` is null.
+- Blocking: no.
+- Answer: (tech lead, 2026-10-27; spec commit ee8a55f) (b). The window ends at the next primary-income date strictly after `asOf`; on payday (Nov 6 in the fixture) it runs to Nov 20. Implemented in WP-02 with regression tests for asOf 2026-11-06.
+
+## Q-006 · WP-02 · Rule 7 when the balance date equals the paid or due date
+- Asked by: wp-builder/wp/02-engine-core · 2026-10-27
+- Where: DESIGN_SPEC §6 rule 7; BACKEND_PLAN §7.2 `projectRunway`
+- Question: Rule 7 covers a balance that is older or newer than a paid date, but not the same day. Also, should an unpaid occurrence due before the balance date (overdue) count?
+- Options considered: (a) treat the balance as the closing balance of its date: a payment made on that date is already in it (doesn't count), an unpaid bill due that date still counts, and unpaid bills due before it don't count ("apply unpaid occurrences between them"); (b) treat it as an opening balance.
+- Current behavior (WP-02): (a). A paid occurrence counts on its paid date when that date is after the balance date (a bill paid early moves to its paid date). Unpaid occurrences between the balance date and today are applied before the first day ("carried events"). The fixture's balance date is today, so golden values are the same either way.
+- Blocking: no.
+- Answer: (tech lead, 2026-10-27; spec commit ee8a55f) (a). Entered balances are end-of-day balances, so an occurrence paid that same day is already included. WP-07 will flag overdue unpaid bills.
+
+## Q-005 · WP-02 · Which holiday observance does the weekend rule use?
+- Asked by: wp-builder/wp/02-engine-core · 2026-10-27
+- Where: BACKEND_PLAN §7.1 "Weekend rule … US federal holidays from a static table"
+- Question: For a holiday on a Saturday, federal employees (OPM) observe the Friday before, but Federal Reserve banks stay open on that Friday. Since the weekend rule is about when money moves, which calendar should the table follow?
+- Options considered: (a) Federal Reserve: Sunday → Monday, Saturday not shifted; (b) OPM: Sunday → Monday, Saturday → Friday.
+- Current behavior (WP-02): (a), table for 2024–2035 in `packages/engine/src/schedule/holidays.ts`, verified against the statutory rules. Dates outside the table throw `holiday_table_out_of_range`, so a stale table fails loudly. Example difference: Fri Dec 31 2027 is a business day under (a), not under (b).
+- Blocking: no.
+- Answer: (tech lead, 2026-10-27) (a) Federal Reserve holiday calendar.
+
+## Q-004 · WP-02 · Month-end days: clamp or skip?
+- Asked by: wp-builder/wp/02-engine-core · 2026-10-27
+- Where: BACKEND_PLAN §7.1 schedule mappings; ADR-006
+- Question: A bill "monthly on the 30th" has no February date, an "every 6 months" anchor on Aug 31 has no Feb 31, and a yearly Feb 29 anchor has no date in common years. Under plain RFC 5545 (`BYMONTHDAY=30`) those months are skipped, which would leave a bill out of the plan. Should they clamp to the month's last day instead?
+- Options considered: (a) clamp to the last day, encoded as `BYMONTHDAY=d,-1;BYSETPOS=1` so the RRULE and the expansion agree; (b) skip, as plain RFC 5545 does.
+- Current behavior (WP-02): (a). `scheduleToRRule` emits the clamped form for days 29–31 (and Feb 29 yearly), and `scheduleFromRRule` rejects a bare `BYMONTHDAY=29..31` because it would skip months. Expansion is checked against the `rrule` library on 300 random schedules.
+- Blocking: no.
+- Answer: (tech lead, 2026-10-27; spec commit ee8a55f) (a) Clamp to the month's last day; a bill never vanishes.
+
 ## Q-003 · WP-04 · "Keep cents" under $100 vs the "+$55 / yr" example
 - Asked by: wp-builder, wp/04-format-tokens · 2026-10-27
 - Where: DESIGN_SPEC §7, Sign row

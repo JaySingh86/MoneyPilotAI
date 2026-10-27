@@ -3,12 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Pure planning math (DESIGN_SPEC \u00a76). No I/O, no clock, no randomness. Built in WP-02 and WP-07.",
+  "description": "Pure planning math (DESIGN_SPEC §6). No I/O, no clock, no randomness. Built in WP-02 and WP-07.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --globals"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1"
+  },
+  "devDependencies": {
+    "rrule": "^2.8.1"
   }
 }
