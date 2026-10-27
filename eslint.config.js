@@ -9,6 +9,7 @@ export default tseslint.config(
   {
     ignores: [
       "**/node_modules/**",
+      ".claude/**",
       "**/dist/**",
       "**/.next/**",
       "**/.turbo/**",
@@ -64,6 +65,7 @@ export default tseslint.config(
         "error",
         { object: "Date", property: "now", message: "Pass asOf in; the engine has no clock." },
         { object: "Math", property: "random", message: "The engine is deterministic." },
+        { object: "Temporal", property: "Now", message: "Pass asOf in; the engine has no clock." },
       ],
       "no-restricted-syntax": [
         "error",

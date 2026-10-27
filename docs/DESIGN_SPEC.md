@@ -301,7 +301,7 @@ All of these run in tested, deterministic code. AI never produces these numbers.
 |---|---|---|
 | Money in tables, lists and detail | en-US, $, 2 decimals | $2,150.00 |
 | Money in hero and KPI tiles | Whole dollars (bill totals keep cents). Money you can spend (safe to spend, per day) rounds **down**; shortfalls round **up**; averages and summaries round to the **nearest** dollar. | $1,007 · $793 short · about $566 a month · $4,792.99 |
-| Sign | Outflows use “−” (U+2212) in mixed lists and charts. Income uses “+” in `income.text`. Bill tables have no sign. Calendar chips and per-year changes keep the sign and show whole dollars rounded to the nearest dollar when the amount is $100 or more; smaller amounts keep cents. | −$389.00 · +$2,900.00 · +$3,150 · −$1,263 · −$22.99 · +$55 / yr |
+| Sign | Outflows use “−” (U+2212) in mixed lists and charts. Income uses “+” in `income.text`. Bill tables have no sign. Calendar chips and per-year changes keep the sign and show whole dollars rounded to the nearest dollar when the amount is $100 or more; smaller amounts keep cents unless they are exact whole dollars. | −$389.00 · +$2,900.00 · +$3,150 · −$1,263 · −$22.99 · +$55 / yr |
 | Estimates | “~” prefix plus a range chip. In signed lists the sign follows the “~”. | ~$142.00 · ~−$142.00 · Estimate ±$30 |
 | Dates | “Nov 4” in the current year, otherwise “Jan 9, 2027”. Add the weekday where timing matters. Relative time is secondary: today, tomorrow, in N days, yesterday, N days ago. | Wed, Nov 4 · in 8 days |
 | Masking | Last 4 digits only. Emails show at most 3 characters of the name and always hide at least one. | •••4821 · sam•••@gmail.com · sa•••@x.com · j•••@x.com |
