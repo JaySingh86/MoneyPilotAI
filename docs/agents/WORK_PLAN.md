@@ -150,6 +150,9 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] An expired, revoked or mismatched-email invite returns the right problem codes.
   - [ ] Step-up is required on the endpoints marked in BACKEND_PLAN §8.2 (`mfa_required`).
   - [ ] The OpenAPI client regenerates without drift.
+  - [ ] Invites are accepted only through `app_accept_invite` and looked up only through `app_invite_lookup` (WP-03). The mismatch hint shows the masked email from the lookup.
+  - [ ] The Clerk webhook verifies the svix signature before anything else. `app_sync_auth_user` receives only Clerk's verified primary email from that webhook; no other path calls it.
+  - [ ] `/me/bootstrap` takes the user's email from the verified token claims, never from the request body.
 - **Gate:** G1.
 
 ## WP-06 · Items, schedules, renewals, occurrences
@@ -324,6 +327,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] The export ZIP contains every entity and the activity log; the link expires in 24 h; step-up is required.
   - [ ] Deletion is scheduled for +7 days, can be cancelled by either member, and when executed revokes tokens, cancels billing, removes S3 objects and deletes rows (verified by a test that counts rows per table).
   - [ ] The retention purge follows the schedule table.
+  - [ ] Account deletion anonymizes `ip` and `user_agent` on that user's household-less audit events, which otherwise live 2 years (WP-03 G1 re-review).
 - **Gate:** G2.
 
 ## WP-25 · Billing + entitlements
