@@ -18,10 +18,10 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP | Title | Wave | Depends on | Size | Gate | Status |
 |---|---|---|---|---|---|---|
 | H-01 | Human setup: accounts, decisions, repo protections | 0 | — | — | — | todo |
-| WP-01 | Monorepo, tooling, CI skeleton | 1 | H-01 | M | — | in-review (wp/01-tooling) |
-| WP-02 | Engine core: window, runway, safe to spend, schedules | 1 | WP-01 | M | — | todo |
+| WP-01 | Monorepo, tooling, CI skeleton | 1 | H-01 | M | — | done |
+| WP-02 | Engine core: window, runway, safe to spend, schedules | 1 | WP-01 | M | — | in-progress (wp-builder, wp/02-engine-core) |
 | WP-03 | DB foundation: roles, RLS, migrations, `withHouseholdTx`, RLS test harness | 1 | WP-01 | M | G1 | todo |
-| WP-04 | Format + design tokens packages | 1 | WP-01 | S | — | todo |
+| WP-04 | Format + design tokens packages | 1 | WP-01 | S | — | in-progress (wp-builder, wp/04-format-tokens) |
 | WP-05 | Auth adapter, identity, households, invites | 2 | WP-03, WP-08 | M | G1 | todo |
 | WP-06 | Items, schedules, renewals, occurrences | 2 | WP-03, WP-02, WP-08 | L | G1 | todo |
 | WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | todo |
