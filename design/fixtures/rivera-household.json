@@ -4,13 +4,14 @@
   "household": {
     "id": "hh-rivera",
     "name": "Rivera household",
+    "timezone": "America/New_York",
     "plan": "family_plus",
     "cushionCents": 50000,
     "primaryIncomeId": "inc-sam"
   },
   "members": [
-    { "id": "m-sam", "name": "Sam", "colorRole": "partnerA", "emailConnection": { "provider": "gmail", "maskedAddress": "sam•••@gmail.com", "status": "connected" } },
-    { "id": "m-jordan", "name": "Jordan", "colorRole": "partnerB", "emailConnection": null }
+    { "id": "m-sam", "name": "Sam", "email": "sam@rivera-household.example", "colorRole": "partnerA", "emailConnection": { "provider": "gmail", "maskedAddress": "sam•••@gmail.com", "status": "connected" } },
+    { "id": "m-jordan", "name": "Jordan", "email": "jordan@rivera-household.example", "colorRole": "partnerB", "emailConnection": null }
   ],
   "forwardingAddress": "rivera-7k2@in.moneypilot.app",
   "balance": { "amountCents": 340000, "asOf": "2026-10-27", "source": "csv" },
