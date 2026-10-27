@@ -823,7 +823,7 @@ export interface PlanResult {
 
 | Function | Rule (DESIGN_SPEC §6) | Notes |
 |---|---|---|
-| `planningWindow` | 1 | Next occurrence of the primary income on or after `asOf`. |
+| `planningWindow` | 1 | Next occurrence of the primary income strictly after `asOf` (on payday, plan to the following payday). |
 | `projectRunway` | 2, 7 | If the balance is older than `asOf`, apply unpaid occurrences between them. If it is more than 7 days old, raise a `stale_balance` flag. Goal transfers on the final payday are excluded. |
 | `safeToSpend` | 3–5 | The lowest point excludes the final payday. Floor when positive; round the shortfall up for display. |
 | `estimate` | 6 | Mean of the last 3 amounts; range = ceil((max − min)/2 to $10). Credit cards use the last statement. |

@@ -30,7 +30,8 @@ module.exports = {
       name: "engine-npm-allowlist",
       comment: `packages/engine may only use these npm packages: ${ENGINE_NPM_ALLOWLIST.join(", ")}.`,
       severity: "error",
-      from: { path: pkg("engine") },
+      // Tests and the fixture loader may use test libraries such as fast-check (Q-009).
+      from: { path: pkg("engine"), pathNot: "\\.test\\.ts$|(^|/)packages/engine/src/testing/" },
       to: {
         dependencyTypes: ["npm", "npm-dev", "npm-optional", "npm-peer", "npm-no-pkg", "npm-unknown"],
         pathNot: `node_modules/(${ENGINE_NPM_ALLOWLIST.map((p) => p.replace("/", "\\/")).join("|")})/`,
@@ -76,6 +77,13 @@ module.exports = {
       severity: "error",
       from: { path: pkg("email") },
       to: { path: "(^|/)packages/(db|ai|notify|billing|bank)/" },
+    },
+    {
+      name: "engine-testing-only-in-tests",
+      comment: "@mp/engine/testing (fixture loader, test generators) is for tests only.",
+      severity: "error",
+      from: { pathNot: ["\\.test\\.ts$", "(^|/)packages/engine/src/testing/", "(^|/)packages/[a-z]+/test/"] },
+      to: { path: "(^|/)packages/engine/src/testing/" },
     },
     {
       name: "packages-never-import-apps",

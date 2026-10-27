@@ -53,6 +53,12 @@ describe("dependency rules (ARCHITECTURE §3)", () => {
     expect(rules).toContain("api-ai-explain-ask-only");
   });
 
+  it("rejects production code importing the engine test fixtures", async () => {
+    expect(await violationsIn([`${FIX}/apps/worker/imports-engine-testing.ts`])).toContain(
+      "engine-testing-only-in-tests",
+    );
+  });
+
   it("finds no violations in the real codebase", async () => {
     expect(await violationsIn(["apps", "packages"])).toEqual([]);
   });

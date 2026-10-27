@@ -258,7 +258,7 @@ The routes below are suggestions. Each screen lists its regions in order, the da
 
 All of these run in tested, deterministic code. AI never produces these numbers. Use integer cents throughout.
 
-1. **Planning window:** today through the next date of the household’s *primary income* (Settings; defaults to the largest regular paycheck), inclusive. In the fixture that is Oct 27 → Nov 6, “10 days to payday”.
+1. **Planning window:** today through the next date of the household’s *primary income* (Settings; defaults to the largest regular paycheck), inclusive. In the fixture that is Oct 27 → Nov 6, “10 days to payday”. The payday is the next one strictly after today: on payday itself, the window runs to the following payday, so safe to spend never spikes on payday. A bill scheduled for the 29th–31st falls on the last day of shorter months. Entered balances are end-of-day balances, so a payment marked paid that same day is already included.
 2. **Projected balance (runway):** start from the latest known balance (manual entry or the most recent CSV or bank balance). For each day, apply scheduled income, bills and planned expenses dated that day, giving one end-of-day value per day. Goal transfers scheduled on the window’s final payday belong to the next window.
 3. **Lowest point:** the minimum end-of-day balance in the window, excluding the final payday.
 4. **Safe to spend** = lowest point − cushion (default $500, editable). Display it floored to whole dollars. If it is below 0, use the shortfall state and show the shortfall rounded **up** to whole dollars (−$792.99 → “$793 short”).
