@@ -5,10 +5,13 @@
   "type": "module",
   "description": "Web components on design tokens (DESIGN_SPEC \u00a74). Built in WP-04 and WP-10.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./tokens": "./src/tokens/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "tokens:gen": "tsx src/tokens/cli.ts gen",
+    "tokens:check": "tsx src/tokens/cli.ts check"
   }
 }

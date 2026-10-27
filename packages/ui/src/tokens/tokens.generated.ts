@@ -1,0 +1,482 @@
+// GENERATED from design/tokens.json by `pnpm --filter @mp/ui tokens:gen`. Do not edit by hand.
+// `pnpm --filter @mp/ui tokens:check` verifies design/tokens.css matches design/tokens.json.
+
+/** Raw token values (React Native, charts, anything that can't read CSS variables). */
+// prettier-ignore
+export const tokens = {
+  color: {
+    bg: {
+      canvas: "#F2F4F7",
+      surface: "#FFFFFF",
+      subtle: "#F6F8FA",
+      muted: "#F9FAFB",
+      track: "#E5EAF0",
+    },
+    border: {
+      default: "#DFE4EB",
+      divider: "#EDF0F4",
+      strong: "#C9D1DC",
+      cell: "#E6EAF0",
+    },
+    text: {
+      primary: "#111C2B",
+      secondary: "#334155",
+      muted: "#566173",
+      disabled: "#636E7E",
+      inverse: "#FFFFFF",
+    },
+    brand: {
+      default: "#1F4E79",
+      strong: "#132F4C",
+      soft: "#E3ECF5",
+      onSoft: "#1A3F63",
+      tint: "#F3F7FB",
+      onStrongMuted: "#C9D8E8",
+      onStrongSubtle: "#DCE6F2",
+      strongDivider: "#2A4A6E",
+      paydayBorder: "#B9CCE0",
+    },
+    attention: {
+      text: "#8F430C",
+      soft: "#FBEEE2",
+      surface: "#FFF8F1",
+      border: "#F0D9C4",
+      chipBorder: "#E6BE98",
+      mark: "#C2691F",
+      markOnStrong: "#F0A868",
+    },
+    info: {
+      text: "#3E4C5E",
+      soft: "#E8ECF1",
+      border: "#7D8A9C",
+    },
+    income: {
+      text: "#18794E",
+      soft: "#E3F3EA",
+      onSoft: "#146B44",
+      border: "#A6D8BE",
+    },
+    partnerA: {
+      mark: "#0F7B6C",
+      soft: "#DDF1EE",
+      text: "#0B5A4F",
+    },
+    partnerB: {
+      mark: "#8A4FB0",
+      soft: "#F0E6F6",
+      text: "#5E2F80",
+    },
+    both: {
+      mark: "#1F4E79",
+    },
+    chart: {
+      balance: "#5F86AE",
+      payday: "#1F4E79",
+      lowest: "#C2691F",
+      cushion: "#C98A57",
+      axis: "#D3DAE3",
+      barOnStrong: "#4C6E94",
+      paydayOnStrong: "#C9D8E8",
+    },
+    control: {
+      off: "#B7C0CC",
+      radioOff: "#8794A6",
+    },
+  },
+  font: {
+    family: {
+      display: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      body: ["Inter", "system-ui", "sans-serif"],
+    },
+  },
+  typography: {
+    "display-xl": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 800,
+      fontSize: "52px",
+      lineHeight: "52px",
+      letterSpacing: "-0.03em",
+    },
+    "display-l": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 800,
+      fontSize: "44px",
+      lineHeight: "44px",
+      letterSpacing: "-0.03em",
+    },
+    "amount-xl": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 800,
+      fontSize: "34px",
+      lineHeight: "38px",
+      letterSpacing: "-0.02em",
+    },
+    "heading-1": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 800,
+      fontSize: "32px",
+      lineHeight: "37px",
+      letterSpacing: "-0.02em",
+    },
+    "amount-l": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 800,
+      fontSize: "28px",
+      lineHeight: "34px",
+      letterSpacing: "-0.02em",
+    },
+    "heading-1m": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 800,
+      fontSize: "26px",
+      lineHeight: "30px",
+      letterSpacing: "-0.02em",
+    },
+    "heading-3": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 800,
+      fontSize: "22px",
+      lineHeight: "28px",
+      letterSpacing: "0",
+    },
+    "heading-2": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 700,
+      fontSize: "18px",
+      lineHeight: "24px",
+      letterSpacing: "0",
+    },
+    "heading-2m": {
+      fontFamily: ["Manrope", "Inter", "system-ui", "sans-serif"],
+      fontWeight: 700,
+      fontSize: "16px",
+      lineHeight: "22px",
+      letterSpacing: "0",
+    },
+    title: {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 600,
+      fontSize: "15px",
+      lineHeight: "21px",
+      letterSpacing: "0",
+    },
+    "body-l": {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 400,
+      fontSize: "15px",
+      lineHeight: "22px",
+      letterSpacing: "0",
+    },
+    body: {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 400,
+      fontSize: "14px",
+      lineHeight: "20px",
+      letterSpacing: "0",
+    },
+    small: {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 400,
+      fontSize: "13px",
+      lineHeight: "19px",
+      letterSpacing: "0",
+    },
+    caption: {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 400,
+      fontSize: "12px",
+      lineHeight: "17px",
+      letterSpacing: "0",
+    },
+    overline: {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 600,
+      fontSize: "12px",
+      lineHeight: "16px",
+      letterSpacing: "0.08em",
+    },
+    micro: {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 400,
+      fontSize: "11px",
+      lineHeight: "14px",
+      letterSpacing: "0",
+    },
+  },
+  space: {
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "7": "28px",
+    "10": "40px",
+    "14": "56px",
+    "0_5": "2px",
+    "1_5": "6px",
+    "2_5": "10px",
+    "3_5": "14px",
+    "5_5": "22px",
+  },
+  radius: {
+    xs: "6px",
+    sm: "8px",
+    md: "10px",
+    lg: "12px",
+    xl: "14px",
+    "2xl": "16px",
+    "3xl": "18px",
+    "4xl": "20px",
+    full: "999px",
+  },
+  shadow: {
+    selected: "0 1px 2px rgba(17,28,43,0.12)",
+    overlay: "0 8px 24px rgba(17,28,43,0.16)",
+  },
+  size: {
+    touchTarget: "44px",
+    sidebarWidth: "240px",
+    contentMaxWidth: "1160px",
+    mobileGutter: "16px",
+    buttonHeightWeb: "40px",
+    buttonHeightMobile: "46px",
+    buttonHeightMobileBar: "50px",
+    inputHeight: "44px",
+    segmentHeight: "36px",
+    iconNav: "18px",
+    iconTab: "22px",
+    iconInline: "16px",
+    iconStroke: 1.8,
+    focusRing: "2px",
+    focusOffset: "2px",
+  },
+  tracking: {
+    tableHeader: "0.06em",
+  },
+  breakpoint: {
+    compact: "800px",
+    wide: "1200px",
+  },
+  motion: {
+    duration: "150ms",
+    easing: [0, 0, 0.2, 1],
+  },
+} as const;
+
+/**
+ * `var(--mp-…)` references into design/tokens.css, for web styles.
+ * Note: `cssVar.size.focusRing` is the full outline shorthand (`2px solid` brand.default),
+ * while `tokens.size.focusRing` is only the ring width (`2px`).
+ */
+// prettier-ignore
+export const cssVar = {
+  color: {
+    bg: {
+      canvas: "var(--mp-bg-canvas)",
+      surface: "var(--mp-bg-surface)",
+      subtle: "var(--mp-bg-subtle)",
+      muted: "var(--mp-bg-muted)",
+      track: "var(--mp-bg-track)",
+    },
+    border: {
+      default: "var(--mp-border-default)",
+      divider: "var(--mp-border-divider)",
+      strong: "var(--mp-border-strong)",
+      cell: "var(--mp-border-cell)",
+    },
+    text: {
+      primary: "var(--mp-text-primary)",
+      secondary: "var(--mp-text-secondary)",
+      muted: "var(--mp-text-muted)",
+      disabled: "var(--mp-text-disabled)",
+      inverse: "var(--mp-text-inverse)",
+    },
+    brand: {
+      default: "var(--mp-brand-default)",
+      strong: "var(--mp-brand-strong)",
+      soft: "var(--mp-brand-soft)",
+      onSoft: "var(--mp-brand-on-soft)",
+      tint: "var(--mp-brand-tint)",
+      onStrongMuted: "var(--mp-brand-on-strong-muted)",
+      onStrongSubtle: "var(--mp-brand-on-strong-subtle)",
+      strongDivider: "var(--mp-brand-strong-divider)",
+      paydayBorder: "var(--mp-brand-payday-border)",
+    },
+    attention: {
+      text: "var(--mp-attention-text)",
+      soft: "var(--mp-attention-soft)",
+      surface: "var(--mp-attention-surface)",
+      border: "var(--mp-attention-border)",
+      chipBorder: "var(--mp-attention-chip-border)",
+      mark: "var(--mp-attention-mark)",
+      markOnStrong: "var(--mp-attention-mark-on-strong)",
+    },
+    info: {
+      text: "var(--mp-info-text)",
+      soft: "var(--mp-info-soft)",
+      border: "var(--mp-info-border)",
+    },
+    income: {
+      text: "var(--mp-income-text)",
+      soft: "var(--mp-income-soft)",
+      onSoft: "var(--mp-income-on-soft)",
+      border: "var(--mp-income-border)",
+    },
+    partnerA: {
+      mark: "var(--mp-partner-a-mark)",
+      soft: "var(--mp-partner-a-soft)",
+      text: "var(--mp-partner-a-text)",
+    },
+    partnerB: {
+      mark: "var(--mp-partner-b-mark)",
+      soft: "var(--mp-partner-b-soft)",
+      text: "var(--mp-partner-b-text)",
+    },
+    both: {
+      mark: "var(--mp-both-mark)",
+    },
+    chart: {
+      balance: "var(--mp-chart-balance)",
+      payday: "var(--mp-chart-payday)",
+      lowest: "var(--mp-chart-lowest)",
+      cushion: "var(--mp-chart-cushion)",
+      axis: "var(--mp-chart-axis)",
+      barOnStrong: "var(--mp-chart-bar-on-strong)",
+      paydayOnStrong: "var(--mp-chart-payday-on-strong)",
+    },
+    control: {
+      off: "var(--mp-control-off)",
+      radioOff: "var(--mp-control-radio-off)",
+    },
+  },
+  font: {
+    family: {
+      display: "var(--mp-font-display)",
+      body: "var(--mp-font-body)",
+    },
+  },
+  typography: {
+    "display-xl": {
+      font: "var(--mp-type-display-xl)",
+      letterSpacing: "var(--mp-tracking-display-xl)",
+    },
+    "display-l": {
+      font: "var(--mp-type-display-l)",
+      letterSpacing: "var(--mp-tracking-display-xl)",
+    },
+    "amount-xl": {
+      font: "var(--mp-type-amount-xl)",
+      letterSpacing: "var(--mp-tracking-heading)",
+    },
+    "heading-1": {
+      font: "var(--mp-type-heading-1)",
+      letterSpacing: "var(--mp-tracking-heading)",
+    },
+    "amount-l": {
+      font: "var(--mp-type-amount-l)",
+      letterSpacing: "var(--mp-tracking-heading)",
+    },
+    "heading-1m": {
+      font: "var(--mp-type-heading-1m)",
+      letterSpacing: "var(--mp-tracking-heading)",
+    },
+    "heading-3": {
+      font: "var(--mp-type-heading-3)",
+      letterSpacing: "0",
+    },
+    "heading-2": {
+      font: "var(--mp-type-heading-2)",
+      letterSpacing: "0",
+    },
+    "heading-2m": {
+      font: "var(--mp-type-heading-2m)",
+      letterSpacing: "0",
+    },
+    title: {
+      font: "var(--mp-type-title)",
+      letterSpacing: "0",
+    },
+    "body-l": {
+      font: "var(--mp-type-body-l)",
+      letterSpacing: "0",
+    },
+    body: {
+      font: "var(--mp-type-body)",
+      letterSpacing: "0",
+    },
+    small: {
+      font: "var(--mp-type-small)",
+      letterSpacing: "0",
+    },
+    caption: {
+      font: "var(--mp-type-caption)",
+      letterSpacing: "0",
+    },
+    overline: {
+      font: "var(--mp-type-overline)",
+      letterSpacing: "var(--mp-tracking-overline)",
+    },
+    micro: {
+      font: "var(--mp-type-micro)",
+      letterSpacing: "0",
+    },
+  },
+  space: {
+    "1": "var(--mp-space-1)",
+    "2": "var(--mp-space-2)",
+    "3": "var(--mp-space-3)",
+    "4": "var(--mp-space-4)",
+    "5": "var(--mp-space-5)",
+    "6": "var(--mp-space-6)",
+    "7": "var(--mp-space-7)",
+    "10": "var(--mp-space-10)",
+    "14": "var(--mp-space-14)",
+    "0_5": "var(--mp-space-0_5)",
+    "1_5": "var(--mp-space-1_5)",
+    "2_5": "var(--mp-space-2_5)",
+    "3_5": "var(--mp-space-3_5)",
+    "5_5": "var(--mp-space-5_5)",
+  },
+  radius: {
+    xs: "var(--mp-radius-xs)",
+    sm: "var(--mp-radius-sm)",
+    md: "var(--mp-radius-md)",
+    lg: "var(--mp-radius-lg)",
+    xl: "var(--mp-radius-xl)",
+    "2xl": "var(--mp-radius-2xl)",
+    "3xl": "var(--mp-radius-3xl)",
+    "4xl": "var(--mp-radius-4xl)",
+    full: "var(--mp-radius-full)",
+  },
+  shadow: {
+    selected: "var(--mp-shadow-selected)",
+    overlay: "var(--mp-shadow-overlay)",
+  },
+  size: {
+    touchTarget: "var(--mp-touch-target)",
+    sidebarWidth: "var(--mp-sidebar-width)",
+    contentMaxWidth: "var(--mp-content-max-width)",
+    mobileGutter: "var(--mp-mobile-gutter)",
+    buttonHeightWeb: "var(--mp-button-height-web)",
+    buttonHeightMobile: "var(--mp-button-height-mobile)",
+    buttonHeightMobileBar: "var(--mp-button-height-mobile-bar)",
+    inputHeight: "var(--mp-input-height)",
+    segmentHeight: "var(--mp-segment-height)",
+    focusRing: "var(--mp-focus-ring)",
+    focusOffset: "var(--mp-focus-offset)",
+  },
+  tracking: {
+    displayXl: "var(--mp-tracking-display-xl)",
+    heading: "var(--mp-tracking-heading)",
+    overline: "var(--mp-tracking-overline)",
+    tableHeader: "var(--mp-tracking-table-header)",
+  },
+  motion: {
+    duration: "var(--mp-duration)",
+    easing: "var(--mp-easing)",
+  },
+} as const;
+
+export type Tokens = typeof tokens;
+export type CssVar = typeof cssVar;
