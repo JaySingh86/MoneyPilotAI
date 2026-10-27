@@ -1097,7 +1097,8 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 - **Writes** accept `Idempotency-Key` (required on POSTs that create things). Repeats within 24 h return the stored response.
 - **Optimistic concurrency:** resources carry `version`. `PATCH` requires `If-Match: <version>`, and a mismatch returns 409 with the current resource. This matters because partners edit the same data.
 - **Errors:** RFC 9457 `application/problem+json`, e.g. `{ type, title, status, detail, code, fields? }`. Codes include `validation_failed`, `not_found`, `forbidden`, `conflict`, `entitlement_required`, `mfa_required`, `rate_limited`.
-- **Rate limits** (per user): 600 req/min overall; auth-sensitive endpoints 20/min; Ask 30/day; exports 3/day. Returns 429 with `Retry-After`.
+- **Rate limits** (per user): 600 req/min overall; auth-sensitive endpoints 20/min; Ask 30/day; exports 3/day. Returns 429 with `Retry-After`. Per-minute limits are kept in memory per API instance. The daily caps are enforced in their own services by counting today’s `ai_runs` (Ask) and `data_requests` (exports) rows, so they hold across instances (Q-031).
+- **Problem `type`** is the relative URI `/problems/<code>`. Entitlement and MFA failures return 403 with codes `entitlement_required` and `mfa_required`; clients branch on `code`, not status (Q-030).
 - OpenAPI is generated from Zod and published at `/v1/openapi.json`. The web and mobile clients are generated from it in CI. A contract test fails if a client and the server disagree.
 
 ### 8.2 Endpoints
