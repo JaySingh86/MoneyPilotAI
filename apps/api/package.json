@@ -1,0 +1,17 @@
+{
+  "name": "@mp/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "HTTP API: auth, validation, reads/writes under RLS, webhooks (BACKEND_PLAN §8).",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mp/observability": "workspace:*",
+    "fastify": "^5.2.0"
+  }
+}

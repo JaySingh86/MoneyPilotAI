@@ -1,0 +1,14 @@
+{
+  "name": "@mp/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure planning math (DESIGN_SPEC \u00a76). No I/O, no clock, no randomness. Built in WP-02 and WP-07.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  }
+}

@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.next/
+.turbo/
+coverage/
+*.log
+.DS_Store
+
+# Local env files (keep .env.example)
+.env
+.env.*
+!.env.example
+
+# Claude Code local settings
+.claude/settings.local.json
+*.tsbuildinfo
+
+# Keys and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*service-account*.json

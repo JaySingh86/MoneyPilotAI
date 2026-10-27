@@ -1,0 +1,14 @@
+{
+  "name": "@mp/notify",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Email and push rendering and delivery. Built in WP-15.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  }
+}

@@ -96,7 +96,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 - CI secrets: **dev and staging only**. Agents never receive production credentials.
 
 ## WP-01 · Monorepo, tooling, CI skeleton
-- **Owns:** repo root config (`package.json`, `pnpm-workspace.yaml`, `turbo.json`, `tsconfig.base.json`, `.eslintrc*`, `.dependency-cruiser.cjs`, `.github/workflows/**`, `docker-compose.yml`, `.env.example`), skeleton `package.json` + `src/index.ts` in every app and package listed in CLAUDE.md.
+- **Owns:** repo root config (`package.json`, `pnpm-workspace.yaml`, `turbo.json`, `tsconfig.base.json`, `.eslintrc*`, `.dependency-cruiser.cjs`, `.github/workflows/**`, `.github/dependabot.yml`, `docker-compose.yml`, `docker/**`, `.env.example`, `.gitignore`, `.prettier*`, `eslint.config.js`, `tooling/**`), skeleton `package.json` + `src/index.ts` in every app and package listed in CLAUDE.md.
 - **Read first:** CLAUDE.md; ARCHITECTURE §3, §8; BACKEND_PLAN §2.1, §3, §4.
 - **Build:** pnpm + Turborepo; TS strict base config; Vitest; ESLint (including a no-hex/no-raw-px rule for `apps/web` and `packages/ui`, and a no-`console` rule); dependency-cruiser encoding ARCHITECTURE §3 rules; Docker Compose (Postgres 16, MinIO, Mailpit); all scripts from CLAUDE.md (no-op where the package is empty); a GitHub Actions workflow running lint, typecheck, test, dep-cruise and contracts drift (stubbed).
 - **Acceptance:**
@@ -127,6 +127,8 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] User A gets 0 rows from household B on every table (select, insert, update, delete attempts).
   - [ ] `audit_events` rejects UPDATE and DELETE for app roles.
   - [ ] The harness fails when a new table with `household_id` is added without a test (meta-test).
+  - [ ] RLS tests connect as `mp_api` / `mp_worker` (`DATABASE_URL`, `WORKER_DATABASE_URL`), never as the migrator or a superuser. Local roles come from `docker/postgres/init.sql`.
+  - [ ] The `migrate`, `seed` and `test:rls` placeholder scripts in `packages/db/package.json` are replaced. They fail on purpose once `packages/db/migrations` exists.
 - **Gate:** G1.
 
 ## WP-04 · Format + tokens
@@ -174,7 +176,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 ## WP-08 · API platform + contracts
 - **Owns:** `apps/api/src/{server.ts,plugins/**,lib/**}`, `packages/contracts/src/{common,errors}/**`, the client generation script.
 - **Read first:** BACKEND_PLAN §8.1, §8.4; ADR-008; ARCHITECTURE §5.
-- **Build:** Fastify server with the Zod type provider; a module registry; `AppError` → problem+json; Idempotency-Key plugin; `If-Match` helper; rate limits; request context (user, household); OpenAPI generation at `/v1/openapi.json`; `pnpm contracts:gen` with a `--check` drift mode; webhook verification helpers (signature, SNS, OIDC) as utilities.
+- **Build:** Fastify server with the Zod type provider; a module registry; `AppError` → problem+json; Idempotency-Key plugin; `If-Match` helper; rate limits; request context (user, household); OpenAPI generation at `/v1/openapi.json`; `pnpm contracts:gen` with a `--check` drift mode; webhook verification helpers (signature, SNS, OIDC) as utilities. Fastify logs through `createLogger` from `@mp/observability`, and logged request URLs have their query strings stripped (OAuth `code` and `state`). Replace the `contracts:gen` placeholder script, which fails on purpose once `packages/contracts/src/openapi` exists.
 - **Acceptance:**
   - [ ] Repeating a POST with the same Idempotency-Key returns the stored response; a different body with the same key returns 422.
   - [ ] Every error path returns RFC 9457 JSON with a `code`.
@@ -193,7 +195,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 ## WP-10 · UI kit
 - **Owns:** `packages/ui/src/components/**`, `packages/ui/.storybook/**`
 - **Read first:** DESIGN_SPEC §2–§4, §8; the canvas “Design specification v1.0” board.
-- **Build:** React components exactly as specified: Button (primary, secondary, text, icon, destructive, disabled), SegmentedControl, FilterPills, StatusChip (ok, attention, info, estimate), Card (standard, hero, hero-shortfall, attention), KpiTile, Avatar/OwnerDot, ProgressBar, Switch, RadioCard, Stepper, Input/Select, SidebarNav, TabBar (web preview), Table, ListRow, MathBreakdown, ReviewQueueItem, RunwayChart (incl. negative bars), CalendarCell/EventChip, EmptyState, Skeleton, ErrorBanner. Stories for every state.
+- **Build:** React components exactly as specified: Button (primary, secondary, text, icon, destructive, disabled), SegmentedControl, FilterPills, StatusChip (ok, attention, info, estimate), Card (standard, hero, hero-shortfall, attention), KpiTile, Avatar/OwnerDot, ProgressBar, Switch, RadioCard, Stepper, Input/Select, SidebarNav, TabBar (web preview), Table, ListRow, MathBreakdown, ReviewQueueItem, RunwayChart (incl. negative bars), CalendarCell/EventChip, EmptyState, Skeleton, ErrorBanner. Stories for every state. Add stylelint for CSS files (no hex or raw px outside the token files), matching the ESLint rule from WP-01 (ARCHITECTURE §8).
 - **Acceptance:**
   - [ ] Tokens only (the lint rule passes); every interactive element is keyboard-reachable with a visible focus ring; axe passes in Storybook.
   - [ ] Visual snapshots of RunwayChart rendered with fixture values (normal and shortfall).

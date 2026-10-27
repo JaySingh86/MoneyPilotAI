@@ -1,0 +1,14 @@
+{
+  "name": "@mp/detection",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CSV parsing and recurring detection. Built in WP-16.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  }
+}

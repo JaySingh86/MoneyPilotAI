@@ -1,0 +1,15 @@
+{
+  "name": "@mp/crypto",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "KMS envelope encryption. Built in WP-21.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./encrypt": "./src/encrypt.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  }
+}

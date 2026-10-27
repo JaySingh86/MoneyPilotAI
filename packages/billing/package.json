@@ -1,0 +1,14 @@
+{
+  "name": "@mp/billing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Billing provider adapter and entitlements. Built in WP-25.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  }
+}

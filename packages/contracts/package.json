@@ -1,0 +1,15 @@
+{
+  "name": "@mp/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Zod schemas, OpenAPI generation and the typed client. Built in WP-08.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "gen": "node ../../tooling/scripts/not-yet.mjs contracts:gen WP-08 src/openapi"
+  }
+}

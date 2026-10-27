@@ -1,0 +1,14 @@
+{
+  "name": "@mp/bank",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bank provider adapter interface (P1, disabled). Built in WP-31.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  }
+}

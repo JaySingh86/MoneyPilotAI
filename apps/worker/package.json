@@ -1,0 +1,16 @@
+{
+  "name": "@mp/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Background jobs and cron on pg-boss (BACKEND_PLAN §9). The only process that decrypts tokens.",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mp/observability": "workspace:*"
+  }
+}
