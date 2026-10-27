@@ -1,5 +1,5 @@
 {
-  "$description": "Golden sample household used in every mockup. Load it in dev/storybook and in tests: with this data the screens must show the values under `expected`, matching the design canvas. All money is integer cents. Company names are fictional.",
+  "$description": "Golden sample household used in every mockup. `source` on incomes and bills is where the item was found (csv, email, or email+csv); `subcategory` groups items for the possible-duplicate flag; `emergencyFund` marks the goal the shortfall options draw from. Load it in dev/storybook and in tests: with this data the screens must show the values under `expected`, matching the design canvas. All money is integer cents. Company names are fictional.",
   "today": "2026-10-27",
   "household": {
     "id": "hh-rivera",
@@ -16,32 +16,32 @@
   "forwardingAddress": "rivera-7k2@in.moneypilot.app",
   "balance": { "amountCents": 340000, "asOf": "2026-10-27", "source": "csv" },
   "incomes": [
-    { "id": "inc-sam", "owner": "m-sam", "name": "Sam’s pay", "amountCents": 315000, "schedule": { "type": "biweekly", "anchor": "2026-11-06" } },
-    { "id": "inc-jordan", "owner": "m-jordan", "name": "Jordan’s pay", "amountCents": 290000, "schedule": { "type": "monthly_last_weekday", "weekday": "friday" } }
+    { "id": "inc-sam", "owner": "m-sam", "source": "csv", "name": "Sam’s pay", "amountCents": 315000, "schedule": { "type": "biweekly", "anchor": "2026-11-06" } },
+    { "id": "inc-jordan", "owner": "m-jordan", "source": "csv", "name": "Jordan’s pay", "amountCents": 290000, "schedule": { "type": "monthly_last_weekday", "weekday": "friday" } }
   ],
   "bills": [
-    { "id": "b-car", "name": "Car payment", "owner": "m-sam", "amountCents": 38900, "schedule": { "type": "monthly", "day": 29 } },
-    { "id": "b-phone", "name": "Phone plan", "owner": "m-jordan", "amountCents": 9500, "schedule": { "type": "monthly", "day": "last" } },
-    { "id": "b-rent", "name": "Rent", "owner": "m-jordan", "amountCents": 215000, "schedule": { "type": "monthly", "day": 1 } },
-    { "id": "b-daycare", "name": "Daycare", "owner": "m-sam", "amountCents": 124000, "schedule": { "type": "monthly", "day": 2 } },
-    { "id": "b-stream", "name": "Streaming bundle", "owner": "m-sam", "amountCents": 2299, "previousAmountCents": 1999, "priceChangedOn": "2026-09-28", "kind": "subscription", "schedule": { "type": "monthly", "day": 2 } },
-    { "id": "b-power", "name": "Electricity", "owner": "m-sam", "estimate": { "historyCents": [11800, 17100, 13700] }, "schedule": { "type": "monthly", "day": 3 } },
-    { "id": "b-carins", "name": "Car insurance renewal", "owner": "m-jordan", "amountCents": 68400, "kind": "insurance", "schedule": { "type": "every_n_months", "n": 6, "next": "2026-11-04" } },
-    { "id": "b-internet", "name": "Internet", "owner": "m-jordan", "amountCents": 7000, "schedule": { "type": "monthly", "day": 5 } },
-    { "id": "b-news", "name": "News", "owner": "m-jordan", "amountCents": 800, "kind": "subscription", "schedule": { "type": "monthly", "day": 8 } },
-    { "id": "b-cloud", "name": "Cloud storage", "owner": "m-sam", "amountCents": 299, "kind": "subscription", "schedule": { "type": "monthly", "day": 9 } },
-    { "id": "b-musicf", "name": "Music family plan", "owner": "m-jordan", "amountCents": 1699, "kind": "subscription", "schedule": { "type": "monthly", "day": 12 } },
-    { "id": "b-card", "name": "Credit card", "owner": "m-jordan", "estimate": { "fromLastStatementCents": 64000 }, "schedule": { "type": "monthly", "day": 15 } },
-    { "id": "b-fit", "name": "Fitness app", "owner": "m-sam", "amountCents": 1499, "kind": "subscription", "schedule": { "type": "monthly", "day": 17 } },
-    { "id": "b-water", "name": "Water & trash", "owner": "m-sam", "amountCents": 9600, "schedule": { "type": "every_n_months", "n": 3, "next": "2026-11-18" } },
-    { "id": "b-music2", "name": "Music (second service)", "owner": "m-sam", "amountCents": 1099, "kind": "subscription", "markedPossiblyUnused": true, "schedule": { "type": "monthly", "day": 21 } },
-    { "id": "b-kids", "name": "Kids learning app", "owner": "m-jordan", "amountCents": 799, "kind": "subscription", "schedule": { "type": "monthly", "day": 24 } }
+    { "id": "b-car", "name": "Car payment", "owner": "m-sam", "source": "csv", "amountCents": 38900, "schedule": { "type": "monthly", "day": 29 } },
+    { "id": "b-phone", "name": "Phone plan", "owner": "m-jordan", "source": "email", "amountCents": 9500, "schedule": { "type": "monthly", "day": "last" } },
+    { "id": "b-rent", "name": "Rent", "owner": "m-jordan", "source": "csv", "amountCents": 215000, "schedule": { "type": "monthly", "day": 1 } },
+    { "id": "b-daycare", "name": "Daycare", "owner": "m-sam", "source": "csv", "amountCents": 124000, "schedule": { "type": "monthly", "day": 2 } },
+    { "id": "b-stream", "name": "Streaming bundle", "owner": "m-sam", "source": "email", "amountCents": 2299, "previousAmountCents": 1999, "priceChangedOn": "2026-09-28", "kind": "subscription", "schedule": { "type": "monthly", "day": 2 } },
+    { "id": "b-power", "name": "Electricity", "owner": "m-sam", "source": "email", "estimate": { "historyCents": [11800, 17100, 13700] }, "schedule": { "type": "monthly", "day": 3 } },
+    { "id": "b-carins", "name": "Car insurance renewal", "owner": "m-jordan", "source": "email+csv", "amountCents": 68400, "kind": "insurance", "schedule": { "type": "every_n_months", "n": 6, "next": "2026-11-04" } },
+    { "id": "b-internet", "name": "Internet", "owner": "m-jordan", "source": "email", "amountCents": 7000, "schedule": { "type": "monthly", "day": 5 } },
+    { "id": "b-news", "name": "News", "owner": "m-jordan", "source": "email", "amountCents": 800, "kind": "subscription", "schedule": { "type": "monthly", "day": 8 } },
+    { "id": "b-cloud", "name": "Cloud storage", "owner": "m-sam", "source": "csv", "amountCents": 299, "kind": "subscription", "schedule": { "type": "monthly", "day": 9 } },
+    { "id": "b-musicf", "name": "Music family plan", "owner": "m-jordan", "source": "csv", "amountCents": 1699, "kind": "subscription", "subcategory": "music", "schedule": { "type": "monthly", "day": 12 } },
+    { "id": "b-card", "name": "Credit card", "owner": "m-jordan", "source": "email", "estimate": { "fromLastStatementCents": 64000 }, "schedule": { "type": "monthly", "day": 15 } },
+    { "id": "b-fit", "name": "Fitness app", "owner": "m-sam", "source": "email", "amountCents": 1499, "kind": "subscription", "schedule": { "type": "monthly", "day": 17 } },
+    { "id": "b-water", "name": "Water & trash", "owner": "m-sam", "source": "csv", "amountCents": 9600, "schedule": { "type": "every_n_months", "n": 3, "next": "2026-11-18" } },
+    { "id": "b-music2", "name": "Music (second service)", "owner": "m-sam", "source": "csv", "amountCents": 1099, "kind": "subscription", "subcategory": "music", "markedPossiblyUnused": true, "schedule": { "type": "monthly", "day": 21 } },
+    { "id": "b-kids", "name": "Kids learning app", "owner": "m-jordan", "source": "email", "amountCents": 799, "kind": "subscription", "schedule": { "type": "monthly", "day": 24 } }
   ],
   "plannedExpenses": [
     { "id": "p-thanks", "name": "Thanksgiving", "owner": "both", "amountCents": 25000, "date": "2026-11-26" }
   ],
   "goals": [
-    { "id": "g-emergency", "name": "Emergency fund", "targetCents": 1000000, "savedCents": 640000, "monthlyCents": 30000 },
+    { "id": "g-emergency", "name": "Emergency fund", "emergencyFund": true, "targetCents": 1000000, "savedCents": 640000, "monthlyCents": 30000 },
     { "id": "g-tahoe", "name": "Lake Tahoe trip", "targetCents": 240000, "savedCents": 115000, "monthlyCents": 25000, "targetDate": "2027-03-01" },
     { "id": "g-gifts", "name": "Holiday gifts", "type": "planned_expense", "targetCents": 80000, "savedCents": 42000, "targetDate": "2026-12-15" }
   ],
@@ -55,6 +55,18 @@
     { "id": "r-shop", "name": "Shopping membership", "provider": "Yearly membership", "category": "membership", "amountCents": 13900, "frequency": "yearly", "renewsOn": "2026-12-18", "owner": "m-jordan", "autoRenew": true, "source": "email" },
     { "id": "r-club", "name": "Warehouse club", "provider": "Yearly membership", "category": "membership", "amountCents": 6500, "frequency": "yearly", "renewsOn": "2027-02-02", "owner": "m-jordan", "autoRenew": true, "source": "csv" },
     { "id": "r-reg", "name": "Car registration", "provider": "State DMV", "category": "vehicle_home", "amountCents": 18600, "frequency": "yearly", "renewsOn": "2027-01-31", "owner": "m-sam", "autoRenew": false, "source": "email" }
+  ],
+  "tasks": [
+    { "id": "t1", "title": "Review 2 flagged subscriptions", "owner": "both", "dueOn": "2026-10-30", "completed": false },
+    { "id": "t2", "title": "Enter the actual electricity amount", "owner": "m-sam", "dueOn": "2026-11-01", "dueHint": "When the bill arrives, about Nov 1", "completed": false },
+    { "id": "t3", "title": "Compare car insurance renewal quote", "owner": "m-jordan", "dueOn": "2026-11-02", "completed": false },
+    { "id": "t4", "title": "Choose a 2027 health plan", "owner": "m-jordan", "dueOn": "2026-11-13", "completed": false },
+    { "id": "t5", "title": "Decide whether to keep antivirus", "owner": "m-sam", "dueOn": "2026-11-30", "completed": false },
+    { "id": "t6", "title": "Shop around for renters insurance", "owner": "m-sam", "dueOn": "2026-12-10", "completed": false },
+    { "id": "t7", "title": "Renew car registration", "owner": "m-sam", "dueOn": "2027-01-31", "completed": false },
+    { "id": "d1", "title": "Import October bank CSV", "owner": "m-sam", "dueOn": "2026-10-26", "completed": true },
+    { "id": "d2", "title": "Connect Gmail", "owner": "m-sam", "dueOn": "2026-10-26", "completed": true },
+    { "id": "d3", "title": "Invite Jordan", "owner": "m-sam", "dueOn": "2026-10-26", "completed": true }
   ],
   "renewalsNote": "The 7 monthly subscriptions in `bills` (kind: subscription) also appear on the renewals screen. 16 items in total.",
   "scenarios": {

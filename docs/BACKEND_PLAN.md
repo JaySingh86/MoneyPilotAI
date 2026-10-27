@@ -278,6 +278,8 @@ create table recurring_items (
   account_last4    text check (account_last4 ~ '^[0-9A-Za-z]{2,4}$'),
   paid_from        text not null default 'account' check (paid_from in ('account','payroll')),  -- payroll = excluded from runway
   marked_possibly_unused boolean not null default false,
+  subcategory      text,                 -- groups items for the possible-duplicate flag, e.g. 'music' (DESIGN_SPEC §6 rule 8)
+  movable          boolean,              -- user override for shortfall option 3; null = default by kind (DESIGN_SPEC §6 rule 18)
   notes            text,
   version          int not null default 1,          -- If-Match concurrency (§8.1)
   created_by       uuid references users(id),
@@ -369,12 +371,14 @@ create table goals (
   monthly_cents bigint not null default 0 check (monthly_cents >= 0),
   target_date   date,
   color_slot    smallint not null default 1 check (color_slot between 1 and 3),
+  is_emergency_fund boolean not null default false,  -- the goal shortfall option 1 draws from (DESIGN_SPEC §5.3)
   status        text not null default 'active' check (status in ('active','reached','archived')),
   created_by    uuid references users(id),
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
   deleted_at    timestamptz
 );
+create unique index goals_one_emergency_fund on goals(household_id) where is_emergency_fund and deleted_at is null;
 
 create table goal_events (                              -- user-recorded deposits/withdrawals (we never move money)
   id           uuid primary key default gen_random_uuid(),

@@ -184,7 +184,7 @@ The routes below are suggestions. Each screen lists its regions in order, the da
 2. Main column: the “Review what we found” card (count chip, status banner, empty state, review queue items) and the “Applied automatically” card (rows with an Undo text button).
 3. Side column: “Connected sources” (one block per member’s email connection with status chip, scan stats, and Pause/Disconnect. If a partner isn’t connected, show “Only {name} can connect it” and a “Remind {name} to connect” button. Then the forwarding address in a code box with Copy, then Bank CSV with “Upload new”). Below that, the “What MoneyPilot reads” card (hero colors, 5 bullets, “Manage watched senders (N)”).
 - The nav badge shows the number of items still in the queue.
-- **Golden values:** 4 to review. Confirming the electricity item shows “Electricity set to $151.37. Safe to spend is now $998.”
+- **Golden values:** 4 to review. Confirming the electricity item shows “Electricity set to $151.37. Safe to spend is now $997.” (Rule 4: $997.64 rounds down.)
 
 **Bills & recurring: `/bills`** (FR-02, FR-09)
 1. Header: overline “Everything that repeats”, title, subtitle with counts. Actions: “Import CSV” (secondary) and “Add bill or income” (primary).
@@ -248,7 +248,7 @@ The routes below are suggestions. Each screen lists its regions in order, the da
   - **“Ways to cover the gap” card:** up to 3 options, each recalculated with rule 9 and shown with an effect chip (ok when safe to spend ends up ≥ 0, info otherwise), then “Decide with Jordan”. Options come in this order:
     1. Move money from the emergency fund: the smallest multiple of $100 that gives at least $50 a day, capped at the fund balance.
     2. Split the expense that caused the shortfall into two halves, before and after payday.
-    3. Move the largest bill in the window that could be moved to payday.
+    3. Move the largest bill in the window that could be moved to payday (§6 rule 18).
   - Options that depend on a third party carry “Only if … allows it”.
   - **Golden values:** $793 short · options $507 / $107 / “$109 short, never below $0”.
 
@@ -269,7 +269,7 @@ All of these run in tested, deterministic code. AI never produces these numbers.
    - *Not in your usual month*: frequency is every 2 months or less often, and it falls in the window.
    - *Price up*: the new amount exceeds the previous term by at least $1 and at least 2%. It shows until reviewed or for 60 days.
    - *Possible duplicate*: two or more active subscriptions in the same sub-category.
-   - *Decide by*: an email gives a deadline (enrollment, cancel-by).
+   - *Decide by*: an email gives a deadline (enrollment, cancel-by). Both kinds raise this flag, dated by the earliest upcoming deadline; the flag says which kind it is, so the copy can read “Decide by Nov 13” or “Cancel by Nov 30?”.
    - *Not automatic*: the renewal doesn’t renew itself (for example, a registration).
 9. **What-if:** “Pay on {date} instead” re-runs rules 2–4 with that one occurrence moved. The UI only shows it when it changes safe to spend, and always adds “Only if your provider allows it.”
 10. **Goal suggestion:** ceil((target − saved) ÷ remaining contributions) to whole dollars, with one contribution per month on the first primary payday. Options to close a gap are: raise the monthly amount, move the date to the first month that closes the gap at the current amount, or lower the target to the projected amount.
@@ -292,6 +292,15 @@ All of these run in tested, deterministic code. AI never produces these numbers.
     - *Reach month* = the month of the n-th deposit, where n = ceil(remaining ÷ monthly deposit). Deposits start on the next primary payday (Nov 6 in the fixture).
     - A goal with a target date shows “On track for {date}” or “$X behind”. A planned expense shows “$X to set aside”. Suggestions follow rule 10.
 17. **Averages on Bills & recurring:** biweekly income × 26 ÷ 12. Bills paid every n months ÷ n. Estimates use their current estimate.
+18. **Movable bills** (shortfall option 3, “Pay {bill} on payday”): a bill can be suggested for a move only if it is movable. Each item may carry a user-set `movable` flag. When it isn’t set, subscription, insurance, membership, registration and other items are movable; bill, loan and income items are not (hard due dates, late fees). Among movable bills due before payday, pick the largest whose move changes safe to spend (ties: earliest date, then id).
+19. **Decide this week** (Overview region 4), in this order:
+    1. The shortfall, if any.
+    2. Not-in-your-usual-month bills in the window, with rule 9’s “Pay on payday” value when it changes safe to spend.
+    3. Estimated bills due before payday.
+    4. Decide-by deadlines within 7 days (rule 15’s “this week”).
+    5. Savings goals that are behind.
+
+    Ties go by date, then id. Price-up and possible-duplicate flags are not decisions; they become the task “Review N flagged subscriptions”. In the fixture this gives exactly 3 cards (car insurance, electricity estimate, Lake Tahoe).
 
 ---
 
