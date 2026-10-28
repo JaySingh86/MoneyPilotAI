@@ -1,0 +1,159 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MoneyPilot API",
+    "version": "1.0.0",
+    "description": "Household planning API. Money is integer cents, dates are YYYY-MM-DD, errors are RFC 9457 problem+json with a `code` (BACKEND_PLAN §8.1). The API never moves money."
+  },
+  "components": {
+    "securitySchemes": { "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" } },
+    "schemas": {
+      "ProblemFieldInput": {
+        "type": "object",
+        "properties": {
+          "in": {
+            "type": "string",
+            "enum": ["body", "querystring", "params", "headers"],
+            "description": "Where the invalid value was sent"
+          },
+          "path": {
+            "type": "string",
+            "description": "Dot path inside that part, e.g. `schedule.dayOfMonth`; empty for the root"
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["in", "path", "message"]
+      },
+      "ProblemInput": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "description": "URI reference identifying the problem type" },
+          "title": { "type": "string" },
+          "status": { "type": "integer", "minimum": 400, "maximum": 599 },
+          "detail": { "type": "string" },
+          "instance": { "description": "Request path, without the query string", "type": "string" },
+          "code": {
+            "type": "string",
+            "enum": [
+              "validation_failed",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "conflict",
+              "entitlement_required",
+              "mfa_required",
+              "rate_limited",
+              "idempotency_key_reused",
+              "precondition_required",
+              "payload_too_large",
+              "unsupported_media_type",
+              "bad_request",
+              "internal_error"
+            ]
+          },
+          "requestId": { "type": "string" },
+          "fields": {
+            "description": "Per-field errors for validation_failed",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProblemFieldInput" }
+          },
+          "current": { "description": "The current resource, on a version conflict (If-Match)" }
+        },
+        "required": ["type", "title", "status", "code"],
+        "description": "RFC 9457 problem details"
+      },
+      "ProblemField": {
+        "type": "object",
+        "properties": {
+          "in": {
+            "type": "string",
+            "enum": ["body", "querystring", "params", "headers"],
+            "description": "Where the invalid value was sent"
+          },
+          "path": {
+            "type": "string",
+            "description": "Dot path inside that part, e.g. `schedule.dayOfMonth`; empty for the root"
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["in", "path", "message"],
+        "additionalProperties": false
+      },
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "description": "URI reference identifying the problem type" },
+          "title": { "type": "string" },
+          "status": { "type": "integer", "minimum": 400, "maximum": 599 },
+          "detail": { "type": "string" },
+          "instance": { "description": "Request path, without the query string", "type": "string" },
+          "code": {
+            "type": "string",
+            "enum": [
+              "validation_failed",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "conflict",
+              "entitlement_required",
+              "mfa_required",
+              "rate_limited",
+              "idempotency_key_reused",
+              "precondition_required",
+              "payload_too_large",
+              "unsupported_media_type",
+              "bad_request",
+              "internal_error"
+            ]
+          },
+          "requestId": { "type": "string" },
+          "fields": {
+            "description": "Per-field errors for validation_failed",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProblemField" }
+          },
+          "current": { "description": "The current resource, on a version conflict (If-Match)" }
+        },
+        "required": ["type", "title", "status", "code"],
+        "additionalProperties": false,
+        "description": "RFC 9457 problem details"
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["system"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "status": { "type": "string", "enum": ["ok"] } },
+                  "required": ["status"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }]
+}

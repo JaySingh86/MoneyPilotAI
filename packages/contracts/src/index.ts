@@ -1,2 +1,4 @@
-// Zod schemas, OpenAPI generation and the typed client. Built in WP-08.
-export const PACKAGE = "@mp/contracts";
+// @mp/contracts: Zod schemas shared by api, worker, web and mobile, the generated OpenAPI document and
+// the typed client (ADR-008). Module contracts live in src/<module>/ and are re-exported here.
+export * from "./common";
+export * from "./errors";

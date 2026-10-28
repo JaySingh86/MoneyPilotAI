@@ -25,7 +25,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-05 | Auth adapter, identity, households, invites | 2 | WP-03, WP-08 | M | G1 | todo |
 | WP-06 | Items, schedules, renewals, occurrences | 2 | WP-03, WP-02, WP-08 | L | G1 | todo |
 | WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | in-progress (wp-builder, wp/07-engine-rules) |
-| WP-08 | API platform + contracts (server, errors, idempotency, OpenAPI, client gen) | 2 | WP-01 | M | — | in-progress (wp-builder, wp/08-api-platform) |
+| WP-08 | API platform + contracts (server, errors, idempotency, OpenAPI, client gen) | 2 | WP-01 | M | — | done |
 | WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | todo |
 | WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | in-progress (wp-builder, wp/10-ui-kit) |
 | WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | todo |

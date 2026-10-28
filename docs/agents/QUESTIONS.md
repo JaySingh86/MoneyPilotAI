@@ -14,6 +14,37 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-032 · WP-08 · Webhook paths: `/webhooks/*` or `/v1/webhooks/*`?
+- Asked by: wp-builder/wp/08-api-platform · 2026-10-27
+- Where: BACKEND_PLAN §8.1 (base URL `/v1`), §8.4 (paths `/webhooks/clerk` …)
+- Question: §8.1 puts the API under `/v1`, but §8.4 lists webhook paths without it. Which is canonical? The URL is registered with Clerk, Google Pub/Sub, SNS and the billing provider, so it is costly to change later.
+- Options considered: (a) `/webhooks/*` at the root, unversioned (providers call a fixed URL); (b) `/v1/webhooks/*`.
+- Current behavior (WP-08): modules mount at `/v1` by default and may set their own `prefix`, so either works. No webhook routes exist yet.
+- Blocking: no. The webhooks module (WP-05 for Clerk, WP-19+ for the rest) needs the answer.
+- Answer: Option (a). `/webhooks/*` stays at the root, unversioned. (owner, 2026-10-27) WP-08 exports `WEBHOOKS_PREFIX` and hides those routes from the public OpenAPI document.
+
+## Q-031 · WP-08 · Shared store for rate limits (daily Ask and export limits)
+- Asked by: wp-builder/wp/08-api-platform · 2026-10-27
+- Where: BACKEND_PLAN §8.1 (rate limits), §3 (no Redis in the stack), ARCHITECTURE §6 (more than one API task)
+- Question: Limits are per user, but the counters live in each API process (`@fastify/rate-limit` in-memory store). With N ECS tasks, a user gets up to N× the limit, and a deploy resets the daily Ask (30/day) and export (3/day) counters. Which shared store should back them?
+- Options considered: (a) a Postgres-backed store (a small `rate_limit_counters` table, unlogged, outside RLS); (b) ElastiCache Redis (new infra); (c) keep per-minute limits in memory and enforce the daily Ask/export limits in their services from `ai_runs` / `data_requests` counts.
+- Current behavior (WP-08): in-memory store with a TODO in `apps/api/src/plugins/rate-limit.ts`; presets in `RATE_LIMITS`.
+- Blocking: no.
+- Answer: Option (c). Per-minute limits stay in memory per instance. Ask 30/day and exports 3/day are not enforced by the platform limiter; their services count today's `ai_runs` / `data_requests` rows (WP-28, WP-24). BACKEND_PLAN §8.1 updated in c235112. (owner, 2026-10-27) WP-08 removed the daily presets and left TODOs in `apps/api/src/plugins/rate-limit.ts`.
+
+## Q-030 · WP-08 · Error codes, statuses and problem `type` beyond §8.1
+- Asked by: wp-builder/wp/08-api-platform · 2026-10-27
+- Where: BACKEND_PLAN §8.1 (Errors, Writes, Optimistic concurrency); `packages/contracts/src/errors`
+- Question: §8.1 says the codes "include" seven names. The platform needs a few more, and some statuses and the `type` URI are not specified. Please confirm or correct:
+  1. Extra codes: `unauthorized` (401), `idempotency_key_reused` (422, same key with a different request), `precondition_required` (428, PATCH without `If-Match`), `payload_too_large` (413), `unsupported_media_type` (415), `bad_request` (other 4xx), `internal_error` (500).
+  2. Statuses: `entitlement_required` and `mfa_required` default to 403 (alternatives: 402 for entitlement, 401 for step-up).
+  3. Problem `type` is the relative URI `/problems/<code>` because the product domain is undecided (§17). Should it become an absolute docs URL later?
+  4. Validation errors carry `fields: [{ in: "body"|"querystring"|"params"|"headers", path: "a.b", message }]`.
+  5. A repeated key while the first request is still running returns 409 `conflict`. Only successful (< 400) responses are stored; errors (4xx and 5xx) release the key, so a client can fix the cause (for example complete step-up MFA) and retry with the same key.
+- Options considered: as listed; each is one constant in `packages/contracts/src/errors/index.ts`.
+- Blocking: no. Implemented as listed and covered by `apps/api/src/plugins/errors.test.ts`.
+- Answer: Accepted as built. `entitlement_required` and `mfa_required` return 403; problem `type` is the relative `/problems/<code>`; the `fields` shape is fine. BACKEND_PLAN §8.1 updated in c235112. (owner, 2026-10-27)
+
 ## Q-013 · WP-03 · Masked-email hint for a mismatched invite vs. invites RLS
 - Asked by: wp-builder/wp/03-db-foundation · 2026-10-27
 - Where: BACKEND_PLAN §6 (Invites, step 2); WORK_PLAN WP-05 acceptance

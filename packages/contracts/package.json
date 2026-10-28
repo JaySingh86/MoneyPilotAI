@@ -3,13 +3,23 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Zod schemas, OpenAPI generation and the typed client. Built in WP-08.",
+  "description": "Zod schemas, the generated OpenAPI document and the typed client (ADR-008).",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./client": "./src/client/index.ts",
+    "./openapi.json": "./src/openapi/openapi.json"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests",
-    "gen": "node ../../tooling/scripts/not-yet.mjs contracts:gen WP-08 src/openapi"
+    "test": "vitest run",
+    "gen": "tsx scripts/gen.ts"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.17.0",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.4.0"
   }
 }
