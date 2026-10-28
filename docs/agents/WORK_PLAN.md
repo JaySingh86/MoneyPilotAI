@@ -22,13 +22,13 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-02 | Engine core: window, runway, safe to spend, schedules | 1 | WP-01 | M | — | done |
 | WP-03 | DB foundation: roles, RLS, migrations, `withHouseholdTx`, RLS test harness | 1 | WP-01 | M | G1 | done (G1 approved) |
 | WP-04 | Format + design tokens packages | 1 | WP-01 | S | — | done |
-| WP-05 | Auth adapter, identity, households, invites | 2 | WP-03, WP-08 | M | G1 | todo |
-| WP-06 | Items, schedules, renewals, occurrences | 2 | WP-03, WP-02, WP-08 | L | G1 | todo |
+| WP-05 | Auth adapter, identity, households, invites | 2 | WP-03, WP-08 | M | G1 | in-progress (wp-builder, wp/05-auth) |
+| WP-06 | Items, schedules, renewals, occurrences | 2 | WP-03, WP-02, WP-08 | L | G1 | in-progress (wp-builder, wp/06-items) |
 | WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | done |
 | WP-08 | API platform + contracts (server, errors, idempotency, OpenAPI, client gen) | 2 | WP-01 | M | — | done |
 | WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | todo |
 | WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | in-progress (wp-builder, wp/10-ui-kit) |
-| WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | todo |
+| WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | in-progress (wp-builder, wp/11-ai) |
 | WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | todo |
 | WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | todo |
 | WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | todo |
@@ -36,7 +36,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | todo |
 | WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | todo |
 | WP-18 | Web: Bills, Renewals, Goals, Tasks | 3 | WP-10, WP-08 (WP-12, WP-13 for live data) | L | — | todo |
-| WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | todo |
+| WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | in-progress (wp-builder, wp/19-email-core) |
 | WP-20 | Forwarding channel (SES inbound) | 4 | WP-19, WP-09 | M | G2 | todo |
 | WP-21 | Gmail + Outlook connectors, token crypto | 4 | WP-05, WP-19, WP-09 | L | G2 | todo |
 | WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | todo |
