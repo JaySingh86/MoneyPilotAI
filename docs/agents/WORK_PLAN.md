@@ -92,7 +92,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 
 ## H-01 · Human setup (not an agent task)
 - Make the decisions in BACKEND_PLAN §17: hosting, auth, billing, product name/domain, AI model policy.
-- Create: GitHub repo (branch protection on `main`, required checks, CODEOWNERS for `design/`, `docs/`, `packages/db/migrations/`, `infra/`); AWS Organization with dev, staging and prod accounts; Clerk dev and prod instances; Google Cloud project + OAuth consent (**start Gmail verification**); Microsoft app registration; SES domain + production access request; Anthropic API keys per environment; billing sandbox.
+- Create: GitHub repo (branch protection on `main`, required checks, CODEOWNERS for `design/`, `docs/`, `packages/db/migrations/`, `infra/`); AWS Organization with dev, staging and prod accounts; Cognito user pools per environment (WP-09); Google Cloud project + OAuth consent (**start Gmail verification**); Microsoft app registration; SES domain + production access request; Anthropic API keys per environment; billing sandbox.
 - CI secrets: **dev and staging only**. Agents never receive production credentials.
 
 ## WP-01 · Monorepo, tooling, CI skeleton
@@ -143,15 +143,15 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 
 ## WP-05 · Auth, identity, households, invites
 - **Owns:** `apps/api/src/auth/**`, `apps/api/src/modules/{identity,households}/**`, the matching contracts files.
-- **Read first:** BACKEND_PLAN §6, §8.2 (me, households, invites, leave); ADR-011.
-- **Build:** the auth provider interface + Clerk implementation (JWT verify via JWKS, step-up check), `/me/bootstrap`, `/me`, household create/read/patch, the summary endpoint (members, badges stubbed), invites (create, revoke, accept with email match), leave (reassignment hooks stubbed), audit events.
+- **Read first:** BACKEND_PLAN §6, §8.2 (me, households, invites, leave); ADR-017.
+- **Build:** the auth provider interface + Cognito implementation (`aws-jwt-verify` access-token check, step-up from `mfa_enabled` and `auth_time`), a fake issuer with a local JWKS for tests, `/me/bootstrap`, `/me`, household create/read/patch, the summary endpoint (members, badges stubbed), invites (create, revoke, accept with email match), leave (reassignment hooks stubbed), audit events.
 - **Acceptance:**
   - [ ] Two seeded users join one household via invite; a third user can’t read it (RLS + API test).
   - [ ] An expired, revoked or mismatched-email invite returns the right problem codes.
   - [ ] Step-up is required on the endpoints marked in BACKEND_PLAN §8.2 (`mfa_required`).
   - [ ] The OpenAPI client regenerates without drift.
   - [ ] Invites are accepted only through `app_accept_invite` and looked up only through `app_invite_lookup` (WP-03). The mismatch hint shows the masked email from the lookup.
-  - [ ] The Clerk webhook verifies the svix signature before anything else. `app_sync_auth_user` receives only Clerk's verified primary email from that webhook; no other path calls it.
+  - [ ] A WP-05 migration grants `app_sync_auth_user` to `mp_api` (ADR-017). It is called only from bootstrap, with the email from a verified token whose `email_verified` claim is true. Tokens with `email_verified = false`, the wrong `token_use`, client id or issuer, or an expired `exp`, are rejected (tests for each).
   - [ ] `/me/bootstrap` takes the user's email from the verified token claims, never from the request body.
 - **Gate:** G1.
 
@@ -266,7 +266,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 ## WP-17 · Web: shell, sign-in, Overview, Calendar
 - **Owns:** `apps/web/app/(app)/{layout,overview,calendar}/**`, `apps/web/lib/**`, `apps/web/mocks/**`
 - **Read first:** DESIGN_SPEC §3, §5.1 Overview + Calendar + Safe-to-spend states, §5.3; canvas boards Web · Overview, Calendar, Safe-to-spend states.
-- **Build:** the app shell (sidebar, compact top bar under 800 px), Clerk sign-in, the API client with React Query, MSW mocks from the fixture, the Overview (on track **and** shortfall states, What-if “See the math” drawer) and the Calendar.
+- **Build:** the app shell (sidebar, compact top bar under 800 px), Cognito sign-in with Amplify Auth (our screens, UI kit components), the API client with React Query, MSW mocks from the fixture, the Overview (on track **and** shortfall states, What-if “See the math” drawer) and the Calendar.
 - **Acceptance:**
   - [ ] With fixture data (mock or seeded), every golden value on the canvas renders exactly.
   - [ ] Layout matches at 1440, 1024 and 390 widths (Playwright screenshots attached next to the canvas frames).

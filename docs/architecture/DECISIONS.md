@@ -18,12 +18,13 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 | 008 | Zod-first contracts → OpenAPI → generated clients | Accepted |
 | 009 | Email capture: metadata prefilter, one structured extraction, evidence validation, no bodies stored | Accepted |
 | 010 | AI provider and per-route model config | Accepted (default model); per-route changes Proposed |
-| 011 | Auth through an adapter (Clerk proposed) | Proposed |
+| 011 | Auth through an adapter (Clerk proposed) | Superseded by 017 |
 | 012 | Hosting on AWS with CDK; web on Vercel | Proposed |
 | 013 | Billing through an adapter (merchant of record proposed) | Proposed |
 | 014 | Agent-driven delivery: work packages, path ownership, CI as the contract | Accepted |
 | 015 | Timestamped SQL migrations, expand/contract | Accepted |
 | 016 | Mobile app on the React Native CLI (no Expo) | Accepted |
+| 017 | Auth on AWS Cognito behind the adapter | Accepted |
 
 ---
 
@@ -111,8 +112,30 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 - **Navigation:** React Navigation.
 - **Secure token storage:** `react-native-keychain` (iOS Keychain, Android Keystore).
 - **Push:** Firebase Cloud Messaging through `@react-native-firebase/messaging`; iOS goes through APNs via FCM.
-- **Sign-in:** the provider's plain React Native integration, or a provider with a native RN SDK (see ADR-011).
+- **Sign-in:** AWS Amplify Auth with `@aws-amplify/react-native`, which supports bare React Native (ADR-017).
 - **Builds and releases:** Xcode and Android Studio projects in the repo, Fastlane for signing and store uploads, CI on macOS runners for iOS.
 - **Tests:** Jest with React Native Testing Library; Detox for end-to-end.
 
 **Consequences:** full control over native code and dependencies, at the cost of maintaining the iOS and Android projects ourselves (upgrades with the React Native Upgrade Helper, signing, store builds). There are no over-the-air JS updates; every change ships through the app stores. Pin the React Native version in WP-30 and follow its upgrade guide for each release.
+
+## ADR-017 Auth on AWS Cognito (supersedes ADR-011's Clerk proposal)
+**Context:** Clerk's React Native SDK depends on Expo, which ADR-016 rules out. Hosting is proposed on AWS (ADR-012), where Cognito sits next to KMS, SES and the rest.
+**Decision:** a Cognito user pool per environment, behind the adapter in `apps/api/src/auth/provider.ts` (`verifyToken`, `getUser`, `requireStepUp`).
+- Sign-in: email + password, passkeys, Sign in with Google (federation), and TOTP MFA.
+- Clients:
+  - Web uses Amplify Auth with our own screens built from the UI kit.
+  - Mobile uses Amplify Auth with `@aws-amplify/react-native`; tokens go in the Keychain or Keystore via `react-native-keychain`.
+- The API accepts the Cognito **access token** as `Authorization: Bearer`. It verifies the token with `aws-jwt-verify`: issuer, client id, `token_use = access`, expiry, 60 s skew.
+- A pre-token-generation trigger (V2) adds `email`, `email_verified` and `mfa_enabled` to the access token.
+- Step-up uses `mfa_enabled` and `auth_time`, at most 10 minutes old for destructive actions.
+- There are no auth webhooks:
+  - `/me/bootstrap` creates the `users` row from verified claims.
+  - Email and MFA changes sync from the claims on bootstrap, and only when `email_verified` is true.
+  - Account deletion removes the Cognito user from the worker with `AdminDeleteUser`.
+- Tests and local dev use a fake issuer with a locally generated JWKS. The real user pool and the trigger Lambda are created in WP-09, and agents never get its credentials.
+
+**Consequences:**
+- The sign-in UI is ours to build, since Cognito's managed login isn't used for the in-app look.
+- It is cheaper at scale and stays in one cloud.
+- `app_sync_auth_user` becomes callable by `mp_api`; the email argument may only come from a verified `email_verified = true` claim.
+

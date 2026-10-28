@@ -21,7 +21,7 @@ If any assumption is wrong, see §17.
 | API | Fastify 5, Zod schemas, generated OpenAPI 3.1, and a typed client shared by web and mobile. |
 | Database | PostgreSQL 16 with **row-level security (RLS)** for household isolation. Drizzle ORM and SQL migrations. |
 | Jobs | **pg-boss** (a Postgres-backed queue with retries, cron and singleton keys). No Redis in the MVP. |
-| Auth | Managed auth with MFA (Clerk recommended) behind an adapter. Our own `users` table keyed by the auth subject. |
+| Auth | AWS Cognito with MFA behind an adapter (ADR-017). Our own `users` table keyed by the auth subject. |
 | Planning math | `packages/engine`: pure, deterministic TypeScript, tested against the golden fixture. **AI never computes numbers.** |
 | Email capture | Gmail API (read-only), Microsoft Graph (Mail.Read), plus a per-household forwarding address over inbound email. Rules prefilter, then one AI extraction call per message, then rule validation, then the review queue. |
 | AI | Anthropic Claude API, `claude-opus-5-5` by default (see §7.9). Structured outputs for extraction; tool use limited to engine functions for Ask. |
@@ -72,7 +72,7 @@ flowchart LR
     SES[SES<br/>send + inbound]
     SM[Secrets Manager]
   end
-  AUTH[Clerk<br/>auth + MFA]
+  AUTH[AWS Cognito<br/>auth + MFA]
   G[Gmail API +<br/>Google Pub/Sub]
   MS[Microsoft Graph]
   AI[Anthropic Claude API]
@@ -149,7 +149,7 @@ Dependency rules, enforced with a lint rule:
 | Jobs / cron | pg-boss | Transactional enqueue, retries, cron, singleton keys, no extra infra | SQS + EventBridge when scale demands |
 | Dates | `@js-temporal/polyfill` (`PlainDate`, `ZonedDateTime`) | Date-only bill logic without timezone bugs | date-fns-tz |
 | Recurrence | RFC 5545 RRULE via the `rrule` library | Standard; covers all our schedules | Custom schedule JSON |
-| Auth | Clerk (MFA: TOTP and passkeys; React SDK). Mobile needs a plain React Native integration (ADR-016) | Fast to ship, MFA built in | Auth0 (react-native-auth0), AWS Cognito |
+| Auth | AWS Cognito (TOTP MFA, passkeys, Google federation); Amplify Auth on web and bare React Native; `aws-jwt-verify` in the API (ADR-017) | Same cloud as hosting, works without Expo, cheap at scale | Auth0 (react-native-auth0), Clerk |
 | Files | S3 + SSE-KMS, presigned uploads | Standard, cheap, encrypted | — |
 | Email send | Amazon SES (transactional, with configuration sets for events) | Cheap; delivery events via SNS | Postmark |
 | Inbound email | SES receiving → S3 → SNS → worker | Same vendor, encrypted at rest | Postmark inbound |
@@ -202,7 +202,7 @@ create extension if not exists citext;
 -- ===== Identity & households =====
 create table users (
   id            uuid primary key default gen_random_uuid(),
-  auth_subject  text not null unique,              -- Clerk user id
+  auth_subject  text not null unique,              -- Cognito `sub`
   email         citext not null unique,
   first_name    text not null,
   last_name     text,
@@ -737,13 +737,13 @@ Extra rules:
 ## 6. Authentication, households and permissions
 
 **Sign-up and sign-in:**
-1. Clerk handles email + password or passkey, Sign in with Google, and MFA (TOTP or passkey).
-2. The API verifies the Clerk JWT against JWKS, with a 60 s clock skew and an audience check.
-3. On the first request, `POST /v1/me/bootstrap` upserts the `users` row (or a `user.created` webhook does).
+1. AWS Cognito handles email + password or passkey, Sign in with Google, and TOTP MFA (ADR-017). Web and mobile use Amplify Auth with our own screens.
+2. The API verifies the Cognito access token with `aws-jwt-verify`. It checks the issuer, client id, `token_use = access` and expiry, with a 60 s clock skew. A pre-token-generation trigger adds `email`, `email_verified` and `mfa_enabled` claims.
+3. On the first request, `POST /v1/me/bootstrap` upserts the `users` row from the verified claims; there are no auth webhooks. Email and MFA changes sync on bootstrap through `app_sync_auth_user`, and only when `email_verified` is true.
 
 **MFA policy:**
 - Encouraged at signup.
-- **Required before connecting an email account, exporting data, or deleting the household** (step-up). The API checks the `mfa_enabled` claim and the authentication age (≤ 10 min for destructive actions).
+- **Required before connecting an email account, exporting data, or deleting the household** (step-up). The API checks the `mfa_enabled` claim and the authentication age from `auth_time` (≤ 10 min for destructive actions).
 
 **Household creation:**
 - Creates the `households` row and a `household_members` row (creator → `partnerA`, `is_creator = true`) in one transaction.
@@ -765,7 +765,7 @@ Extra rules:
   - Their audit history stays with the household.
   - If they were the last member, use delete instead.
 
-**Sessions on mobile:** the mobile app is a React Native CLI app without Expo (ADR-016). Clerk’s official React Native SDK depends on Expo modules, so H-01 decides between a plain-React-Native integration of the chosen provider and a provider with a native RN SDK (Auth0, Cognito). Tokens live in the iOS Keychain / Android Keystore via `react-native-keychain`. The API stays the same.
+**Sessions on mobile:** the mobile app is a React Native CLI app without Expo (ADR-016). It uses Amplify Auth with `@aws-amplify/react-native`, which supports bare React Native (ADR-017). Tokens live in the iOS Keychain / Android Keystore via `react-native-keychain`. The API stays the same.
 
 ---
 
@@ -1058,7 +1058,7 @@ email.cleanup(message)            → discard text/attachments from memory/S3 te
 | **Export** | `POST /households/:id/exports` requires step-up MFA. A job builds a ZIP of CSV + JSON for each entity, plus the activity log, encrypted in S3. The download link (presigned) expires in 24 h and is emailed. Audit event recorded. |
 | **Leave household** | Revoke the member’s email connections and reassign their items (§6). Membership `left_at` is set. |
 | **Delete household** | Requires step-up MFA and typing the household name. Sets `deletion_scheduled_for = now + 7 days` and notifies the other member, who can cancel. When it runs: revoke all email tokens, cancel billing, delete S3 objects, then delete the household (cascades). Audit events keep only a tombstone (`household_id`, action, time) for 1 year. Backups age out within 35 days (stated in the privacy policy). |
-| **Account deletion** | Leave or delete the household, then delete the user in Clerk and anonymize `users`. |
+| **Account deletion** | Leave or delete the household, then delete the Cognito user (`AdminDeleteUser`, from the worker) and anonymize `users`. |
 
 **Retention schedule** (enforced by nightly `retention.purge`):
 
@@ -1096,7 +1096,7 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 ## 8. API
 
 ### 8.1 Conventions
-- **Base URL:** `https://api.<domain>/v1`, JSON over HTTP. **Auth:** `Authorization: Bearer <Clerk JWT>`.
+- **Base URL:** `https://api.<domain>/v1`, JSON over HTTP. **Auth:** `Authorization: Bearer <Cognito access token>`.
 - **Money:** integer cents (`amountCents`). **Dates:** `YYYY-MM-DD`. **Timestamps:** ISO 8601 UTC. **IDs:** UUID.
 - **Pagination:** cursor-based (`?limit=50&cursor=…`) → `{ data: [...], nextCursor }`.
 - **Writes** accept `Idempotency-Key` (required on POSTs that create things). Repeats within 24 h return the stored response.
@@ -1202,7 +1202,6 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 
 | Path | Verification |
 |---|---|
-| `/webhooks/clerk` | Svix signature |
 | `/webhooks/gmail` | Pub/Sub push OIDC token (audience + service account email) |
 | `/webhooks/graph` | Validation-token handshake; `clientState` match; then the job re-reads via delta (never trust the payload body) |
 | `/webhooks/ses-inbound`, `/webhooks/ses-events` | SNS message signature + topic ARN allowlist |
@@ -1251,7 +1250,7 @@ Every job handler:
 | Stolen OAuth refresh tokens | KMS envelope encryption (a data key per connection, wrapped by a CMK); decrypt only in the worker; column grants; KMS key policy limited to the worker task role; CloudTrail alerts on unusual `Decrypt` volume |
 | Prompt injection via email | No tools on extraction; schema-only output; verbatim-evidence validation; rules decide; nothing is executed (§7.8.2) |
 | Forged webhooks | Signature/OIDC verification; idempotency; re-read the source of truth |
-| Account takeover | Clerk MFA; step-up for email connect, export and delete; new-device sign-in email; session revocation on password change |
+| Account takeover | Cognito MFA; step-up for email connect, export and delete; new-device sign-in email; session revocation on password change |
 | Malicious CSV / file upload | Size and type limits; parse in the worker only; formula-injection-safe export (prefix `=+-@` cells with `'`) |
 | Inbound spam to the forwarding address | Sender must be a member, else quarantine; SES spam and virus verdicts; per-address rate limit; rotate address |
 | Data leaks in logs | pino redaction of tokens, emails, amounts and descriptions; no request bodies logged; Sentry `beforeSend` scrubbing |
@@ -1367,7 +1366,7 @@ Every job handler:
 
 | Sprint | E1 (platform / data) | E2 (product / API) | Exit criteria |
 |---|---|---|---|
-| **S1 · Days 31–37** | Monorepo, CDK infra (dev/staging), RDS, roles + RLS helpers, CI/CD, observability | Clerk integration, `/me`, households, invites, members; items CRUD + schedules; occurrences materializer | Two users in one household see the same items; cross-tenant RLS tests pass |
+| **S1 · Days 31–37** | Monorepo, CDK infra (dev/staging), RDS, roles + RLS helpers, CI/CD, observability | Cognito integration, `/me`, households, invites, members; items CRUD + schedules; occurrences materializer | Two users in one household see the same items; cross-tenant RLS tests pass |
 | **S2 · Days 38–44** | `packages/engine` (rules 1–11, 16, 17) with golden + property tests; `calc_snapshots`; plan recompute job | `GET /plan`, what-if, calendar, renewals summary, bills averages; CSV import + mapping + recurring detection → review queue | Every fixture `expected` value served by the API matches |
 | **S3 · Days 45–51** | Email: forwarding (SES inbound), Gmail (test mode) + Outlook connect, discover/backfill, prefilter, redact, extraction (structured output), validation, match, auto-apply + undo; KMS token encryption | Review queue API; reminders planner + dispatcher + SES events; notifications API; tasks + auto-complete | A pilot inbox produces correct review items; reminders arrive once, on time, in local time |
 | **S4 · Days 52–60** | Privacy: export, leave, delete (scheduled), retention purge, audit log; security hardening, rate limits, pen-test-lite; load test | Goals + proposals + approvals; shortfall options; billing adapter + webhooks + entitlements; summary endpoint; seed pilot | 20–30 pilot households onboarded; DESIGN_SPEC §9 checklist passes on all MVP screens |
@@ -1400,7 +1399,7 @@ Every job handler:
 ## 17. Decisions needed from you
 
 1. **Hosting:** AWS as planned (stronger security story, KMS), or a leaner pilot on a managed Postgres (Neon or Supabase) + Render/Fly, then migrating? Recommendation: AWS from the start, because tokens and KMS matter.
-2. **Auth provider:** Clerk (recommended for speed) vs AWS Cognito (cheaper at scale, more work).
+2. **Auth provider:** decided: AWS Cognito (ADR-017, owner, 2026-10-28).
 3. **Billing provider** for an India-based company: a merchant of record (Paddle or Lemon Squeezy) vs a Stripe account through an eligible entity.
 4. **AI model per route:** this plan uses `claude-opus-5-5` everywhere (~$0.64/month/household for extraction). Once the eval set exists, you can decide whether a cheaper model such as `claude-haiku-5-5` meets the extraction quality gates. That is your cost-versus-quality call; the code makes it a one-line config per route.
 5. **Free vs Plus:** whether partner sharing and Gmail/Outlook connection are free (affects activation) or Plus (affects conversion).

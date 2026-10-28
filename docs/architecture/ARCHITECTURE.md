@@ -11,7 +11,7 @@ flowchart TB
   A([Partner A<br/>household creator])
   B([Partner B<br/>invited partner])
   MP[[MoneyPilot<br/>household planning assistant]]
-  CL[Clerk<br/>sign-in, MFA]
+  CL[AWS Cognito<br/>sign-in, MFA]
   GM[Gmail API<br/>+ Google Pub/Sub]
   MS[Microsoft Graph<br/>Outlook / M365]
   IN[Any mailbox<br/>forwarding to household address]
@@ -324,7 +324,7 @@ flowchart TB
   WRKS --> RDS
   APIS --> NAT
   WRKS --> NAT
-  NAT --> EXT[Clerk · Google · Microsoft · Anthropic · Billing]
+  NAT --> EXT[Cognito · Google · Microsoft · Anthropic · Billing]
 ```
 
 - **Environments:** `local` (docker compose + fakes), `dev`, `staging`, `prod`. Each is a separate CDK stack and a separate AWS account (via Organizations).
