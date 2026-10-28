@@ -24,7 +24,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-04 | Format + design tokens packages | 1 | WP-01 | S | — | done |
 | WP-05 | Auth adapter, identity, households, invites | 2 | WP-03, WP-08 | M | G1 | todo |
 | WP-06 | Items, schedules, renewals, occurrences | 2 | WP-03, WP-02, WP-08 | L | G1 | todo |
-| WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | in-progress (wp-builder, wp/07-engine-rules) |
+| WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | done |
 | WP-08 | API platform + contracts (server, errors, idempotency, OpenAPI, client gen) | 2 | WP-01 | M | — | done |
 | WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | todo |
 | WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | in-progress (wp-builder, wp/10-ui-kit) |
@@ -164,6 +164,8 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] A schedule change rebuilds only future `scheduled` occurrences; paid ones are untouched.
   - [ ] A stale `If-Match` returns 409 with the current resource.
   - [ ] RLS tests cover all new tables.
+  - [ ] `recurring_items.subcategory`, `movable`, `on_bills_page` and `goals.is_emergency_fund` exist (BACKEND_PLAN §5.2). Seeding the fixture stores each renewal as an item; renewal-only ones get `on_bills_page = false`, and r-car links to the car insurance item (Q-020).
+  - [ ] The engine input carries `onBillsPage`, and `billsAverages` skips items where it is false (small cross-WP change in `packages/engine`), so the bills page still shows 18 rows and $4,956.94 (DESIGN_SPEC §6 rule 17).
 - **Gate:** G1.
 
 ## WP-07 · Engine rules complete

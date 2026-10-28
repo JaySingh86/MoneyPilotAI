@@ -159,14 +159,46 @@ function withRandomRows(rng: Rng, input: EngineInput): EngineInput {
   return { ...input, occurrences };
 }
 
-function households(check: (input: EngineInput, plan: PlanResult, rng: Rng) => void) {
-  forAllSeeds(RUNS, (rng) => {
-    const input = withRandomRows(rng, randomHousehold(rng));
-    check(input, computePlan(input), rng);
-  });
+interface Sample {
+  seed: number;
+  input: EngineInput;
+  plan: PlanResult;
+  /** The generator after building the household; only the move property draws from it further. */
+  rng: Rng;
 }
 
-describe("properties (BACKEND_PLAN §7.2)", () => {
+let samples: Sample[] | undefined;
+
+/**
+ * The RUNS seeded households and their plans, built once and shared by every property (each property
+ * still checks all RUNS seeds). Building them per property made the suite slow enough to time out under
+ * a full parallel `pnpm test`.
+ */
+function sampled(): Sample[] {
+  if (samples === undefined) {
+    const built: Sample[] = [];
+    forAllSeeds(RUNS, (rng, seed) => {
+      const input = withRandomRows(rng, randomHousehold(rng));
+      built.push({ seed, input, plan: computePlan(input), rng });
+    });
+    samples = built;
+  }
+  return samples;
+}
+
+function households(check: (input: EngineInput, plan: PlanResult, rng: Rng) => void) {
+  for (const s of sampled()) {
+    try {
+      check(s.input, s.plan, s.rng);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`property failed for seed ${s.seed}: ${message}`, { cause: err });
+    }
+  }
+}
+
+// An explicit timeout so a loaded CI machine never fails the suite on the 5 s default.
+describe("properties (BACKEND_PLAN §7.2)", { timeout: 30_000 }, () => {
   it("runway balance on day n = start + every event up to day n", () => {
     households((_input, plan) => {
       let running = plan.runwayDetail.startingBalanceCents;

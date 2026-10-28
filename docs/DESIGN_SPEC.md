@@ -247,7 +247,7 @@ The routes below are suggestions. Each screen lists its regions in order, the da
   - **Runway:** negative bars hang below a solid `text.primary` $0 axis in `chart.lowest`, with their values in `attention.text`.
   - **“Ways to cover the gap” card:** up to 3 options, each recalculated with rule 9 and shown with an effect chip (ok when safe to spend ends up ≥ 0, info otherwise), then “Decide with Jordan”. Options come in this order:
     1. Move money from the emergency fund: the smallest multiple of $100 that gives at least $50 a day, capped at the fund balance.
-    2. Split the expense that caused the shortfall into two halves, before and after payday.
+    2. Split the expense that caused the shortfall into two halves, before and after payday. The cause is the largest planned expense from today through the lowest day (ties: earliest, then id); regular bills are never the cause. The first half is floor(amount ÷ 2).
     3. Move the largest bill in the window that could be moved to payday (§6 rule 18).
   - Options that depend on a third party carry “Only if … allows it”.
   - **Golden values:** $793 short · options $507 / $107 / “$109 short, never below $0”.
@@ -281,7 +281,7 @@ All of these run in tested, deterministic code. AI never produces these numbers.
     - *Shop-around date* = renewal − 30 days.
     - *Reminders* go out 30 and 7 days before plus on the day for items billed every 6 months or less often. Monthly subscriptions only get a reminder when the price changes.
 12. **Reminders:** sent to the owner, or to both when the owner is Split or Both. The dedupe key is (item, occurrence date, offset). Delivery is tracked, and failures appear in Notifications.
-13. **Owner filters:** a partner’s filter includes their own items plus items owned by Both.
+13. **Owner filters:** a partner’s filter includes their own items plus items owned by Both or Split.
 14. **Email capture:**
     - Only the mailbox owner can connect or disconnect it. Partners see the extracted items, never the emails.
     - An item is applied automatically only when it matches a confirmed item (same sender and account last 4) with an identical amount, or with an actual amount for an estimated bill. Everything else goes to the review queue.
@@ -291,7 +291,7 @@ All of these run in tested, deterministic code. AI never produces these numbers.
 16. **Goal status:**
     - *Reach month* = the month of the n-th deposit, where n = ceil(remaining ÷ monthly deposit). Deposits start on the next primary payday (Nov 6 in the fixture).
     - A goal with a target date shows “On track for {date}” or “$X behind”. A planned expense shows “$X to set aside”. Suggestions follow rule 10.
-17. **Averages on Bills & recurring:** biweekly income × 26 ÷ 12. Bills paid every n months ÷ n. Estimates use their current estimate.
+17. **Averages on Bills & recurring:** biweekly income × 26 ÷ 12. Bills paid every n months ÷ n. Estimates use their current estimate. Items that exist only as renewals (renters, life insurance, memberships, registration and similar) are listed on Subscriptions & renewals, not on Bills & recurring, and are left out of these averages. They still count in the runway like any other outflow paid from the account.
 18. **Movable bills** (shortfall option 3, “Pay {bill} on payday”): a bill can be suggested for a move only if it is movable. Each item may carry a user-set `movable` flag. When it isn’t set, subscription, insurance, membership, registration and other items are movable; bill, loan and income items are not (hard due dates, late fees). Among movable bills due before payday, pick the largest whose move changes safe to spend (ties: earliest date, then id).
 19. **Decide this week** (Overview region 4), in this order:
     1. The shortfall, if any.
@@ -300,7 +300,7 @@ All of these run in tested, deterministic code. AI never produces these numbers.
     4. Decide-by deadlines within 7 days (rule 15’s “this week”).
     5. Savings goals that are behind.
 
-    Ties go by date, then id. Price-up and possible-duplicate flags are not decisions; they become the task “Review N flagged subscriptions”. In the fixture this gives exactly 3 cards (car insurance, electricity estimate, Lake Tahoe).
+    Ties go by date, then id. Price-up and possible-duplicate flags are not decisions; they become the task “Review N flagged subscriptions”. On the calendar, those bills still show a “Needs a decision” chip, as the canvas draws them. In the fixture this gives exactly 3 cards (car insurance, electricity estimate, Lake Tahoe).
 
 ---
 

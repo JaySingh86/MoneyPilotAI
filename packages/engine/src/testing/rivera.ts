@@ -7,9 +7,13 @@ import type {
   ItemAmount,
   ItemInput,
   ItemKind,
+  ItemSource,
   OccurrenceInput,
   PlannedExpenseInput,
+  RenewalCategory,
+  RenewalInput,
   Schedule,
+  TaskInput,
   Weekday,
 } from "../types";
 
@@ -27,6 +31,12 @@ interface FixtureItem {
   estimate?: { historyCents?: number[]; fromLastStatementCents?: number };
   kind?: string;
   schedule: FixtureSchedule;
+  previousAmountCents?: number;
+  priceChangedOn?: string;
+  markedPossiblyUnused?: boolean;
+  /** `csv`, `email`, or `email+csv`. */
+  source?: string;
+  subcategory?: string;
 }
 
 interface FixturePlannedExpense {
@@ -45,6 +55,33 @@ interface FixtureGoal {
   savedCents: number;
   monthlyCents?: number;
   targetDate?: string;
+  emergencyFund?: boolean;
+}
+
+interface FixtureTask {
+  id: string;
+  title: string;
+  owner: string;
+  dueOn: string | null;
+  dueHint?: string;
+  completed: boolean;
+}
+
+interface FixtureRenewal {
+  id: string;
+  name: string;
+  provider: string;
+  category: string;
+  amountCents: number;
+  previousAmountCents?: number;
+  frequency: string;
+  renewsOn: string;
+  decisionBy?: string;
+  cancelBy?: string;
+  owner: string;
+  autoRenew: boolean | "rolls_over";
+  source: string;
+  markedPossiblyUnused?: boolean;
 }
 
 export interface RiveraExpectedCore {
@@ -59,6 +96,48 @@ export interface RiveraExpectedCore {
   safeToSpendAfterElectricityActual15137Cents: number;
 }
 
+/** The `expected` keys checked by the WP-07 rules. */
+export interface RiveraExpectedRules {
+  electricityEstimate: { amountCents: number; rangeDisplay: string };
+  tahoeGoal: {
+    projectedByTargetCents: number;
+    gapCents: number;
+    suggestedMonthlyCents: number;
+    alternativeTargetDate: string;
+  };
+  november: {
+    incomeCents: number;
+    billsCount: number;
+    billsCents: number;
+    goalsAndPlannedCents: number;
+    leftForEverydayCents: number;
+  };
+  renewals: {
+    count: number;
+    yearlyCents: number;
+    bigRenewalsNext90DaysCents: number;
+    priceIncreaseYearlyCents: number;
+    couldSaveYearlyCents: number;
+    foundAutomatically: number;
+  };
+  billsPage: {
+    rows: number;
+    monthlyBillsAverageCents: number;
+    monthlyIncomeAverageCents: number;
+    leftAfterBillsCents: number;
+    estimatesToConfirm: number;
+  };
+  goalsPage: {
+    savingEachMonthCents: number;
+    savedSoFarCents: number;
+    effectOnSafeToSpendCents: number;
+    emergency: { percent: number; status: string };
+    tahoe: { percent: number; status: string; suggestedMonthlyCents: number };
+    gifts: { percent: number; status: string; suggestedMonthlyCents: number };
+  };
+  tasks: { dueThisWeek: number; later: number; done: number; navBadge: number };
+}
+
 export interface RiveraShortfallExpectedCore {
   runwayEndOfDayCents: Record<string, number>;
   lowest: { date: string; balanceCents: number };
@@ -69,21 +148,44 @@ export interface RiveraShortfallExpectedCore {
   itemsBeforePayday: { count: number; totalCents: number };
 }
 
+export type RiveraShortfallOptionExpected =
+  | {
+      id: "move-from-emergency";
+      amountCents: number;
+      safeToSpendCents: number;
+      display: string;
+      emergencyReachMonth: string;
+    }
+  | {
+      id: "split-repair";
+      amountNowCents: number;
+      amountAfterPaydayCents: number;
+      safeToSpendCents: number;
+      display: string;
+    }
+  | { id: "car-insurance-on-payday"; safeToSpendCents: number; minBalanceCents: number; display: string };
+
+export interface RiveraShortfallExpected extends RiveraShortfallExpectedCore {
+  options: RiveraShortfallOptionExpected[];
+}
+
 export interface RiveraFixture {
   today: string;
-  household: { id: string; cushionCents: number; primaryIncomeId: string };
+  household: { id: string; timezone: string; cushionCents: number; primaryIncomeId: string };
   balance: { amountCents: number; asOf: string };
   incomes: FixtureItem[];
   bills: FixtureItem[];
   plannedExpenses: FixturePlannedExpense[];
   goals: FixtureGoal[];
+  renewals: FixtureRenewal[];
+  tasks: FixtureTask[];
   scenarios: {
-    shortfall: { addPlannedExpenses: FixturePlannedExpense[]; expected: RiveraShortfallExpectedCore };
+    shortfall: { addPlannedExpenses: FixturePlannedExpense[]; expected: RiveraShortfallExpected };
   };
-  expected: RiveraExpectedCore;
+  expected: RiveraExpectedCore & RiveraExpectedRules;
 }
 
-/** The raw fixture, typed for the keys the engine core uses. Treat as read-only. */
+/** The raw fixture, typed for the keys the engine uses. Treat as read-only. */
 export const riveraFixture = fixtureJson as unknown as RiveraFixture;
 
 /**
@@ -141,6 +243,17 @@ const KINDS: readonly ItemKind[] = [
   "other",
 ];
 
+/** `email+csv` → `["email", "csv"]`. */
+function parseSources(source: string | undefined): ItemSource[] {
+  return source === undefined ? [] : source.split("+").map((s) => s as ItemSource);
+}
+
+/**
+ * Renewals that are also recurring items (renewal_details is a 1:1 extension of recurring_items,
+ * BACKEND_PLAN §5.2). The fixture has no link; r-car is the car insurance bill b-carins.
+ */
+const RENEWAL_ITEM_LINKS: Readonly<Record<string, string>> = { "r-car": "b-carins" };
+
 function toItem(item: FixtureItem, direction: ItemInput["direction"]): ItemInput {
   const kind = (item.kind ?? (direction === "inflow" ? "income" : "bill")) as ItemKind;
   if (!KINDS.includes(kind)) throw new Error(`fixture ${item.id}: unknown kind`);
@@ -155,6 +268,11 @@ function toItem(item: FixtureItem, direction: ItemInput["direction"]): ItemInput
     weekendRule: "none",
     paidFrom: "account",
     status: "active",
+    sources: parseSources(item.source),
+    previousAmountCents: item.previousAmountCents ?? null,
+    priceChangedOn: item.priceChangedOn ?? null,
+    markedPossiblyUnused: item.markedPossiblyUnused ?? false,
+    subcategory: item.subcategory ?? null,
   };
 }
 
@@ -178,15 +296,62 @@ function toGoal(g: FixtureGoal): GoalInput {
     savedCents: g.savedCents,
     monthlyCents: g.monthlyCents ?? null,
     targetDate: g.targetDate ?? null,
+    emergencyFund: g.emergencyFund ?? false,
+  };
+}
+
+const RENEWAL_CATEGORIES: readonly RenewalCategory[] = [
+  "insurance",
+  "subscription",
+  "membership",
+  "vehicle_home",
+];
+
+function toRenewal(r: FixtureRenewal): RenewalInput {
+  if (!RENEWAL_CATEGORIES.includes(r.category as RenewalCategory))
+    throw new Error(`fixture ${r.id}: unknown category`);
+  const frequency: Record<string, Pick<RenewalInput, "every" | "paidFrom">> = {
+    "6_months": { every: { unit: "month", n: 6 }, paidFrom: "account" },
+    monthly_payroll: { every: { unit: "month", n: 1 }, paidFrom: "payroll" },
+    yearly: { every: { unit: "month", n: 12 }, paidFrom: "account" },
+  };
+  const f = frequency[r.frequency];
+  if (!f) throw new Error(`fixture ${r.id}: unknown frequency`);
+  return {
+    id: r.id,
+    itemId: RENEWAL_ITEM_LINKS[r.id] ?? null,
+    name: r.name,
+    category: r.category as RenewalCategory,
+    owner: r.owner,
+    amountCents: r.amountCents,
+    ...f,
+    renewsOn: r.renewsOn,
+    autoRenews: r.autoRenew === "rolls_over" ? "rolls_over" : r.autoRenew ? "yes" : "no",
+    sources: parseSources(r.source),
+    previousAmountCents: r.previousAmountCents ?? null,
+    priceChangedOn: null,
+    markedPossiblyUnused: r.markedPossiblyUnused ?? false,
+    subcategory: null,
+    decisionBy: r.decisionBy ?? null,
+    cancelBy: r.cancelBy ?? null,
   };
 }
 
 export interface RiveraOptions {
   scenario?: "base" | "shortfall";
-  /** The fixture has no timezone; tests pick one. Defaults to America/Los_Angeles. */
+  /** Defaults to the fixture's household timezone (America/New_York). */
   timezone?: string;
   occurrences?: OccurrenceInput[];
 }
+
+/** The fixture's household tasks (`tasks`), as engine input. */
+export const RIVERA_TASKS: readonly TaskInput[] = riveraFixture.tasks.map((t) => ({
+  id: t.id,
+  title: t.title,
+  owner: t.owner,
+  dueOn: t.dueOn,
+  completed: t.completed,
+}));
 
 /** The golden household as an EngineInput. Every call returns a fresh copy. */
 export function riveraInput(options: RiveraOptions = {}): EngineInput {
@@ -195,7 +360,7 @@ export function riveraInput(options: RiveraOptions = {}): EngineInput {
   if (options.scenario === "shortfall") planned.push(...f.scenarios.shortfall.addPlannedExpenses);
   return {
     asOf: f.today,
-    timezone: options.timezone ?? "America/Los_Angeles",
+    timezone: options.timezone ?? f.household.timezone,
     cushionCents: f.household.cushionCents,
     startingBalance: { cents: f.balance.amountCents, asOf: f.balance.asOf },
     primaryIncomeItemId: f.household.primaryIncomeId,
@@ -203,5 +368,6 @@ export function riveraInput(options: RiveraOptions = {}): EngineInput {
     occurrences: options.occurrences ? options.occurrences.map((o) => ({ ...o })) : [],
     plannedExpenses: planned.map(toPlannedExpense),
     goals: f.goals.map(toGoal),
+    renewals: f.renewals.map(toRenewal),
   };
 }

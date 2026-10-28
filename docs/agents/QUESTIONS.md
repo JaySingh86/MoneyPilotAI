@@ -45,6 +45,71 @@ Format (newest first):
 - Blocking: no. Implemented as listed and covered by `apps/api/src/plugins/errors.test.ts`.
 - Answer: Accepted as built. `entitlement_required` and `mfa_required` return 403; problem `type` is the relative `/problems/<code>`; the `fields` shape is fine. BACKEND_PLAN §8.1 updated in c235112. (owner, 2026-10-27)
 
+## Q-021 · WP-07 · Split items in a partner's filter (informational)
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-28
+- Where: DESIGN_SPEC §6 rule 13 ("a partner's filter includes their own items plus items owned by Both"); `packages/engine/src/rules/owners.ts`
+- Question: Rule 13 names Both only. The engine also includes `split` items (Split = 50/50, both partners get reminders, mobile Bill detail) in each partner's filter. Confirm?
+- Options considered: include split (implemented); or own and Both only.
+- Blocking: no.
+- Proposed answer: yes, include split.
+- Answer: Yes, include split. DESIGN_SPEC §6 rule 13 updated. (owner, 2026-10-28)
+
+## Q-020 · WP-07 · How do renewal-only items map to items (WP-06, WP-12)?
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-28
+- Where: BACKEND_PLAN §5.2 (`renewal_details` is 1:1 with `recurring_items`), §7.5; fixture `renewals` (9 rows) vs `bills`; `expected.billsPage` (18 rows, $4,956.94 a month) and `expected.renewals` (16 items)
+- Question: In production every renewal is a recurring item, but the fixture's renewals r-health, r-renters, r-moto, r-life, r-av, r-shop, r-club and r-reg have no matching `bills` entry (only r-car matches b-carins). `billsAverages` must stay at 18 rows and $4,956.94, which excludes them. So when they exist as items, how should WP-06 and WP-12 treat them for bill averages and the runway? The loader links r-car to b-carins only; the other renewals stay renewal-only input (`RenewalInput.itemId` null). `renewalList` skips a subscription item that a renewal links to, so the count of 16 holds either way.
+- Options considered: (a) renewal-only items are items too, but carry a marker (e.g. `paid_from = payroll` for health, or a flag) so averages and the runway skip them; (b) they are items and are included in averages and the runway (the golden values would change; needs a fixture decision); (c) renewals can exist without an item, contradicting §5.2.
+- Blocking: no. Nothing was skipped; this decides how WP-06 builds the engine input.
+- Answer: (a) for the bills page, but not for the runway. Every renewal is a recurring item. Items that exist only as renewals carry `recurring_items.on_bills_page = false`, so the Bills & recurring page and `billsAverages` skip them (18 rows, $4,956.94 hold). They still count in the runway like any outflow paid from the account; payroll-paid items (health) stay out through `paid_from = payroll`. BACKEND_PLAN §5.2 and DESIGN_SPEC §6 rule 17 updated; WP-06 maps the marker and the engine honours it. (owner, 2026-10-28)
+
+## Q-019 · WP-07 · Which expense "caused the shortfall" (shortfall option 2)?
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-28
+- Where: DESIGN_SPEC §5.3 option 2 ("Split the expense that caused the shortfall into two halves"); `packages/engine/src/rules/shortfall.ts`
+- Question: The spec doesn't say how the cause is chosen. Implemented heuristic: the largest planned expense dated from today through the lowest day (ties: earliest, then id); halves are floor(amount ÷ 2) now and the rest the day after payday. Bills are not considered, only planned expenses. In the fixture this is the $1,800 car repair. Is this right, and should bills count as a cause (e.g. the largest outflow of any kind before the lowest day, which in the fixture would be rent, not the repair)?
+- Options considered: (a) planned expenses only (implemented); (b) the largest planned expense or bill; (c) the expense whose removal brings safe to spend closest to 0.
+- Blocking: no. Golden values pass under (a).
+- Answer: (a) The largest planned expense from today through the lowest day; regular bills are never the cause. DESIGN_SPEC §5.3 option 2 updated. (owner, 2026-10-28)
+
+## Q-018 · WP-07 · "Safe to spend is now $998" vs rule 4 flooring
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-27
+- Where: DESIGN_SPEC §5.1 Email & imports golden values; §6 rule 4; §7 Money in hero ("money you can spend rounds down"); fixture `expected.safeToSpendAfterElectricityActual15137Cents` (99764)
+- Question: After confirming electricity at $151.37, safe to spend is $997.64. Rule 4 and §7 floor it to "$997", but the Email & imports golden value says "Safe to spend is now $998". Which is right?
+- Options considered: (a) floor everywhere ("$997"; the §5.1 string changes); (b) round to the nearest dollar in that confirmation sentence only.
+- Blocking: no. The engine returns 99764 cents and the floored display value 99700, as rule 4 says; the test asserts the cents value only.
+- Answer: Answered (owner, 2026-10-28; spec commit a535a33): $997, flooring everywhere. DESIGN_SPEC §5.1 is fixed. `golden-rules.test.ts` asserts the display value "$997" for the $151.37 case.
+
+## Q-017 · WP-07 · "Decide this week": which cards, and in what order?
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-27
+- Where: DESIGN_SPEC §5.1 Overview region 4; BACKEND_PLAN §7.2 `decisions` ("ranked"); canvas Overview board (3 cards: car insurance, electricity estimate, Lake Tahoe)
+- Question: The spec doesn't define what becomes a decision or how they rank. Implemented: shortfall first, then not-in-usual-month bills in the window (with rule 9's "pay on payday" value when it changes safe to spend), estimates due before payday, decide-by deadlines within 7 days (rule 15's "this week"), then savings goals that are behind; ties by date, then id. Price-up and possible-duplicate flags are not decisions (the canvas shows them as the task "Review 2 flagged subscriptions"). This gives exactly the canvas's 3 cards for the fixture. Is this the intended ranking and scope?
+- Options considered: as implemented; or include every rule 8 flag as a decision (6+ cards, the count chip would no longer read "3 items").
+- Blocking: no.
+- Answer: Answered (owner, 2026-10-28; spec commit a535a33): accepted as built; now DESIGN_SPEC §6 rule 19. Note from the WP-07 fix round: the calendar chips (`calendarMonth`) still show price-up and possible-duplicate bills as "Needs a decision" chips, because the canvas Web · Calendar board draws Streaming (Nov 2) and Music second service (Nov 21) that way. Rule 19 only governs the Overview cards. Confirmed: the canvas wins on the calendar; rule 19 now says so. (owner, 2026-10-28)
+
+## Q-016 · WP-07 · Which bills "could be moved" to payday (shortfall option 3)?
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-27
+- Where: DESIGN_SPEC §5.3 option 3 ("the largest bill in the window that could be moved to payday"); fixture `scenarios.shortfall.expected.options[2]` (car insurance, not rent or daycare)
+- Question: Rent ($2,150) and daycare ($1,240) are larger than car insurance ($684) and in the window, yet the golden option moves car insurance. Nothing in the spec or fixture says which bills are movable. Implemented: an optional `ItemInput.movable`; when absent it defaults to true for subscription, insurance, membership, registration and other items, and false for bill, loan and income items (hard due dates, late fees). Among movable bills due before payday, the largest whose move changes safe to spend wins (ties: earliest, then id). Should movability be a stored field on `recurring_items` (and in the fixture), or is the kind-based default acceptable?
+- Options considered: (a) kind-based default plus override (implemented); (b) a `movable`/`grace_period` column set by the user or from email; (c) only infrequent (not-in-usual-month) bills are movable.
+- Blocking: no. Golden values pass under (a).
+- Answer: Answered (owner, 2026-10-28; spec commit a535a33): kind-based default plus the optional per-item `movable` override, as built; now DESIGN_SPEC §6 rule 18, and BACKEND_PLAN has `recurring_items.movable`.
+
+## Q-015 · WP-07 · Does a cancel-by date raise "Decide by"?
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-27
+- Where: DESIGN_SPEC §6 rule 8 ("Decide by: an email gives a deadline (enrollment, cancel-by)"); WORK_PLAN WP-07 acceptance ("decide by", listed once); fixture `renewals` r-health (`decisionBy` Nov 13) and r-av (`cancelBy` Nov 30)
+- Question: Rule 8 says cancel-by deadlines raise "Decide by", so the antivirus renewal flags too (the canvas shows it as "Cancel by Nov 30?"). That gives 2 decide-by flags, while the WP acceptance lists "decide by" without "×2". Implemented per rule 8: both flag, each dated by its earliest upcoming deadline. Should a cancel-by deadline be a separate code (e.g. `cancel_by`), or limited to a horizon (e.g. 30 days, which would leave only health)?
+- Options considered: (a) both raise `decide_by` (implemented); (b) a separate `cancel_by` code; (c) a 30-day horizon.
+- Blocking: no. The flags test asserts health and antivirus explicitly.
+- Answer: Answered (owner, 2026-10-28; spec commit a535a33): (a). Both raise `decide_by`. The flag carries `deadlineKind` ("decision" or "cancel") so the copy can read "Decide by Nov 13" or "Cancel by Nov 30?". DESIGN_SPEC §6 rule 8 says this.
+
+## Q-014 · WP-07 · Data the rules need that the fixture doesn't carry
+- Asked by: wp-builder/wp/07-engine-rules · 2026-10-27
+- Where: `design/fixtures/rivera-household.json`; canvas boards Web · Bills & recurring, Renewals, Household tasks, Safe-to-spend states
+- Question: Several golden values depend on data only the canvas has. The test loader (`packages/engine/src/testing/`) fills them from the canvas, without editing the fixture: (1) `source` for incomes and bills ("Found in" column) for `renewals.foundAutomatically` = 16; (2) a sub-category for the two music subscriptions (possible duplicate); (3) which goal is the emergency fund (shortfall option 1); (4) the task list behind `expected.tasks` (3 / 4 / 3, badge 3), with task t2's due hint read as due Nov 1. Should these be added to the fixture (and `goals` get an emergency-fund marker in BACKEND_PLAN §5.2)?
+- Options considered: add them to the fixture and schema; or keep the canvas-derived constants in the test loader (current).
+- Blocking: no. All golden values pass with the loader constants.
+- Answer: Answered (owner, 2026-10-28; spec commit a535a33): the data is now in the fixture (`source`, `subcategory`, `emergencyFund`, top-level `tasks` with t2 `dueOn` and `dueHint`). The test loader reads it from there; the canvas-derived constants are gone.
+
 ## Q-013 · WP-03 · Masked-email hint for a mismatched invite vs. invites RLS
 - Asked by: wp-builder/wp/03-db-foundation · 2026-10-27
 - Where: BACKEND_PLAN §6 (Invites, step 2); WORK_PLAN WP-05 acceptance

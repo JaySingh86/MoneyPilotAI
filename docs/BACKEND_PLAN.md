@@ -280,6 +280,7 @@ create table recurring_items (
   marked_possibly_unused boolean not null default false,
   subcategory      text,                 -- groups items for the possible-duplicate flag, e.g. 'music' (DESIGN_SPEC §6 rule 8)
   movable          boolean,              -- user override for shortfall option 3; null = default by kind (DESIGN_SPEC §6 rule 18)
+  on_bills_page    boolean not null default true,  -- false for items that exist only as renewals (DESIGN_SPEC §6 rule 17, Q-020)
   notes            text,
   version          int not null default 1,          -- If-Match concurrency (§8.1)
   created_by       uuid references users(id),
