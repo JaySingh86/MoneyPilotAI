@@ -98,9 +98,11 @@
   --mp-type-caption: 400 12px/17px var(--mp-font-body);
   --mp-type-overline: 600 12px/16px var(--mp-font-body);
   --mp-type-micro: 400 11px/14px var(--mp-font-body);
+  --mp-type-nano: 700 10px/12px var(--mp-font-body);
   --mp-tracking-display-xl: -0.03em;
   --mp-tracking-heading: -0.02em;
   --mp-tracking-overline: 0.08em;
+  --mp-tracking-nano: 0.06em;
   --mp-tracking-table-header: 0.06em;
 
   /* Spacing */

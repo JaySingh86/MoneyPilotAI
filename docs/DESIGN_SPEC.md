@@ -48,7 +48,7 @@ The exact values are in `design/tokens.json`. This section covers how to use the
 ### 2.2 Typography
 - **Manrope** (600/700/800) for headings and every money amount shown as a figure. **Inter** (400/500/600) for everything else. Load only these weights.
 - Every amount, date and count uses `font-variant-numeric: tabular-nums` (`fontVariant: ['tabular-nums']` in React Native).
-- Scale tokens: `display-xl` 52, `display-l` 44, `amount-xl` 34, `heading-1` 32, `amount-l` 28, `heading-1m` 26, `heading-3` 22, `heading-2` 18, `heading-2m` 16, `title` 15/600, `body-l` 15, `body` 14, `small` 13, `caption` 12, `overline` 12/600 uppercase +0.08em, `micro` 11.
+- Scale tokens: `display-xl` 52, `display-l` 44, `amount-xl` 34, `heading-1` 32, `amount-l` 28, `heading-1m` 26, `heading-3` 22, `heading-2` 18, `heading-2m` 16, `title` 15/600, `body-l` 15, `body` 14, `small` 13, `caption` 12, `overline` 12/600 uppercase +0.08em, `micro` 11, `nano` 10/700 uppercase +0.06em (cell labels such as PAYDAY).
 - Table headers: 11 px, weight 600, uppercase, +0.06em, `text.muted`.
 - Display sizes (Manrope 800) use −0.02em tracking, and the two hero amounts use −0.03em.
 
@@ -111,7 +111,7 @@ Minimum touch target is 44 × 44. A 36 px control gets an invisible hit area. Th
 | **Status chip** | 12/600, padding 3×10, radius full. Variants: `ok` (brand.soft / brand.onSoft), `income` (income.soft / income.onSoft), `attention` (attention.soft / attention.text), `info` (info.soft / info.text), `estimate` (surface, 1 px dashed `info.border`, `info.text`), `release` (brand.default / white, plan documents only). |
 | **Badge (nav count)** | 12/600, padding 1×8, radius full, attention variant. |
 | **Card: standard** | Surface, 1 px `border.default`. Web: radius 3xl, padding 22. Mobile: radius 2xl, padding 14. The title is `heading-2` / `heading-2m`, with an optional `small` subtitle in `text.muted` 2 px below. |
-| **Card: hero** | `brand.strong`, white text. Web: radius 3xl, padding 24. Mobile: radius 4xl, padding 20. The label is 13/500 `brand.onStrongMuted`, the amount `display-xl` / `display-l`, and the breakdown row sits on a `brand.strongDivider` top rule. Only one hero per screen. **Shortfall variant:** same colors. Label “Short before {payday}”, a “Needs a decision” chip (`attention.markOnStrong` background, `text.primary` text), amount “$X short”, and a caption naming the dates below the cushion and below $0. |
+| **Card: hero** | `brand.strong`, white text. Web: radius 3xl, padding 24. Mobile: radius 4xl, padding 20. The label is 14/500 (`body`, weight 500) `brand.onStrongMuted`, the amount `display-xl` / `display-l`, and the breakdown row sits on a `brand.strongDivider` top rule. Only one hero per screen. **Shortfall variant:** same colors. Label “Short before {payday}”, a “Needs a decision” chip (`attention.markOnStrong` background, `text.primary` text), amount “$X short”, and a caption naming the dates below the cushion and below $0. |
 | **Card: attention** | `attention.surface`, 1 px `attention.border`, radius xl, padding 14. The header row is a 16 px triangle icon plus a 12/600 `attention.text` label (“Needs a decision · Jordan”), then a `title`, a `small` body, and actions (36 px buttons). |
 | **KPI tile** | A standard card with gap 6–8: 13/500 `text.muted` label, `amount-l` value, 13 px `text.muted` caption. An optional owner split bar (height 8, radius full, segments in partner marks) goes at the bottom. |
 | **Avatar** | Circle. Sizes 32 (header), 28 (lists), 24 (table), 22 (activity). The initial is 600 in the partner text color on the partner soft color. When stacked, overlap by −8 / −10 with a 2 px border in the background color. |
@@ -136,7 +136,7 @@ Minimum touch target is 44 × 44. A 36 px control gets an invisible hit area. Th
 - Bars have a max width of 44, a gap of 8 and radius `6 6 0 0`. Colors: `chart.balance`; paydays `chart.payday`; the single lowest day `chart.lowest`.
 - The cushion is a 2 px dashed `chart.cushion` line at the cushion value. The baseline is 1 px `chart.axis`.
 - Every bar has its value above it (11 px; 600 and colored for payday and lowest bars). Under each bar sit the date (600) and the event (11 px muted, e.g. “Rent −2,150”). The lowest bar also gets a tooltip: `text.primary` background, white 11/600 text, radius xs, reading “Lowest · $1,507”.
-- The legend reads Balance · Payday · Lowest point · $500 cushion.
+- The legend reads Balance · Payday · Lowest point · $500 cushion. Each swatch uses the same token as the mark it names (the cushion swatch is `chart.cushion`).
 - **Negative balances:** draw a solid 1 px `text.primary` axis at $0, and reserve space below it scaled the same way as above it. Negative bars use `chart.lowest` with radius `0 0 6 6` and hang down from the axis. Their values (“−$293”) sit under the bar in `attention.text` 600.
 - Below 620 px the chart scrolls horizontally inside its card.
 - Accessibility: each bar gets an `aria-label` (“Nov 5, projected $1,507, lowest”), or provide a visually hidden table.
@@ -144,7 +144,7 @@ Minimum touch target is 44 × 44. A 36 px control gets an invisible hit area. Th
 
 ### 4.2 Calendar
 - A 7-column grid (`repeat(7, minmax(0,1fr))`, gap 6) with weekday headers 11/600 +0.08em muted. Weeks start on Sunday (US).
-- **Cell:** a `button`, minimum height 112, padding 8, radius lg, 1 px `border.cell`, surface background. The day number is 13/600 inside a 26 px circle. Selected: 2 px `brand.default` border with the day number filled `brand.default` and white text. Payday: `brand.tint` background plus a “PAYDAY” label (10/700 +0.06em `brand.onSoft`). Days outside the month use `bg.muted` and `text.disabled` and can’t be selected. The aria-label reads “November 4, 1 item”.
+- **Cell:** a `button`, minimum height 112, padding 8, radius lg, 1 px `border.cell`, surface background. The day number is 13/600 inside a 26 px circle. Selected: 2 px `brand.default` border with the day number filled `brand.default` and white text. Payday: `brand.tint` background plus a “PAYDAY” label (`nano`, `brand.onSoft`). Days outside the month use `bg.muted` and `text.disabled` and can’t be selected. The aria-label reads “November 4, 1 item”.
 - **Event chip:** flex row, padding 3×6, radius xs, 11 px. Owner dot, then the name (ellipsis), then the amount (600, signed). Variants: income (income.soft, income.onSoft, `income.border`), bill (bg.canvas, border.default), estimate (surface, dashed `info.border`), decision (attention.soft, `attention.chipBorder`), planned (surface, `border.strong`). Show up to 3, then “+N more”. Amounts of $100 or more show as whole dollars.
 - **Side panel:** the selected day as `heading-3`, then one inner card per item: title, signed amount in Manrope 800 17, kind chip, owner dot and name, and a note.
 - **Owner filter:** “Sam” shows Sam’s items plus items owned by Both. The same applies for Jordan.

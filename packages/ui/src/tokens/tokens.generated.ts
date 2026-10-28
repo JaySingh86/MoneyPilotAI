@@ -202,6 +202,13 @@ export const tokens = {
       lineHeight: "14px",
       letterSpacing: "0",
     },
+    nano: {
+      fontFamily: ["Inter", "system-ui", "sans-serif"],
+      fontWeight: 700,
+      fontSize: "10px",
+      lineHeight: "12px",
+      letterSpacing: "0.06em",
+    },
   },
   space: {
     "1": "4px",
@@ -421,6 +428,10 @@ export const cssVar = {
       font: "var(--mp-type-micro)",
       letterSpacing: "0",
     },
+    nano: {
+      font: "var(--mp-type-nano)",
+      letterSpacing: "var(--mp-tracking-nano)",
+    },
   },
   space: {
     "1": "var(--mp-space-1)",
@@ -470,6 +481,7 @@ export const cssVar = {
     displayXl: "var(--mp-tracking-display-xl)",
     heading: "var(--mp-tracking-heading)",
     overline: "var(--mp-tracking-overline)",
+    nano: "var(--mp-tracking-nano)",
     tableHeader: "var(--mp-tracking-table-header)",
   },
   motion: {

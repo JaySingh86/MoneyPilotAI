@@ -44,6 +44,7 @@ const TRACKING_FROM_STYLE: Record<string, string> = {
   "display-xl": "display-xl",
   heading: "heading-1",
   overline: "overline",
+  nano: "nano",
 };
 
 /** Overrides tokens.css must declare under `@media (prefers-reduced-motion: reduce)` (§2.5). */
