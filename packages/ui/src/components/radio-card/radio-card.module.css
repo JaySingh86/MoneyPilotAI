@@ -1,0 +1,136 @@
+/* Radio card, DESIGN_SPEC §4. */
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: var(--mp-space-3_5);
+}
+
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mp-space-3);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--mp-touch-target);
+  padding: var(--mp-space-3);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-xl);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--mp-duration) var(--mp-easing),
+    border-color var(--mp-duration) var(--mp-easing);
+}
+
+.card:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+/* Selected: 2 px brand.default border on brand.tint. Padding drops 1 px so content doesn't shift. */
+.checked {
+  border: 2px solid var(--mp-brand-default);
+  background: var(--mp-brand-tint);
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- keeps content in place when the border grows from 1 to 2 px */
+  padding: calc(var(--mp-space-3) - 1px);
+}
+
+.disabled {
+  border-style: dashed;
+  border-color: var(--mp-border-strong);
+  background: var(--mp-bg-muted);
+  color: var(--mp-text-disabled);
+  cursor: not-allowed;
+}
+
+.iconTile {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-brand-soft);
+  color: var(--mp-brand-default);
+}
+
+/* Selected: the icon tile is filled brand.default with white (canvas "Mobile · Setup"). */
+.checked .iconTile {
+  background: var(--mp-brand-default);
+  color: var(--mp-text-inverse);
+}
+
+.disabled .iconTile {
+  background: var(--mp-bg-track);
+  color: var(--mp-text-disabled);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.title {
+  font: var(--mp-type-body);
+  font-weight: 600;
+}
+
+.description {
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.disabled .description {
+  color: var(--mp-text-disabled);
+}
+
+/* Ring 20 with a 2 px border (control.radioOff when off) and a 10 px dot. */
+.ring {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- canvas "Design specification": ring is nudged down 1 px to align with the title */
+  margin-top: 1px;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--mp-control-radio-off);
+  border-radius: var(--mp-radius-full);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--mp-radius-full);
+  background: transparent;
+}
+
+.checked .ring {
+  border-color: var(--mp-brand-default);
+}
+
+.checked .dot {
+  background: var(--mp-brand-default);
+}

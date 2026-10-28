@@ -1,0 +1,52 @@
+/* Filter pills, DESIGN_SPEC §4. */
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-1_5);
+}
+
+.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-1_5);
+  height: var(--mp-segment-height);
+  padding: 0 var(--mp-space-3_5);
+  border: 1px solid var(--mp-border-strong);
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-secondary);
+  font: var(--mp-type-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--mp-duration) var(--mp-easing),
+    color var(--mp-duration) var(--mp-easing);
+}
+
+.pill::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--mp-touch-target);
+  transform: translateY(-50%);
+}
+
+.pill:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.selected {
+  border-color: var(--mp-text-primary);
+  background: var(--mp-text-primary);
+  color: var(--mp-text-inverse);
+}
+
+.count {
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}

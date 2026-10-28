@@ -1,0 +1,14 @@
+/* Amounts use tabular figures (DESIGN_SPEC §2.2); income uses income.text (§7). */
+
+.amount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.income {
+  color: var(--mp-income-text);
+}

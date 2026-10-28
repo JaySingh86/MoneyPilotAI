@@ -1,0 +1,1739 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RunwayChart with the fixture runway (normal) > matches the structural snapshot 1`] = `
+<div
+  class="chart"
+>
+  <ul
+    aria-label="Legend"
+    class="legend"
+  >
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatch swatchBalance"
+      />
+      Balance
+    </li>
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatch swatchPayday"
+      />
+      Payday
+    </li>
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatch swatchLowest"
+      />
+      Lowest point
+    </li>
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatchCushion"
+      />
+      $500 cushion
+    </li>
+  </ul>
+  <div
+    aria-describedby="runway-caption"
+    aria-label="Runway chart, scrolls sideways"
+    class="scroll"
+    role="group"
+    tabindex="0"
+  >
+    <div
+      aria-hidden="true"
+      class="inner"
+    >
+      <div
+        class="plot"
+        style="--axis: 0; --cushion: 0.0833;"
+      >
+        <div
+          class="cushion"
+          data-runway-cushion=""
+        />
+        <div
+          class="axis"
+          data-negative="false"
+          data-runway-axis=""
+        />
+        <div
+          class="column"
+          data-date="2026-10-27"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$3,400"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $3,400
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.5667;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-28"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$3,400"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $3,400
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.5667;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-29"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$3,011"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $3,011
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.5018;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-30"
+          data-kind="payday"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$5,911"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value value-payday"
+              >
+                $5,911
+              </span>
+            </span>
+            <span
+              class="bar bar-payday"
+              data-bar=""
+              style="--h: 0.9852;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-31"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$5,816"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $5,816
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.9693;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-01"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$3,666"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $3,666
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.611;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-02"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$2,403"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $2,403
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.4005;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-03"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$2,261"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $2,261
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.3768;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-04"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$1,577"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $1,577
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.2628;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-05"
+          data-kind="lowest"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$1,507"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="tooltipAbove"
+              >
+                <span
+                  class="tooltip"
+                >
+                  Lowest · $1,507
+                </span>
+              </span>
+              <span
+                class="value value-lowest"
+              >
+                $1,507
+              </span>
+            </span>
+            <span
+              class="bar bar-lowest"
+              data-bar=""
+              style="--h: 0.2512;"
+            />
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-06"
+          data-kind="payday"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$4,657"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 1;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value value-payday"
+              >
+                $4,657
+              </span>
+            </span>
+            <span
+              class="bar bar-payday"
+              data-bar=""
+              style="--h: 0.7762;"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="labels"
+      >
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            Oct 27
+          </span>
+          <span>
+            Today
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            28
+          </span>
+          <span>
+            —
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            29
+          </span>
+          <span>
+            Car −389
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            30
+          </span>
+          <span>
+            Pay +2,900
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            31
+          </span>
+          <span>
+            Phone −95
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            Nov 1
+          </span>
+          <span>
+            Rent −2,150
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            2
+          </span>
+          <span>
+            Daycare & TV −1,263
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            3
+          </span>
+          <span>
+            Power ~−142
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            4
+          </span>
+          <span>
+            Insurance −684
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            5
+          </span>
+          <span>
+            Internet −70
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            6
+          </span>
+          <span>
+            Pay +3,150
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table
+    class="visuallyHidden"
+  >
+    <caption
+      id="runway-caption"
+    >
+      Projected end-of-day balance to payday
+    </caption>
+    <thead>
+      <tr>
+        <th
+          scope="col"
+        >
+          Date
+        </th>
+        <th
+          scope="col"
+        >
+          Projected balance
+        </th>
+        <th
+          scope="col"
+        >
+          Scheduled
+        </th>
+        <th
+          scope="col"
+        >
+          Note
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th
+          scope="row"
+        >
+          Tue, Oct 27
+        </th>
+        <td>
+          $3,400
+        </td>
+        <td>
+          Nothing scheduled
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Wed, Oct 28
+        </th>
+        <td>
+          $3,400
+        </td>
+        <td>
+          Nothing scheduled
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Thu, Oct 29
+        </th>
+        <td>
+          $3,011
+        </td>
+        <td>
+          Car −$389.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Fri, Oct 30
+        </th>
+        <td>
+          $5,911
+        </td>
+        <td>
+          Pay +$2,900.00
+        </td>
+        <td>
+          Payday
+        </td>
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Sat, Oct 31
+        </th>
+        <td>
+          $5,816
+        </td>
+        <td>
+          Phone −$95.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Sun, Nov 1
+        </th>
+        <td>
+          $3,666
+        </td>
+        <td>
+          Rent −$2,150.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Mon, Nov 2
+        </th>
+        <td>
+          $2,403
+        </td>
+        <td>
+          Daycare & TV −$1,262.99
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Tue, Nov 3
+        </th>
+        <td>
+          $2,261
+        </td>
+        <td>
+          Power ~−$142.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Wed, Nov 4
+        </th>
+        <td>
+          $1,577
+        </td>
+        <td>
+          Insurance −$684.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Thu, Nov 5
+        </th>
+        <td>
+          $1,507
+        </td>
+        <td>
+          Internet −$70.00
+        </td>
+        <td>
+          Lowest
+        </td>
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Fri, Nov 6
+        </th>
+        <td>
+          $4,657
+        </td>
+        <td>
+          Pay +$3,150.00
+        </td>
+        <td>
+          Payday
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`RunwayChart with the fixture shortfall scenario > matches the structural snapshot 1`] = `
+<div
+  class="chart"
+>
+  <ul
+    aria-label="Legend"
+    class="legend"
+  >
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatch swatchBalance"
+      />
+      Balance
+    </li>
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatch swatchPayday"
+      />
+      Payday
+    </li>
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatch swatchLowest"
+      />
+      Lowest point
+    </li>
+    <li>
+      <span
+        aria-hidden="true"
+        class="swatchCushion"
+      />
+      $500 cushion
+    </li>
+  </ul>
+  <div
+    aria-describedby="runway-caption"
+    aria-label="Runway chart, scrolls sideways"
+    class="scroll"
+    role="group"
+    tabindex="0"
+  >
+    <div
+      aria-hidden="true"
+      class="inner"
+    >
+      <div
+        class="plot hasNegative"
+        style="--axis: 0.1667; --cushion: 0.25;"
+      >
+        <div
+          class="cushion"
+          data-runway-cushion=""
+        />
+        <div
+          class="axis axisZero"
+          data-negative="true"
+          data-runway-axis=""
+        />
+        <div
+          class="column"
+          data-date="2026-10-27"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$3,400"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $3,400
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.5667;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-28"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$1,600"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $1,600
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.2667;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-29"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$1,211"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $1,211
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.2018;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-30"
+          data-kind="payday"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$4,111"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value value-payday"
+              >
+                $4,111
+              </span>
+            </span>
+            <span
+              class="bar bar-payday"
+              data-bar=""
+              style="--h: 0.6852;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-10-31"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$4,016"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $4,016
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.6693;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-01"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$1,866"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $1,866
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.311;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-02"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$603"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $603
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.1005;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-03"
+          data-kind="balance"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$461"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value"
+              >
+                $461
+              </span>
+            </span>
+            <span
+              class="bar bar-balance"
+              data-bar=""
+              style="--h: 0.0768;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-04"
+          data-kind="negative"
+          data-negative="true"
+          data-runway-bar=""
+          data-value="−$223"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          />
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          >
+            <span
+              class="bar barDown bar-negative"
+              data-bar=""
+              style="--h: 0.0372;"
+            />
+            <span
+              class="value value-negative"
+            >
+              −$223
+            </span>
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-05"
+          data-kind="lowest"
+          data-negative="true"
+          data-runway-bar=""
+          data-value="−$293"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          />
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          >
+            <span
+              class="bar barDown bar-lowest"
+              data-bar=""
+              style="--h: 0.0488;"
+            />
+            <span
+              class="value value-lowest"
+            >
+              −$293
+            </span>
+            <span
+              class="tooltip"
+            >
+              Lowest · −$293
+            </span>
+          </div>
+        </div>
+        <div
+          class="column"
+          data-date="2026-11-06"
+          data-kind="payday"
+          data-negative="false"
+          data-runway-bar=""
+          data-value="$2,857"
+        >
+          <div
+            class="positive"
+            data-region="positive"
+            style="--region: 0.8333;"
+          >
+            <span
+              class="valueWrap"
+            >
+              <span
+                class="value value-payday"
+              >
+                $2,857
+              </span>
+            </span>
+            <span
+              class="bar bar-payday"
+              data-bar=""
+              style="--h: 0.4762;"
+            />
+          </div>
+          <div
+            class="negative"
+            data-region="negative"
+            style="--region: 0.1667;"
+          />
+        </div>
+      </div>
+      <div
+        class="labels"
+      >
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            Oct 27
+          </span>
+          <span>
+            Today
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            28
+          </span>
+          <span>
+            Repair −1,800
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            29
+          </span>
+          <span>
+            Car −389
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            30
+          </span>
+          <span>
+            Pay +2,900
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            31
+          </span>
+          <span>
+            Phone −95
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            Nov 1
+          </span>
+          <span>
+            Rent −2,150
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            2
+          </span>
+          <span>
+            Daycare & TV −1,263
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            3
+          </span>
+          <span>
+            Power ~−142
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            4
+          </span>
+          <span>
+            Insurance −684
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            5
+          </span>
+          <span>
+            Internet −70
+          </span>
+        </div>
+        <div
+          class="label"
+          data-runway-label=""
+        >
+          <span
+            class="date"
+          >
+            6
+          </span>
+          <span>
+            Pay +3,150
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table
+    class="visuallyHidden"
+  >
+    <caption
+      id="runway-caption"
+    >
+      Projected end-of-day balance to payday
+    </caption>
+    <thead>
+      <tr>
+        <th
+          scope="col"
+        >
+          Date
+        </th>
+        <th
+          scope="col"
+        >
+          Projected balance
+        </th>
+        <th
+          scope="col"
+        >
+          Scheduled
+        </th>
+        <th
+          scope="col"
+        >
+          Note
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th
+          scope="row"
+        >
+          Tue, Oct 27
+        </th>
+        <td>
+          $3,400
+        </td>
+        <td>
+          Nothing scheduled
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Wed, Oct 28
+        </th>
+        <td>
+          $1,600
+        </td>
+        <td>
+          Repair −$1,800.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Thu, Oct 29
+        </th>
+        <td>
+          $1,211
+        </td>
+        <td>
+          Car −$389.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Fri, Oct 30
+        </th>
+        <td>
+          $4,111
+        </td>
+        <td>
+          Pay +$2,900.00
+        </td>
+        <td>
+          Payday
+        </td>
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Sat, Oct 31
+        </th>
+        <td>
+          $4,016
+        </td>
+        <td>
+          Phone −$95.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Sun, Nov 1
+        </th>
+        <td>
+          $1,866
+        </td>
+        <td>
+          Rent −$2,150.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Mon, Nov 2
+        </th>
+        <td>
+          $603
+        </td>
+        <td>
+          Daycare & TV −$1,262.99
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Tue, Nov 3
+        </th>
+        <td>
+          $461
+        </td>
+        <td>
+          Power ~−$142.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Wed, Nov 4
+        </th>
+        <td>
+          −$223
+        </td>
+        <td>
+          Insurance −$684.00
+        </td>
+        <td />
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Thu, Nov 5
+        </th>
+        <td>
+          −$293
+        </td>
+        <td>
+          Internet −$70.00
+        </td>
+        <td>
+          Lowest
+        </td>
+      </tr>
+      <tr>
+        <th
+          scope="row"
+        >
+          Fri, Nov 6
+        </th>
+        <td>
+          $2,857
+        </td>
+        <td>
+          Pay +$3,150.00
+        </td>
+        <td>
+          Payday
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`RunwayMini (mobile hero) > is decorative and draws one bar per day 1`] = `
+<div
+  aria-hidden="true"
+  class="mini"
+>
+  <div
+    class="miniZero"
+    style="bottom: 16.6667%;"
+  />
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-balance"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 68%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-balance"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 32%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-balance"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 24.22%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-payday"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 82.22%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-balance"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 80.32%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-balance"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 37.32%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-balance"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 12.0602%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-balance"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 9.2202%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    />
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    >
+      <span
+        class="miniBar miniBarDown mini-lowest"
+        data-mini-bar=""
+        data-negative="true"
+        style="height: 22.299%;"
+      />
+    </div>
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    />
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    >
+      <span
+        class="miniBar miniBarDown mini-lowest"
+        data-mini-bar=""
+        data-negative="true"
+        style="height: 29.299%;"
+      />
+    </div>
+  </div>
+  <div
+    class="miniColumn"
+  >
+    <div
+      class="miniPositive"
+      style="height: 83.3333%;"
+    >
+      <span
+        class="miniBar mini-payday"
+        data-mini-bar=""
+        data-negative="false"
+        style="height: 57.1402%;"
+      />
+    </div>
+    <div
+      class="miniNegative"
+      style="height: 16.6667%;"
+    />
+  </div>
+</div>
+`;

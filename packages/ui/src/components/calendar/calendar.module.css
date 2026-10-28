@@ -1,0 +1,139 @@
+/* Calendar cell and event chip, DESIGN_SPEC §4.2. */
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--mp-space-1);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 112px;
+  padding: var(--mp-space-2);
+  border: 1px solid var(--mp-border-cell);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-micro);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--mp-duration) var(--mp-easing);
+}
+
+.cell:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.payday {
+  background: var(--mp-brand-tint);
+}
+
+/* Selected: 2 px brand.default border; padding drops 1 px so content doesn't shift. */
+.selected {
+  border: 2px solid var(--mp-brand-default);
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- keeps content in place when the border grows from 1 to 2 px */
+  padding: calc(var(--mp-space-2) - 1px);
+}
+
+.outside {
+  background: var(--mp-bg-muted);
+  color: var(--mp-text-disabled);
+  cursor: default;
+}
+
+.cellHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-1);
+}
+
+/* Day number: 13/600 inside a 26 px circle, filled brand.default when selected. */
+.dayNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--mp-radius-full);
+  font: var(--mp-type-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.selected .dayNumber {
+  background: var(--mp-brand-default);
+  color: var(--mp-text-inverse);
+}
+
+/* "PAYDAY": the nano token, 10/700 +0.06em (Q-042). */
+.paydayLabel {
+  font: var(--mp-type-nano);
+  letter-spacing: var(--mp-tracking-nano);
+  text-transform: uppercase;
+  color: var(--mp-brand-on-soft);
+}
+
+/* Event chip: padding 3 × 6, radius xs, 11 px. */
+.chip {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-1);
+  min-width: 0;
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4.2: chip padding 3×6; 3 has no spacing token */
+  padding: 3px var(--mp-space-1_5);
+  border: 1px solid transparent;
+  border-radius: var(--mp-radius-xs);
+  font: var(--mp-type-micro);
+}
+
+.chipName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipAmount {
+  flex: none;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.income {
+  border-color: var(--mp-income-border);
+  background: var(--mp-income-soft);
+  color: var(--mp-income-on-soft);
+}
+
+.bill {
+  border-color: var(--mp-border-default);
+  background: var(--mp-bg-canvas);
+  color: var(--mp-text-primary);
+}
+
+.estimate {
+  border: 1px dashed var(--mp-info-border);
+  background: var(--mp-bg-surface);
+  color: var(--mp-info-text);
+}
+
+.decision {
+  border-color: var(--mp-attention-chip-border);
+  background: var(--mp-attention-soft);
+  color: var(--mp-attention-text);
+}
+
+.planned {
+  border-color: var(--mp-border-strong);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+}
+
+.more {
+  font: var(--mp-type-micro);
+  font-weight: 600;
+  color: var(--mp-text-muted);
+}

@@ -1,0 +1,11 @@
+/* Shared helpers for the UI kit. Token values only (stylelint: no hex, no raw px type/spacing). */
+
+/* Text that only screen readers announce. */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

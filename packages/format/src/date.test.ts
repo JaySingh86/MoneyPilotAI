@@ -1,6 +1,6 @@
 import { Temporal } from "@js-temporal/polyfill";
 import { describe, expect, it } from "vitest";
-import { date, relative } from "./date";
+import { date, relative, weekday } from "./date";
 
 const pd = (s: string) => Temporal.PlainDate.from(s);
 const today = pd("2026-10-27");
@@ -69,5 +69,20 @@ describe("relative", () => {
 
   it("rejects non-integer days", () => {
     expect(() => relative(1.5)).toThrow(TypeError);
+  });
+});
+
+describe("date with a long month and weekday()", () => {
+  const nov4 = { year: 2026, month: 11, day: 4, dayOfWeek: 3 };
+  it("spells the month out for screen-reader labels", () => {
+    expect(date(nov4, { relativeTo: { year: 2026 }, month: "long" })).toBe("November 4");
+    expect(date(nov4, { relativeTo: { year: 2025 }, month: "long" })).toBe("November 4, 2026");
+    expect(date(nov4, { relativeTo: { year: 2026 }, month: "long", weekday: true })).toBe("Wed, November 4");
+  });
+
+  it("returns the short weekday alone", () => {
+    expect(weekday(nov4)).toBe("Wed");
+    expect(weekday({ year: 2026, month: 11, day: 1, dayOfWeek: 7 })).toBe("Sun");
+    expect(() => weekday({ year: 2026, month: 11, day: 1, dayOfWeek: 9 })).toThrow(RangeError);
   });
 });

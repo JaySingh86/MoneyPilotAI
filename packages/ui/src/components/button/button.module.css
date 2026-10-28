@@ -1,0 +1,151 @@
+/* Buttons, DESIGN_SPEC §4. */
+
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mp-space-2);
+  box-sizing: border-box;
+  height: var(--mp-button-height-web);
+  padding: 0 var(--mp-space-4);
+  border: 0;
+  border-radius: var(--mp-radius-md);
+  font: var(--mp-type-body);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--mp-duration) var(--mp-easing),
+    color var(--mp-duration) var(--mp-easing);
+}
+
+.button:focus-visible,
+.iconButton:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.primary {
+  background: var(--mp-brand-default);
+  color: var(--mp-text-inverse);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--mp-brand-strong);
+}
+
+.secondary,
+.destructive {
+  padding: 0 var(--mp-space-3_5);
+  border: 1px solid var(--mp-border-strong);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+}
+
+.secondary.inHeader {
+  border-color: var(--mp-border-default);
+}
+
+.destructive {
+  border-color: var(--mp-text-primary);
+}
+
+.secondary:hover:not(:disabled),
+.destructive:hover:not(:disabled) {
+  background: var(--mp-bg-subtle);
+}
+
+.text {
+  background: transparent;
+  color: var(--mp-brand-default);
+  padding: 0 var(--mp-space-3);
+}
+
+.text:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.button:disabled {
+  background: var(--mp-bg-track);
+  border-color: transparent;
+  color: var(--mp-text-disabled);
+  cursor: not-allowed;
+}
+
+/* 36 px visual height with an invisible 44 px hit area. */
+.compact {
+  height: var(--mp-segment-height);
+}
+
+.compact::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--mp-touch-target);
+  transform: translateY(-50%);
+}
+
+.mobile {
+  height: var(--mp-button-height-mobile);
+  border-radius: var(--mp-radius-lg);
+  font: var(--mp-type-body-l);
+  font-weight: 600;
+}
+
+.mobileBar {
+  width: 100%;
+  height: var(--mp-button-height-mobile-bar);
+  border-radius: var(--mp-radius-xl);
+  font: var(--mp-type-body-l);
+  font-weight: 600;
+}
+
+/* Icon button: 44 × 40 on web, 44 × 44 circle on mobile. */
+.iconButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--mp-touch-target);
+  padding: 0;
+  border: 1px solid var(--mp-border-default);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+  cursor: pointer;
+  transition: background-color var(--mp-duration) var(--mp-easing);
+}
+
+.iconButton:hover:not(:disabled) {
+  background: var(--mp-bg-subtle);
+}
+
+.iconButton:disabled {
+  background: var(--mp-bg-track);
+  color: var(--mp-text-disabled);
+  cursor: not-allowed;
+}
+
+.icon-web {
+  height: var(--mp-button-height-web);
+  border-radius: var(--mp-radius-md);
+}
+
+.icon-mobile {
+  height: var(--mp-touch-target);
+  border-radius: var(--mp-radius-full);
+}
+
+.dot {
+  position: absolute;
+  top: var(--mp-space-2);
+  right: var(--mp-space-2_5);
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--mp-bg-surface);
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-attention-mark);
+}

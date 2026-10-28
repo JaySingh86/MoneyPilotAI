@@ -1,0 +1,288 @@
+/* Runway chart, DESIGN_SPEC §4.1. */
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3_5);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-3_5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-secondary);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-1_5);
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- canvas "Web · Overview": legend swatch radius 3 has no token */
+  border-radius: 3px;
+}
+
+.swatchBalance {
+  background: var(--mp-chart-balance);
+}
+
+.swatchPayday {
+  background: var(--mp-chart-payday);
+}
+
+.swatchLowest {
+  background: var(--mp-chart-lowest);
+}
+
+.swatchCushion {
+  width: 14px;
+  border-top: 2px dashed var(--mp-chart-cushion);
+}
+
+/* Below 620 px the chart scrolls horizontally inside its card. */
+.scroll {
+  overflow-x: auto;
+  border-radius: var(--mp-radius-xs);
+}
+
+.scroll:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.inner {
+  min-width: 620px;
+}
+
+/*
+ * The plot is 230 px tall in total (DESIGN_SPEC §4.1): headroom for the value labels, the bars,
+ * and, only when a balance is negative, room under the $0 axis for the negative value and the
+ * lowest-point tooltip. --plot-h is what is left for bar heights.
+ */
+.plot {
+  --headroom: var(--mp-space-7);
+  --neg-room: 0px;
+  --plot-h: calc(230px - var(--headroom) - var(--neg-room));
+
+  position: relative;
+  box-sizing: border-box;
+  height: 230px;
+  padding-top: var(--headroom);
+  display: flex;
+  gap: var(--mp-space-2);
+}
+
+.hasNegative {
+  --neg-room: var(--mp-space-14);
+}
+
+.column {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.positive,
+.negative {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mp-space-1);
+  min-height: 0;
+}
+
+.positive {
+  justify-content: flex-end;
+  height: calc(var(--plot-h) * var(--region));
+}
+
+/* Below $0: the scaled depth, plus the room for the value label and the lowest-point tooltip. */
+.negative {
+  justify-content: flex-start;
+  height: calc(var(--plot-h) * var(--region) + var(--neg-room));
+}
+
+.bar {
+  flex: none;
+  height: calc(var(--plot-h) * var(--h));
+  width: 100%;
+  max-width: 44px;
+  border-radius: var(--mp-radius-xs) var(--mp-radius-xs) 0 0;
+}
+
+.barDown {
+  border-radius: 0 0 var(--mp-radius-xs) var(--mp-radius-xs);
+}
+
+.bar-balance {
+  background: var(--mp-chart-balance);
+}
+
+.bar-payday {
+  background: var(--mp-chart-payday);
+}
+
+.bar-lowest,
+.bar-negative {
+  background: var(--mp-chart-lowest);
+}
+
+.value {
+  flex: none;
+  font: var(--mp-type-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--mp-text-secondary);
+  white-space: nowrap;
+}
+
+.value-payday {
+  font-weight: 600;
+  color: var(--mp-brand-default);
+}
+
+.value-lowest,
+.value-negative {
+  font-weight: 600;
+  color: var(--mp-attention-text);
+}
+
+/* The lowest-point tooltip sits about 14 px above its value (canvas). */
+.valueWrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.tooltipAbove {
+  position: absolute;
+  bottom: calc(100% + var(--mp-space-3_5));
+  display: flex;
+  justify-content: center;
+}
+
+.tooltip {
+  flex: none;
+  padding: var(--mp-space-1) var(--mp-space-2);
+  border-radius: var(--mp-radius-xs);
+  background: var(--mp-text-primary);
+  color: var(--mp-text-inverse);
+  font: var(--mp-type-micro);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* The baseline: 1 px chart.axis, or a solid 1 px text.primary $0 axis with negative bars. */
+.axis {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--neg-room) + var(--plot-h) * var(--axis));
+  border-top: 1px solid var(--mp-chart-axis);
+  pointer-events: none;
+}
+
+.axisZero {
+  border-top-color: var(--mp-text-primary);
+}
+
+.cushion {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--neg-room) + var(--plot-h) * var(--cushion));
+  border-top: 2px dashed var(--mp-chart-cushion);
+  pointer-events: none;
+}
+
+.labels {
+  display: flex;
+  gap: var(--mp-space-2);
+  padding-top: var(--mp-space-2);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font: var(--mp-type-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--mp-text-muted);
+}
+
+.date {
+  font-weight: 600;
+  color: var(--mp-text-primary);
+}
+
+/* Mobile hero mini runway: 48 px tall, gap 4, radius 3, colors on brand.strong. */
+.mini {
+  position: relative;
+  height: 48px;
+  display: flex;
+  gap: var(--mp-space-1);
+}
+
+.miniColumn {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.miniPositive,
+.miniNegative {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.miniPositive {
+  justify-content: flex-end;
+}
+
+.miniBar {
+  flex: none;
+  width: 100%;
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4.1: mini runway radius 3 has no token */
+  border-radius: 3px 3px 0 0;
+}
+
+.miniBarDown {
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4.1: mini runway radius 3 has no token */
+  border-radius: 0 0 3px 3px;
+}
+
+.mini-balance {
+  background: var(--mp-chart-bar-on-strong);
+}
+
+.mini-payday {
+  background: var(--mp-chart-payday-on-strong);
+}
+
+.mini-lowest {
+  background: var(--mp-attention-mark-on-strong);
+}
+
+.miniZero {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--mp-brand-on-strong-muted);
+}

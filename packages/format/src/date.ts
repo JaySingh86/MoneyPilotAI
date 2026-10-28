@@ -2,6 +2,20 @@
 // There is no clock here: "the current year" comes from the caller's `relativeTo` date.
 import type { Temporal } from "@js-temporal/polyfill";
 
+const LONG_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 // Temporal dayOfWeek: 1 = Monday … 7 = Sunday.
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -14,13 +28,15 @@ export interface DateOptions {
   relativeTo: Pick<Temporal.PlainDate, "year">;
   /** Prefix the short weekday where timing matters: `Wed, Nov 4`. */
   weekday?: boolean;
+  /** `long` spells the month out for screen-reader labels: `November 4`. Default `short`. */
+  month?: "short" | "long";
 }
 
 /**
  * `Nov 4` in the current year, otherwise `Jan 9, 2027`; with `weekday`, `Wed, Nov 4`.
  */
 export function date(value: PlainDateLike, options: DateOptions): string {
-  const month = MONTHS[value.month - 1];
+  const month = (options.month === "long" ? LONG_MONTHS : MONTHS)[value.month - 1];
   const weekday = WEEKDAYS[value.dayOfWeek - 1];
   if (month === undefined || weekday === undefined) {
     throw new RangeError("Not a valid ISO calendar date.");
@@ -42,4 +58,11 @@ export function relative(days: number): string {
   if (days === 1) return "tomorrow";
   if (days === -1) return "yesterday";
   return days > 0 ? `in ${days} days` : `${-days} days ago`;
+}
+
+/** The short weekday alone: `Wed`. */
+export function weekday(value: PlainDateLike): string {
+  const name = WEEKDAYS[value.dayOfWeek - 1];
+  if (name === undefined) throw new RangeError("Not a valid ISO weekday.");
+  return name;
 }

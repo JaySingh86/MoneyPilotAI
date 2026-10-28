@@ -1,0 +1,102 @@
+/* Input, select and checkbox, DESIGN_SPEC §4. */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+  min-width: 0;
+}
+
+.label {
+  font: var(--mp-type-caption);
+  font-weight: 600;
+  color: var(--mp-text-secondary);
+}
+
+.control {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--mp-input-height);
+  padding: 0 var(--mp-space-3);
+  border: 1px solid var(--mp-border-strong);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}
+
+.control::placeholder {
+  color: var(--mp-text-muted);
+}
+
+.control:focus-visible,
+.select:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.control:disabled {
+  background: var(--mp-bg-track);
+  color: var(--mp-text-disabled);
+  cursor: not-allowed;
+}
+
+.money {
+  font-variant-numeric: tabular-nums;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.invalid {
+  border-color: var(--mp-attention-text);
+}
+
+.error,
+.hint {
+  margin: 0;
+  font: var(--mp-type-caption);
+}
+
+.error {
+  color: var(--mp-attention-text);
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--mp-text-muted);
+}
+
+.checkboxRow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+  min-height: var(--mp-touch-target);
+}
+
+.checkbox {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--mp-brand-default);
+  cursor: pointer;
+}
+
+.checkbox:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.checkboxLabel {
+  font: var(--mp-type-body);
+  color: var(--mp-text-primary);
+  cursor: pointer;
+}
+
+.done {
+  color: var(--mp-text-muted);
+  text-decoration: line-through;
+}

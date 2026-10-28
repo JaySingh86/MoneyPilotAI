@@ -1,0 +1,54 @@
+/* Math breakdown, DESIGN_SPEC §4. */
+
+.math {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-3);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-subtle);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.overline {
+  margin: 0;
+  font: var(--mp-type-overline);
+  letter-spacing: var(--mp-tracking-overline);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+}
+
+.row dt,
+.row dd {
+  margin: 0;
+}
+
+.row dd {
+  white-space: nowrap;
+}
+
+.total {
+  padding-top: var(--mp-space-1_5);
+  border-top: 1px solid var(--mp-border-default);
+  font-weight: 600;
+}
+
+.gap {
+  font-weight: 700;
+  color: var(--mp-attention-text);
+}

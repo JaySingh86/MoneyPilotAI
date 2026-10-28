@@ -1,0 +1,87 @@
+/* Switch, DESIGN_SPEC §4. */
+
+.switch {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: 52px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-control-off);
+  cursor: pointer;
+  transition: background-color var(--mp-duration) var(--mp-easing);
+}
+
+/* 32 px tall control, 44 px hit area. */
+.switch::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--mp-touch-target);
+  transform: translateY(-50%);
+}
+
+.switch:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.on {
+  background: var(--mp-brand-default);
+}
+
+.switch:disabled {
+  background: var(--mp-bg-track);
+  cursor: not-allowed;
+}
+
+.knob {
+  position: absolute;
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4: knob 26 with a 3 px inset has no token */
+  top: 3px;
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- same 3 px inset */
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-bg-surface);
+  box-shadow: var(--mp-shadow-selected);
+}
+
+/* Knob travel: 52 − 26 − 2 × 3 = 20. Motion animates opacity and color only (§2.5), so no slide. */
+.on .knob {
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- knob travel 52 − 26 − 3 = 23 */
+  left: 23px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+  min-height: 56px;
+  box-sizing: border-box;
+  padding: var(--mp-space-2) 0;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-0_5);
+  min-width: 0;
+}
+
+.title {
+  font: var(--mp-type-body);
+  font-weight: 500;
+  color: var(--mp-text-primary);
+}
+
+.description {
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}

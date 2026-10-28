@@ -1,0 +1,58 @@
+/* Status chips and the nav badge, DESIGN_SPEC §4. */
+
+.chip,
+.badge {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  border-radius: var(--mp-radius-full);
+  font: var(--mp-type-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chip {
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4: chip padding 3×10; 3 has no spacing token */
+  padding: 3px var(--mp-space-2_5);
+}
+
+.ok {
+  background: var(--mp-brand-soft);
+  color: var(--mp-brand-on-soft);
+}
+
+.income {
+  background: var(--mp-income-soft);
+  color: var(--mp-income-on-soft);
+}
+
+.attention {
+  background: var(--mp-attention-soft);
+  color: var(--mp-attention-text);
+}
+
+.info {
+  background: var(--mp-info-soft);
+  color: var(--mp-info-text);
+}
+
+.estimate {
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- canvas "Web · Overview": the dashed 1 px border replaces 1 px of padding, so the chip is 2×9 + border and keeps its size */
+  padding: 2px 9px;
+  background: var(--mp-bg-surface);
+  border: 1px dashed var(--mp-info-border);
+  color: var(--mp-info-text);
+}
+
+.release {
+  background: var(--mp-brand-default);
+  color: var(--mp-text-inverse);
+}
+
+.badge {
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4: badge padding 1×8; 1 has no spacing token */
+  padding: 1px var(--mp-space-2);
+  background: var(--mp-attention-soft);
+  color: var(--mp-attention-text);
+}

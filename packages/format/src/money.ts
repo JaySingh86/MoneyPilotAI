@@ -11,11 +11,13 @@ export const MINUS = "−";
  * - `chip`: calendar chips and per-year changes. Signed; whole dollars rounded to the nearest
  *   dollar at $100 or more (`+$3,150`, `−$1,263`); smaller amounts keep cents (`−$22.99`),
  *   dropping `.00` only when the amount is whole (`+$55`).
+ * - `chart`: the `chip` amount without the dollar sign, for the labels under runway bars
+ *   (`−2,150`, `+2,900`). With `estimate: true` it gets the `~` prefix (`~−142`).
  * - `estimate`: variable bills before the actual arrives. `~$142.00`; negative `~−$142.00`.
  *
  * `detail`, `headline` and `estimate` show a negative value with `−`; they never add `+`.
  */
-export type MoneyMode = "detail" | "headline" | "signed" | "chip" | "estimate";
+export type MoneyMode = "detail" | "headline" | "signed" | "chip" | "estimate" | "chart";
 
 /**
  * Headline rounding (DESIGN_SPEC §7). Money you can spend (safe to spend, per day) rounds
@@ -25,7 +27,9 @@ export type MoneyMode = "detail" | "headline" | "signed" | "chip" | "estimate";
 export type HeadlineRounding = "floor" | "nearest";
 
 export type MoneyOptions =
-  { mode: Exclude<MoneyMode, "headline"> } | { mode: "headline"; rounding?: HeadlineRounding };
+  | { mode: Exclude<MoneyMode, "headline" | "chart"> }
+  | { mode: "headline"; rounding?: HeadlineRounding }
+  | { mode: "chart"; estimate?: boolean };
 
 function assertCents(cents: number): void {
   if (!Number.isSafeInteger(cents)) {
@@ -83,6 +87,10 @@ export function money(cents: number, options: MoneyOptions = { mode: "detail" })
     case "chip": {
       if (abs >= 10000) return `${signOf(cents)}${wholeDollars(nearestDollars(abs))}`;
       return `${signOf(cents)}${abs % 100 === 0 ? wholeDollars(abs / 100) : dollarsAndCents(abs)}`;
+    }
+    case "chart": {
+      const chip = money(cents, { mode: "chip" }).replace("$", "");
+      return options.estimate ? `~${chip}` : chip;
     }
     case "headline": {
       if (options.rounding === "nearest") {

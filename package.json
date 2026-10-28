@@ -14,7 +14,7 @@
   "scripts": {
     "dev": "turbo run dev --parallel --filter=@mp/api --filter=@mp/worker --filter=@mp/web",
     "build": "turbo run build",
-    "lint": "eslint . --max-warnings=0",
+    "lint": "eslint . --max-warnings=0 && pnpm lint:css",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test && vitest run --config tooling/fitness/vitest.config.ts",
     "test:engine": "pnpm --filter @mp/engine test",
@@ -26,7 +26,8 @@
     "e2e": "node tooling/scripts/not-yet.mjs e2e WP-17",
     "ai:eval": "pnpm --filter @mp/ai eval",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "lint:css": "stylelint \"packages/ui/**/*.css\" \"apps/web/**/*.css\" --max-warnings=0 --allow-empty-input"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -35,6 +36,7 @@
     "eslint": "^9.17.0",
     "globals": "^15.14.0",
     "prettier": "^3.4.0",
+    "stylelint": "^17.16.0",
     "tsx": "^4.19.0",
     "turbo": "^2.3.0",
     "typescript": "^5.7.0",

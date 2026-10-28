@@ -14,6 +14,87 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-049 · WP-10 · CalendarCell: the spec's aria-label vs WCAG 2.5.3 Label in Name
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
+- Where: DESIGN_SPEC §4.2 ("The aria-label reads “November 4, 1 item”"); WCAG 2.2 SC 2.5.3
+- Question: A cell's visible text is the day number plus its event chips ("4 Car insurance −$684"), but the spec's accessible name "November 4, 1 item" doesn't contain it, so axe `label-content-name-mismatch` fails in the browser run. Keep the spec label, or name the cell with its visible text too?
+- Options considered: (a) keep the spec label and exempt only that rule for the Calendar stories in `visual/a11y.spec.ts` (implemented); (b) "November 4, 1 item: Car insurance −$684" built from the chips, which a screen-reader user hears in full; (c) hide the chips from the name with a separate description (`aria-describedby`).
+- Blocking: no.
+- Answer: (c) Name the cell from its visible content plus visually hidden words (“November 4, payday, Car insurance −$684”), with the item count in `aria-describedby`. Remove the axe exemption. DESIGN_SPEC §4.2 updated. (owner, 2026-10-28)
+
+## Q-048 · WP-10 · Attention tokens used for errors (§1 rule 4 vs §5.3 and §4)
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
+- Where: DESIGN_SPEC §1 rule 4 ("amber means needs a decision and nothing else… not for errors"); §5.3 (error = an attention card); §4 (input error border `attention.text`)
+- Question: The error banner and invalid input borders use `attention.*` while rule 4 forbids it for errors. Which wins?
+- Options considered: keep §5.3 and §4 as written (implemented, matching the canvas error banner); add dedicated error tokens.
+- Blocking: no. Left unchanged.
+- Answer: Keep §5.3 and §4 as drawn: errors use the attention tokens. §1 rule 4 reworded to allow errors. (owner, 2026-10-28)
+
+## Q-047 · WP-10 · Switch knob shadow
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
+- Where: DESIGN_SPEC §2.3 (shadows only on selected segments and overlays) vs canvas switch
+- Question: The knob carries `shadow.selected` in code; §2.3 says the UI is flat apart from the selected segment and overlays. Does the canvas knob have a shadow?
+- Options considered: keep `shadow.selected` on the knob (implemented); remove it.
+- Blocking: no. Left unchanged.
+- Answer: Keep `shadow.selected` on the knob; §2.3 and the Switch row updated. (owner, 2026-10-28)
+
+## Q-046 · WP-10 · ErrorBanner padding and radius
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
+- Where: DESIGN_SPEC §5.3 (error = an attention card) and §4 (attention card: radius xl, padding 14); canvas "Design specification" error row
+- Question: The canvas error banner is drawn with its own padding and radius that may differ from the attention card (xl, 14). Which values should `ErrorBanner` use?
+- Options considered: the attention card values (implemented); the canvas row's values.
+- Blocking: no. Left unchanged.
+- Answer: The canvas wins: padding 12×14, radius lg. DESIGN_SPEC §5.3 updated. (owner, 2026-10-28)
+
+## Q-045 · WP-10 · IconButton color and glyph size
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
+- Where: DESIGN_SPEC §2.4 and §4 (icon 20, `text.primary`) vs the canvas header buttons (`text.secondary`, 18)
+- Question: Canvas and spec differ on the icon button glyph color and size. Which wins?
+- Options considered: the spec, `text.primary` at 20 (implemented); the canvas, `text.secondary` at 18.
+- Blocking: no. Left unchanged.
+- Answer: The canvas wins: web icon buttons use `text.secondary` at 18. DESIGN_SPEC §2.4 updated. (owner, 2026-10-28)
+
+## Q-044 · WP-10 · CalendarCell aria-label adds ", payday"
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
+- Where: DESIGN_SPEC §4.2 (aria-label "November 4, 1 item")
+- Question: Paydays are marked by the visible "PAYDAY" label, and the spec label has no equivalent, so the label is "November 6, payday, 1 item". Keep the suffix?
+- Options considered: keep (implemented; it is the accessible name for the visible PAYDAY); drop it.
+- Proposed answer: keep.
+- Blocking: no.
+- Answer: Keep “payday” in the name; it now comes from visually hidden text (see Q-049). (owner, 2026-10-28)
+
+## Q-043 · WP-10 · Runway chart: how much space below $0, and the lowest-bar tooltip when it is negative
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-27
+- Where: DESIGN_SPEC §4.1 (negative balances); canvas board "Web · Safe-to-spend states"
+- Question: (1) "Reserve space below it scaled the same way as above it" doesn't say how deep that space is. (2) §4.1 gives the single lowest bar a "Lowest · $X" tooltip, but the shortfall board draws none on the −$293 bar.
+- Options considered: (1a) the lowest balance rounded down to the next −$1,000, mirroring the top rule (implemented; −$293 → −$1,000, which matches the board's proportions); (1b) exactly the lowest balance. (2a) keep the tooltip ("Lowest · −$293", implemented); (2b) drop it for negative bars.
+- Blocking: no. `runwayScale` and the fixture snapshots in `packages/ui/src/components/runway-chart/` encode (1a) and (2a).
+- Answer: Answered (owner, 2026-10-28). Below $0, round the lowest balance down to the next −$1,000, mirroring the top rule. A negative lowest bar keeps its "Lowest · −$293" tooltip, placed under the negative value so it doesn't overlap the $500 dashed cushion line. Implemented in `RunwayChart`.
+
+## Q-042 · WP-10 · Canvas and spec differ on three small visual details
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-27
+- Where: DESIGN_SPEC §4, §4.1, §4.2; canvas boards "Web · Overview", "Web · Calendar", "Design specification v1.1"
+- Question: (1) The calendar "PAYDAY" label is 10/700 and the shortfall runway uses 10 px labels, but there is no 10 px type token. (2) The runway legend's cushion swatch is `attention.text` on the canvas, while §4.1 draws the cushion line in `chart.cushion` and §1 rule 4 reserves amber for decisions. (3) The web hero label is 14/500 on the canvas and 13/500 in §4.
+- Options considered: (1) add a `nano` 10 px token, or use `micro` 11 px (implemented). (2) `chart.cushion` for both line and swatch (implemented) or follow the canvas. (3) 13/500 per §4 (implemented) or 14/500.
+- Blocking: no. Each is one CSS line in `packages/ui/src/components/`.
+- Answer: Answered (owner, 2026-10-28). PAYDAY uses `--mp-type-nano`; the cushion legend swatch uses `chart.cushion`; the hero label is 14/500 (`--mp-type-body`, weight 500). Implemented.
+
+## Q-041 · WP-10 · Date and amount forms the UI kit needs that @mp/format doesn't offer
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-27
+- Where: DESIGN_SPEC §4.1 ("Rent −2,150"), §4.2 (aria-label "November 4, 1 item"), §4 list row (weekday over day); `packages/format`
+- Question: Three forms have no `@mp/format` function: (a) the runway event amount without "$" ("−2,150", "+2,900", "~−142"); (b) the long month for screen-reader labels ("November 4"); (c) the short weekday alone ("Wed"). Should WP-04's package add them?
+- Options considered: implemented locally for now on top of `@mp/format`: (a) `money(c, { mode: "chip" })` with the "$" removed; (b) a month-name table in `components/internal/dates.ts`; (c) the weekday part of `date(d, { weekday: true })`. Moving them into `@mp/format` later is a small change.
+- Blocking: no.
+- Answer: Answered (owner, 2026-10-28). Add to `packages/format` with tests and delete the local helpers: `money(c, { mode: "chart", estimate })`, `date(d, { month: "long" })` and `weekday(d)`. Implemented; `internal/dates.ts` is gone.
+
+## Q-040 · WP-10 · Stylelint "no raw px": which properties, and spec values with no token
+- Asked by: wp-builder/wp/10-ui-kit · 2026-10-27
+- Where: WORK_PLAN WP-10 ("no hex or raw px outside the token files"); ARCHITECTURE §8; DESIGN_SPEC §2.3–§4
+- Question: DESIGN_SPEC §4 gives many component dimensions in px with no token (switch track 52×32, calendar cell min-height 112, runway plot 230, 1 px and 2 px borders), plus a few off-scale values (chip and segment-track padding 3, badge padding 1, mini-runway radius 3). A literal "no px anywhere" rule can't express them.
+- Options considered: implemented in `packages/ui/stylelint.config.mjs`: no hex, named or functional colors anywhere; no px/rem for font, line-height, letter-spacing, padding, margin, gap, radius or shadow (tokens only); px allowed for width, height, border and outline sizes. The off-scale values, and two "border grows 1 → 2 px" padding compensations, use `stylelint-disable-next-line` with a DESIGN_SPEC citation, and a disable without a reason fails the lint. Alternatives: add 1 px and 3 px spacing tokens and a 3 px radius token, or component-size tokens for the §4 dimensions.
+- Blocking: no.
+- Answer: Answered (owner, 2026-10-28). Keep the split: tokens are required for color, type, spacing, radius and shadow; px is allowed for component dimensions and border/outline widths. Off-scale paddings keep their cited disable comments for now. Rules tightened and the config moved to the repo root (`stylelint.config.mjs`).
+
 ## Q-032 · WP-08 · Webhook paths: `/webhooks/*` or `/v1/webhooks/*`?
 - Asked by: wp-builder/wp/08-api-platform · 2026-10-27
 - Where: BACKEND_PLAN §8.1 (base URL `/v1`), §8.4 (paths `/webhooks/clerk` …)

@@ -1,0 +1,105 @@
+/* Review queue item, DESIGN_SPEC §4: inner card radius xl, padding 16. */
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--mp-space-4);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-xl);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mp-space-3);
+}
+
+.iconTile {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-brand-soft);
+  color: var(--mp-brand-default);
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.title {
+  margin: 0;
+  font: var(--mp-type-title);
+}
+
+.meta {
+  margin: 0;
+  font: var(--mp-type-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--mp-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* Extracted fields: bg.subtle, auto-fit minmax(150px, 1fr). */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--mp-space-3);
+  margin: 0;
+  padding: var(--mp-space-3);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-subtle);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-0_5);
+  min-width: 0;
+}
+
+.key {
+  font: var(--mp-type-micro);
+  font-weight: 600;
+  letter-spacing: var(--mp-tracking-table-header);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.value {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.effect {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2);
+}

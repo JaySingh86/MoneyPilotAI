@@ -1,0 +1,103 @@
+/* Loading, empty, error and status states, DESIGN_SPEC §5.3. */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-6) var(--mp-space-5);
+  border: 1px dashed var(--mp-border-strong);
+  border-radius: var(--mp-radius-xl);
+  text-align: center;
+  color: var(--mp-text-muted);
+  font: var(--mp-type-body);
+}
+
+.emptyText {
+  margin: 0;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2_5);
+}
+
+.skeleton {
+  display: block;
+  height: var(--mp-space-3_5);
+  border-radius: var(--mp-radius-xs);
+  background: var(--mp-bg-track);
+}
+
+.block {
+  height: var(--mp-space-14);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mp-space-2_5);
+  padding: var(--mp-space-3_5);
+  border: 1px solid var(--mp-attention-border);
+  border-radius: var(--mp-radius-xl);
+  background: var(--mp-attention-surface);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-small);
+}
+
+.errorIcon {
+  flex: none;
+  /* Align the 16 px icon with the first line of 19 px text. */
+  margin-top: var(--mp-space-0_5);
+  color: var(--mp-attention-text);
+}
+
+.errorText,
+.statusText {
+  flex: 1;
+  margin: 0;
+}
+
+.retry {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mp-brand-default);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.retry::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, var(--mp-touch-target));
+  height: var(--mp-touch-target);
+  transform: translate(-50%, -50%);
+}
+
+.retry:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+  padding: var(--mp-space-3);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-brand-soft);
+  color: var(--mp-brand-on-soft);
+  font: var(--mp-type-small);
+  font-weight: 500;
+}
+
+.statusIcon {
+  flex: none;
+}

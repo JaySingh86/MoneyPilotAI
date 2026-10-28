@@ -198,3 +198,18 @@ describe("estimateRange", () => {
     expect(() => estimateRange(-3000)).toThrow(RangeError);
   });
 });
+
+describe("money chart mode (runway event labels, no dollar sign)", () => {
+  it("drops the $ and keeps the sign, whole dollars from $100", () => {
+    expect(money(-215000, { mode: "chart" })).toBe("−2,150");
+    expect(money(290000, { mode: "chart" })).toBe("+2,900");
+    expect(money(-38900, { mode: "chart" })).toBe("−389");
+    expect(money(-2299, { mode: "chart" })).toBe("−22.99");
+    expect(money(5500, { mode: "chart" })).toBe("+55");
+  });
+
+  it("prefixes ~ for estimates, after which the sign follows", () => {
+    expect(money(-14200, { mode: "chart", estimate: true })).toBe("~−142");
+    expect(money(14200, { mode: "chart", estimate: true })).toBe("~+142");
+  });
+});

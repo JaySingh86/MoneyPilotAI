@@ -1,0 +1,95 @@
+/* Table, DESIGN_SPEC §4 and §2.2. */
+
+.wrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}
+
+.caption {
+  padding-bottom: var(--mp-space-2);
+  text-align: left;
+  font: var(--mp-type-title);
+}
+
+/* Header: 11 px, 600, uppercase, +0.06em, text.muted. */
+.th {
+  padding: var(--mp-space-2) var(--mp-space-2_5);
+  border-bottom: 1px solid var(--mp-border-divider);
+  font: var(--mp-type-micro);
+  font-weight: 600;
+  letter-spacing: var(--mp-tracking-table-header);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--mp-text-muted);
+  white-space: nowrap;
+}
+
+/* Cell padding 12 × 10 (10 on dense tables). */
+.td {
+  padding: var(--mp-space-3) var(--mp-space-2_5);
+  border-bottom: 1px solid var(--mp-border-divider);
+  text-align: left;
+  vertical-align: middle;
+  font-weight: 400;
+}
+
+.dense .td {
+  padding: var(--mp-space-2_5);
+}
+
+.row:last-child .td {
+  border-bottom: 0;
+}
+
+.selected {
+  background: var(--mp-brand-tint);
+}
+
+.end {
+  text-align: right;
+}
+
+.amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+tfoot .td {
+  border-top: 1px solid var(--mp-border-default);
+  border-bottom: 0;
+}
+
+.totalLabel {
+  font-weight: 600;
+}
+
+/* Footer total: Manrope 800 16. */
+.total {
+  font: var(--mp-type-heading-2m);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.twoLine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-0_5);
+  min-width: 0;
+}
+
+.cellTitle {
+  font-weight: 600;
+}
+
+.cellMeta {
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}

@@ -1,0 +1,65 @@
+/* Segmented control, DESIGN_SPEC §4. */
+
+.track {
+  display: inline-flex;
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4: track padding 3 has no spacing token */
+  padding: 3px;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-bg-canvas);
+}
+
+.onCanvas {
+  background: var(--mp-bg-track);
+}
+
+.mobile {
+  display: flex;
+  border-radius: var(--mp-radius-lg);
+}
+
+.mobile .segment {
+  flex: 1;
+}
+
+.segment {
+  position: relative;
+  min-width: 64px;
+  height: var(--mp-segment-height);
+  padding: 0 var(--mp-space-3);
+  border: 0;
+  border-radius: var(--mp-radius-sm);
+  background: transparent;
+  color: var(--mp-text-muted);
+  font: var(--mp-type-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--mp-duration) var(--mp-easing),
+    color var(--mp-duration) var(--mp-easing);
+}
+
+/* Unselected segments on the bg.track variant use text.secondary. */
+.onCanvas .segment {
+  color: var(--mp-text-secondary);
+}
+
+.segment::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--mp-touch-target);
+  transform: translateY(-50%);
+}
+
+.segment:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.segment.selected {
+  background: var(--mp-bg-surface);
+  box-shadow: var(--mp-shadow-selected);
+  color: var(--mp-text-primary);
+}

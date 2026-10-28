@@ -21,7 +21,7 @@ This is the implementation contract for the web app (Next.js) and the mobile app
 1. **No raw values.** Every color, font size, space, radius and shadow comes from a token. Lint for hex literals outside `design/`.
 2. **Never move money.** There are no “Pay”, “Transfer” or “Send money” actions. Use “Mark as paid” and “Ask [partner] to approve”.
 3. **Rules calculate, AI explains.** Every number on screen comes from deterministic code (§6). AI text only describes those results, and it always appears with its sources and a “See the math” or “How was this calculated?” link.
-4. **Amber means “needs a decision”** and nothing else. Don’t use the `attention.*` tokens for errors, branding or decoration.
+4. **Amber means “needs a decision” or “something went wrong”**, and nothing else. Errors (the error banner, invalid inputs) use the `attention.*` tokens, as the canvas draws them. Never use them for branding or decoration.
 5. **Each partner keeps one color everywhere.** The household creator is `partnerA` (teal) and the invited partner is `partnerB` (plum). Items owned by both use `both.mark` (brand navy). Colors come from the member’s role, never from their name.
 6. **Status is never shown by color alone.** Chips always carry text, owners show an initial, and the lowest bar has a label.
 7. **Light theme only in MVP.** Use semantic token names so a dark theme can be added later without touching components.
@@ -55,10 +55,11 @@ The exact values are in `design/tokens.json`. This section covers how to use the
 ### 2.3 Spacing, radius, elevation
 - **Spacing** uses a 4 px base with 2 px half-steps: 2, 4, 6, 8, 10, 12, 14, 16, 20, 22, 24, 28, 40, 56. Nothing else.
 - **Radius:** xs 6 (chart bars, calendar chips), sm 8 (segments), md 10 (buttons, inputs, nav items), lg 12 (calendar cells), xl 14 (inner cards, radio cards, mobile bottom-bar button), 2xl 16 (mobile cards), 3xl 18 (web cards, web hero), 4xl 20 (mobile hero), full (chips, pills, avatars).
-- **Elevation:** the UI is flat, with surfaces separated by a 1 px `border.default`. The only shadows are `shadow.selected` (selected segment) and `shadow.overlay` (menus, dialogs, toasts).
+- **Elevation:** the UI is flat, with surfaces separated by a 1 px `border.default`. The only shadows are `shadow.selected` (selected segment and the switch knob) and `shadow.overlay` (menus, dialogs, toasts).
 
 ### 2.4 Icons
 - Use [Lucide](https://lucide.dev) (`lucide-react`, `lucide-react-native`) with stroke width **1.8**, round caps and joins, `currentColor`.
+- Web icon-only buttons draw their glyph at 18 in `text.secondary`, as on the canvas.
 - Sizes: 16 inline in buttons, 18 for sidebar nav, 20 for header buttons and mobile list icons, 22 for the tab bar.
 - Mapping: Overview `layout-grid` · Calendar `calendar` · Bills & recurring `repeat` · Subscriptions & renewals `shield-check` · Goals `target` · Tasks `square-check` · Ask `message-circle` · Email & imports `mail` · Import `upload` · Privacy `lock` · Notifications `bell` · Add `plus` · Search `search` · Attention `triangle-alert` · Info `info` · Back/forward `chevron-left`/`chevron-right` · Household `house` · Edit `pencil` · Send `arrow-up` · Confirmed `check`.
 - The logo mark is a compass needle in a circle on a 36 px `brand.default` square (radius md). Use the SVG from the canvas until a final logo exists.
@@ -117,7 +118,7 @@ Minimum touch target is 44 × 44. A 36 px control gets an invisible hit area. Th
 | **Avatar** | Circle. Sizes 32 (header), 28 (lists), 24 (table), 22 (activity). The initial is 600 in the partner text color on the partner soft color. When stacked, overlap by −8 / −10 with a 2 px border in the background color. |
 | **Owner dot** | 7 px circle in the partner mark color (calendar chips, legends). |
 | **Progress bar** | Height 8, radius full, `bg.track` track. The first goal fills with `brand.default`, the second with `partnerA.mark`, the third with `partnerB.mark`. Label row above (title 600, percent 13/600) and caption row below (12 px muted). |
-| **Switch** | Track 52×32, radius full. Knob 26 with a 3 px inset. On `brand.default`, off `control.off`. `role="switch"` with `aria-checked`. Row height at least 56, with title 500 and a 12 px muted sub-line. |
+| **Switch** | Track 52×32, radius full. Knob 26 with a 3 px inset and `shadow.selected`. On `brand.default`, off `control.off`. `role="switch"` with `aria-checked`. Row height at least 56, with title 500 and a 12 px muted sub-line. |
 | **Radio card** | Padding 12, radius xl. Selected: 2 px `brand.default` border and `brand.tint` background. Default: 1 px `border.default`. Ring 20 (2 px border, `control.radioOff` when off) with a 10 px dot. Optional leading icon tile is 40, radius lg. `role="radio"` inside a `role="radiogroup"`. |
 | **Checkbox** | Native, 18–20 px, `accent-color: brand.default`. Done tasks get a strike-through and `text.muted`. |
 | **Input / select** | Height 44, padding-x 12, radius md, 1 px `border.strong`. The label sits above at 12/600 `text.secondary`, 6 px gap. Errors use an `attention.text` border and a message below. Money fields use `inputmode="decimal"`. |
@@ -144,7 +145,7 @@ Minimum touch target is 44 × 44. A 36 px control gets an invisible hit area. Th
 
 ### 4.2 Calendar
 - A 7-column grid (`repeat(7, minmax(0,1fr))`, gap 6) with weekday headers 11/600 +0.08em muted. Weeks start on Sunday (US).
-- **Cell:** a `button`, minimum height 112, padding 8, radius lg, 1 px `border.cell`, surface background. The day number is 13/600 inside a 26 px circle. Selected: 2 px `brand.default` border with the day number filled `brand.default` and white text. Payday: `brand.tint` background plus a “PAYDAY” label (`nano`, `brand.onSoft`). Days outside the month use `bg.muted` and `text.disabled` and can’t be selected. The aria-label reads “November 4, 1 item”.
+- **Cell:** a `button`, minimum height 112, padding 8, radius lg, 1 px `border.cell`, surface background. The day number is 13/600 inside a 26 px circle. Selected: 2 px `brand.default` border with the day number filled `brand.default` and white text. Payday: `brand.tint` background plus a “PAYDAY” label (`nano`, `brand.onSoft`). Days outside the month use `bg.muted` and `text.disabled` and can’t be selected. The cell has no `aria-label`; its accessible name comes from its visible content plus visually hidden words, so it always contains what is shown (WCAG 2.5.3): “November 4, payday, Car insurance −$684”. The item count goes in `aria-describedby` (“1 item”).
 - **Event chip:** flex row, padding 3×6, radius xs, 11 px. Owner dot, then the name (ellipsis), then the amount (600, signed). Variants: income (income.soft, income.onSoft, `income.border`), bill (bg.canvas, border.default), estimate (surface, dashed `info.border`), decision (attention.soft, `attention.chipBorder`), planned (surface, `border.strong`). Show up to 3, then “+N more”. Amounts of $100 or more show as whole dollars.
 - **Side panel:** the selected day as `heading-3`, then one inner card per item: title, signed amount in Manrope 800 17, kind chip, owner dot and name, and a note.
 - **Owner filter:** “Sam” shows Sam’s items plus items owned by Both. The same applies for Jordan.
@@ -240,7 +241,7 @@ The routes below are suggestions. Each screen lists its regions in order, the da
 ### 5.3 Loading, empty, error, stale
 - **Loading:** skeleton blocks in `bg.track` (radius xs) that match the final layout. Show them only after 300 ms. No spinners inside cards.
 - **Empty:** a dashed `border.strong` box, radius xl, padding 20–24, centered `text.muted`, with one sentence about what will appear and how. Example: “All caught up. New bills and renewals will appear here as they arrive.”
-- **Error:** an attention card with `role="alert"` saying what still works, plus one retry link. Never discard what the user entered.
+- **Error:** an error banner in the attention colors (padding 12×14, radius lg, as on the canvas) with `role="alert"` saying what still works, plus one retry link. Never discard what the user entered.
 - **Stale data:** every number from an import or connection shows its “Updated {date}” freshness on that screen (footer caption or source card).
 - **Shortfall** (safe to spend < 0). It is drawn on the “Web · Safe-to-spend states” and “Mobile · Today, shortfall state” boards, and the fixture’s `scenarios.shortfall` has the values.
   - **Hero:** the shortfall variant (§4). The breakdown reads “Lowest projected balance −$293 on Nov 5 − Cushion $500 = −$793”.
@@ -333,7 +334,7 @@ All of these run in tested, deterministic code. AI never produces these numbers.
 - [ ] Matches the canvas screen at 1440, 1024 and 390 widths. Attach screenshots next to the canvas frames.
 - [ ] Loaded with `design/fixtures/rivera-household.json`, it shows the golden values from §5 and `expected`.
 - [ ] Every amount uses tabular figures and follows §7.
-- [ ] Amber appears only on decision items. Partner colors are correct.
+- [ ] Amber appears only on decision items and errors. Partner colors are correct.
 - [ ] Loading, empty and error states exist (§5.3).
 - [ ] Keyboard, focus ring, screen-reader labels and 44 px targets checked.
 - [ ] No action moves money. AI text shows its sources.

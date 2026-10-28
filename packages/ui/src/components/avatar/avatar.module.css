@@ -1,0 +1,123 @@
+/* Avatar and owner dot, DESIGN_SPEC §4. */
+
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: var(--mp-radius-full);
+  font-weight: 600;
+}
+
+.partnerA {
+  background: var(--mp-partner-a-soft);
+  color: var(--mp-partner-a-text);
+}
+
+.partnerB {
+  background: var(--mp-partner-b-soft);
+  color: var(--mp-partner-b-text);
+}
+
+.size22 {
+  width: 22px;
+  height: 22px;
+  font: var(--mp-type-micro);
+  font-weight: 600;
+}
+
+.size24 {
+  width: 24px;
+  height: 24px;
+  font: var(--mp-type-micro);
+  font-weight: 600;
+}
+
+.size28 {
+  width: 28px;
+  height: 28px;
+  font: var(--mp-type-caption);
+  font-weight: 600;
+}
+
+.size32 {
+  width: 32px;
+  height: 32px;
+  font: var(--mp-type-small);
+  font-weight: 600;
+}
+
+.size40 {
+  width: 40px;
+  height: 40px;
+  font: var(--mp-type-body-l);
+  font-weight: 600;
+}
+
+/* Stacked avatars overlap with a 2 px ring in the background color. */
+.stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.stack > .avatar {
+  border: 2px solid var(--ring);
+}
+
+.ring-surface {
+  --ring: var(--mp-bg-surface);
+}
+
+.ring-canvas {
+  --ring: var(--mp-bg-canvas);
+}
+
+.ring-subtle {
+  --ring: var(--mp-bg-subtle);
+}
+
+.ring-tint {
+  --ring: var(--mp-brand-tint);
+}
+
+.stack > .avatar + .avatar {
+  margin-left: calc(-1 * var(--mp-space-2));
+}
+
+.stackMd > .avatar + .avatar {
+  margin-left: calc(-1 * var(--mp-space-2_5));
+}
+
+.dot {
+  display: inline-block;
+  flex: none;
+  border-radius: var(--mp-radius-full);
+}
+
+.dot6 {
+  width: 6px;
+  height: 6px;
+}
+
+.dot7 {
+  width: 7px;
+  height: 7px;
+}
+
+.dot10 {
+  width: 10px;
+  height: 10px;
+}
+
+.dot-partnerA {
+  background: var(--mp-partner-a-mark);
+}
+
+.dot-partnerB {
+  background: var(--mp-partner-b-mark);
+}
+
+.dot-both {
+  background: var(--mp-both-mark);
+}

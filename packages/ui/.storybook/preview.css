@@ -1,0 +1,7 @@
+/* Storybook canvas: the app's page background and body type (DESIGN_SPEC §2). */
+body {
+  margin: 0;
+  background: var(--mp-bg-canvas);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}

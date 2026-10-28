@@ -1,0 +1,215 @@
+/* Cards, DESIGN_SPEC §4. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3_5);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--mp-space-5_5);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}
+
+.card.mobile {
+  padding: var(--mp-space-3_5);
+  border-radius: var(--mp-radius-2xl);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-0_5);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font: var(--mp-type-heading-2);
+  color: var(--mp-text-primary);
+}
+
+.mobile .title {
+  font: var(--mp-type-heading-2m);
+}
+
+.subtitle {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+/* Hero: brand.strong, white text, radius 3xl / padding 24 (web), 4xl / 20 (mobile). */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-4);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--mp-space-6);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-brand-strong);
+  color: var(--mp-text-inverse);
+  font: var(--mp-type-body);
+}
+
+.heroMobile {
+  padding: var(--mp-space-5);
+  border-radius: var(--mp-radius-4xl);
+}
+
+.heroBreakdown a,
+.heroBreakdown button {
+  color: var(--mp-text-inverse);
+  font-weight: 600;
+}
+
+/* The focus ring is white on brand.strong (§4). */
+.hero :is(a, button, input, [tabindex]):focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-color: var(--mp-text-inverse);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.heroHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+}
+
+.heroLabel {
+  margin: 0;
+  font: var(--mp-type-body);
+  font-weight: 500;
+  color: var(--mp-brand-on-strong-muted);
+}
+
+.heroStatus {
+  font: var(--mp-type-caption);
+  color: var(--mp-brand-on-strong-muted);
+}
+
+/* "Needs a decision" on brand.strong: attention.markOnStrong with text.primary. */
+.decisionChip {
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4: chip padding 3×10; 3 has no spacing token */
+  padding: 3px var(--mp-space-2_5);
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-attention-mark-on-strong);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.heroAmountRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--mp-space-2) var(--mp-space-3);
+}
+
+.heroAmount {
+  font: var(--mp-type-display-xl);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--mp-tracking-display-xl);
+  overflow-wrap: anywhere;
+}
+
+.heroMobile .heroAmount {
+  font: var(--mp-type-display-l);
+  font-variant-numeric: tabular-nums;
+}
+
+.heroCaption {
+  font: var(--mp-type-small);
+  color: var(--mp-brand-on-strong-subtle);
+}
+
+.heroBreakdown {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-2) var(--mp-space-3_5);
+  padding-top: var(--mp-space-3_5);
+  border-top: 1px solid var(--mp-brand-strong-divider);
+  font: var(--mp-type-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--mp-brand-on-strong-subtle);
+}
+
+/* "See the math" is right-aligned in the breakdown row. */
+.heroBreakdown > a:last-child,
+.heroBreakdown > button:last-child {
+  margin-left: auto;
+}
+
+.heroBreakdown strong {
+  color: var(--mp-text-inverse);
+  font-weight: 600;
+}
+
+/* Attention: attention.surface, 1 px attention.border, radius xl, padding 14. */
+.attention {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--mp-space-3_5);
+  border: 1px solid var(--mp-attention-border);
+  border-radius: var(--mp-radius-xl);
+  background: var(--mp-attention-surface);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}
+
+.attentionLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-1_5);
+  margin: 0;
+  font: var(--mp-type-caption);
+  font-weight: 600;
+  color: var(--mp-attention-text);
+}
+
+.attentionTitle {
+  margin: 0;
+  font: var(--mp-type-title);
+}
+
+.attentionBody {
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}
+
+.attentionBody p {
+  margin: 0;
+}
+
+.attentionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2);
+  padding-top: var(--mp-space-1_5);
+}

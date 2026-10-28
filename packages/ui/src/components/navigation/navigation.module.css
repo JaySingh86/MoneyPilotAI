@@ -1,0 +1,122 @@
+/* Sidebar nav and tab bar, DESIGN_SPEC §3 and §4. */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-6);
+  box-sizing: border-box;
+  width: var(--mp-sidebar-width);
+  min-height: 100%;
+  padding: var(--mp-space-6) var(--mp-space-4);
+  border-right: 1px solid var(--mp-border-default);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-secondary);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+}
+
+.groupLabel {
+  margin: 0;
+  padding: 0 var(--mp-space-3);
+  font: var(--mp-type-micro);
+  font-weight: 600;
+  letter-spacing: var(--mp-tracking-overline);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-0_5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  min-height: var(--mp-touch-target);
+  box-sizing: border-box;
+  padding: var(--mp-space-2_5) var(--mp-space-3);
+  border-radius: var(--mp-radius-md);
+  color: var(--mp-text-secondary);
+  font: var(--mp-type-body);
+  font-weight: 400;
+  text-decoration: none;
+  transition:
+    background-color var(--mp-duration) var(--mp-easing),
+    color var(--mp-duration) var(--mp-easing);
+}
+
+.item:hover {
+  background: var(--mp-bg-subtle);
+}
+
+.item:focus-visible,
+.tab:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.current,
+.current:hover {
+  background: var(--mp-brand-soft);
+  color: var(--mp-brand-default);
+  font-weight: 600;
+}
+
+.itemLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.badge {
+  flex: none;
+}
+
+/* Tab bar: 5 equal tabs, icon 22, label 11, min-height 48, top border. */
+.tabBar {
+  box-sizing: border-box;
+  padding-bottom: max(var(--mp-space-5_5), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--mp-border-default);
+  background: var(--mp-bg-surface);
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabItem {
+  display: flex;
+}
+
+.tab {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mp-space-0_5);
+  min-height: 48px;
+  padding: var(--mp-space-1_5) var(--mp-space-1);
+  color: var(--mp-text-muted);
+  font: var(--mp-type-micro);
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.tabCurrent {
+  color: var(--mp-brand-default);
+  font-weight: 600;
+}

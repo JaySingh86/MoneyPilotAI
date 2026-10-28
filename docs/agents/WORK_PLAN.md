@@ -27,7 +27,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | done |
 | WP-08 | API platform + contracts (server, errors, idempotency, OpenAPI, client gen) | 2 | WP-01 | M | — | done |
 | WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | todo |
-| WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | in-progress (wp-builder, wp/10-ui-kit) |
+| WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | done |
 | WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | in-progress (wp-builder, wp/11-ai) |
 | WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | todo |
 | WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | todo |
@@ -270,6 +270,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 - **Acceptance:**
   - [ ] With fixture data (mock or seeded), every golden value on the canvas renders exactly.
   - [ ] Layout matches at 1440, 1024 and 390 widths (Playwright screenshots attached next to the canvas frames).
+  - [ ] WP-10 follow-ups: add 1440 visual baselines for RunwayChart and HeroCard, and assert no horizontal page scroll at 1440/1024/390; apply Q-045 to Q-049 in `packages/ui` (icon button 18/`text.secondary`, error banner 12×14 radius lg, calendar cell named from visible content and the axe exemption removed); if CI runs on x86, regenerate the visual baselines there or run the job on an arm64 runner.
   - [ ] Loading, empty and error states exist; axe passes; keyboard navigation works through the calendar grid.
 
 ## WP-18 · Web: Bills, Renewals, Goals, Tasks
