@@ -90,6 +90,7 @@ flowchart TB
   end
   subgraph domain["packages: domain"]
     engine["engine<br/>(pure)"]
+    reviewrules["review-rules<br/>(pure: auto-apply policy + apply planning)"]
     contracts
     format
     detection
@@ -120,6 +121,7 @@ flowchart TB
   worker --> ai
   worker --> notify
   worker --> detection
+  worker --> reviewrules
   worker --> crypto
   worker --> billing
   worker --> observability

@@ -328,6 +328,9 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Backfill goes through the Batch API with results keyed by `custom_id`.
   - [ ] The fixture inbox corpus produces the 4 review items and 3 auto-applied changes shown on the Email & imports board.
   - [ ] `auto_apply` feature flag is off by default.
+  - [ ] Use `@mp/review-rules` (WP-14) for the decide policy and apply planning, through a worker-side items-apply port with the same guards as the API; `applied_by` null, `origin` email, undo window from the shared helper.
+  - [ ] Map the WP-11 snake_case extraction (fields and evidence field names) to the camelCase review contracts explicitly, with tests.
+  - [ ] Run the subject through the WP-19 redactor before writing `extracted_items.message_meta`; `domainMatch` comes only from `isDomainMatch`, and `senderFirstSeen` defaults to true on any error.
 - **Gate:** G3 before `auto_apply` is enabled for any household.
 
 ## WP-23 · Web: Email & imports, Members & privacy, setup, review UI
@@ -343,6 +346,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Deletion is scheduled for +7 days, can be cancelled by either member, and when executed revokes tokens, cancels billing, removes S3 objects and deletes rows (verified by a test that counts rows per table).
   - [ ] The retention purge follows the schedule table.
   - [ ] Account deletion anonymizes `ip` and `user_agent` on that user's household-less audit events, which otherwise live 2 years (WP-03 G1 re-review).
+  - [ ] The retention purge nulls `extracted_items.message_meta` and `evidence` after 13 months and expires `queued` review items after the configured age; soft-deleted items and goals are hard-deleted after the retention period (WP-06 Q-055).
 - **Gate:** G2.
 
 ## WP-25 · Billing + entitlements

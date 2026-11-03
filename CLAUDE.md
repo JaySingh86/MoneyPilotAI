@@ -33,6 +33,7 @@ packages/ui         Web components built on design tokens
 packages/email      Gmail/Graph/forwarding adapters, MIME→text, prefilter, redaction
 packages/ai         Claude client, versioned prompts, schemas, evals
 packages/detection  CSV parsing + recurring detection
+packages/review-rules  Pure auto-apply policy + apply planning (shared by api and worker)
 packages/notify     Email/push rendering + delivery
 packages/billing    Billing adapter + entitlements
 packages/crypto     KMS envelope encryption
