@@ -962,6 +962,8 @@ email.decide(extraction)          → auto-apply (rules below) OR queue for revi
 email.cleanup(message)            → discard text/attachments from memory/S3 temp; keep subject only if extracted
 ```
 
+**Parsing sandbox (Q-067).** MIME parsing, HTML → text, PDF → text and redaction run in an isolated `worker_threads` Worker (or child process) with a memory cap (`resourceLimits`), a hard wall-clock timeout and `terminate()`. A message that exceeds either fails as `parse_limit` and goes nowhere, and the worker process survives. Messages with more than 200 MIME parts are refused before parsing.
+
 **Extraction schema** (`packages/ai/schemas/extraction.v1.ts`, Zod → JSON Schema for `output_config.format`):
 
 ```ts
@@ -997,6 +999,8 @@ email.cleanup(message)            → discard text/attachments from memory/S3 te
 - The match is to an **existing confirmed item** by `provider_domain`, and `account_last4` when present.
 - The change is either (a) replacing an estimate with an actual statement amount within ±50% of the estimate, or (b) a renewal or bill notice whose date and amount are identical to what we already expect.
 - The household hasn’t turned off automatic updates (setting).
+- **The sender is authenticated (Q-062):** our own receiver's `Authentication-Results` shows DMARC pass aligned with the From domain (for forwarded mail, the original sender's verdict as recorded by SES or the Gmail/Graph layer). Missing or failed authentication means review only.
+- **The message wasn't flagged `injection_suspected` (Q-060)**, the match was by `provider_domain` (never a name-only match), and the sender is not first-seen for this item. Everything else goes to the review queue.
 - The item gets an `applied_changes` row with `undo_until = now + 30 days`. It appears under “Applied automatically” and refreshes the plan.
 
 **Everything else is queued:** new items, price increases, decisions, mismatches, low evidence. Each queued item fires a `review` notification (a daily digest if more than 3).
