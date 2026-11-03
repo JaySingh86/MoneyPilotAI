@@ -9,3 +9,4 @@ export {
   recurringItems,
   renewalDetails,
 } from "./items";
+export { appliedChanges, extractedItems, senderRules } from "./review";

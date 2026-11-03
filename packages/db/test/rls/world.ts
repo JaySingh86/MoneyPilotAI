@@ -11,6 +11,7 @@ import {
 } from "../../src/seed/flows";
 import type { ApiDb } from "../../src/tx";
 import { seedItemsWorld, type ItemsWorldRows } from "./items-world";
+import { seedReviewWorld, type ReviewWorldRows } from "./review-world";
 
 export interface TestHousehold {
   id: string;
@@ -20,6 +21,8 @@ export interface TestHousehold {
   partnerInviteToken: string;
   /** One row in every WP-06 table. */
   items: ItemsWorldRows;
+  /** One row in every WP-14 table. */
+  review: ReviewWorldRows;
 }
 
 export interface World {
@@ -61,7 +64,8 @@ export async function buildHousehold(db: ApiDb, label: string): Promise<TestHous
   const household = { id, creator, partner, partnerInviteToken: invite.token };
   // One row in every WP-06 table, so the cross-household tests have a victim in each.
   const items = await seedItemsWorld(db, household);
-  return { ...household, items };
+  const review = await seedReviewWorld(db, household, items.itemId);
+  return { ...household, items, review };
 }
 
 export async function buildWorld(db: ApiDb): Promise<World> {

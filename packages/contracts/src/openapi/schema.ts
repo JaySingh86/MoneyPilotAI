@@ -1769,6 +1769,523 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/households/{hid}/review-items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Review queue (email and CSV extractions) */
+    get: {
+      parameters: {
+        query?: {
+          state?: "queued" | "auto_applied" | "confirmed" | "edited" | "ignored" | "expired";
+          limit?: number;
+          cursor?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReviewItemPage"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/review-items/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One review item */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReviewItem"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/review-items/{id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Confirm: apply the extracted change */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReviewDecision"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/review-items/{id}/edit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Edit the extracted fields, then apply */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["EditReviewItemInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReviewDecision"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/review-items/{id}/ignore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Ignore: nothing changes */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReviewDecision"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/applied-changes": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Applied automatically and confirmed changes, newest first */
+    get: {
+      parameters: {
+        query?: {
+          limit?: number;
+          cursor?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AppliedChangePage"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/applied-changes/{id}/undo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Undo a change within its 30-day window */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AppliedChange"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/sender-rules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The household's watch and ignore sender rules */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["SenderRuleList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Watch or ignore a sender domain (changes the rule when the domain already has one) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PutSenderRuleInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["SenderRule"];
+          };
+        };
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["SenderRule"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2838,6 +3355,214 @@ export interface components {
         monthlyCents: number;
       }[];
     };
+    ExtractedFieldsInput: {
+      /** @enum {string} */
+      docType:
+        | "bill"
+        | "statement"
+        | "renewal_notice"
+        | "price_change"
+        | "receipt"
+        | "enrollment_deadline"
+        | "payment_confirmation"
+        | "irrelevant";
+      providerName: string | null;
+      category:
+        | (
+            | "housing"
+            | "utilities"
+            | "childcare"
+            | "transport"
+            | "debt"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "vehicle_home"
+            | "income"
+            | "other"
+          )
+        | null;
+      insuranceType:
+        ("auto" | "motorcycle" | "health" | "dental" | "home" | "renters" | "life" | "pet" | "other") | null;
+      amountDueCents: number | null;
+      previousAmountCents: number | null;
+      dueDate: string | null;
+      renewalDate: string | null;
+      cancelByDate: string | null;
+      decisionByDate: string | null;
+      frequency:
+        ("monthly" | "every_2_months" | "quarterly" | "every_6_months" | "yearly" | "one_time") | null;
+      autoRenews: boolean | null;
+      accountLast4: string | null;
+      providerDomain: string | null;
+    };
+    EvidenceQuoteInput: {
+      field: string;
+      quote: string;
+    };
+    ReviewMessageInput: {
+      fromDomain: string;
+      subject: string | null;
+      /** Format: date-time */
+      receivedAt: string;
+    };
+    ReviewEffectInput: {
+      summary: string;
+      planDelta: {
+        /** @description Integer cents */
+        safeToSpendCents: number;
+      } | null;
+    };
+    ReviewItemInput: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      source: "email" | "csv";
+      /** @enum {string} */
+      state: "queued" | "auto_applied" | "confirmed" | "edited" | "ignored" | "expired";
+      /** @enum {string} */
+      matchType: "new" | "update" | "decision" | "duplicate";
+      matchItemId: string | null;
+      message: components["schemas"]["ReviewMessageInput"] | null;
+      fields: components["schemas"]["ExtractedFieldsInput"];
+      evidence: components["schemas"]["EvidenceQuoteInput"][];
+      evidenceStale: boolean;
+      effect: components["schemas"]["ReviewEffectInput"];
+      decidedBy: string | null;
+      decidedAt: string | null;
+      appliedChangeId: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ReviewItemPageInput: {
+      data: components["schemas"]["ReviewItemInput"][];
+      nextCursor: string | null;
+    };
+    EditReviewItemInput: {
+      fields: {
+        /** @enum {string} */
+        docType?:
+          | "bill"
+          | "statement"
+          | "renewal_notice"
+          | "price_change"
+          | "receipt"
+          | "enrollment_deadline"
+          | "payment_confirmation"
+          | "irrelevant";
+        providerName?: string | null;
+        category?:
+          | (
+              | "housing"
+              | "utilities"
+              | "childcare"
+              | "transport"
+              | "debt"
+              | "subscription"
+              | "insurance"
+              | "membership"
+              | "vehicle_home"
+              | "income"
+              | "other"
+            )
+          | null;
+        insuranceType?:
+          | ("auto" | "motorcycle" | "health" | "dental" | "home" | "renters" | "life" | "pet" | "other")
+          | null;
+        amountDueCents?: number | null;
+        previousAmountCents?: number | null;
+        dueDate?: string | null;
+        renewalDate?: string | null;
+        cancelByDate?: string | null;
+        decisionByDate?: string | null;
+        frequency?:
+          ("monthly" | "every_2_months" | "quarterly" | "every_6_months" | "yearly" | "one_time") | null;
+        autoRenews?: boolean | null;
+        accountLast4?: string | null;
+        providerDomain?: string | null;
+      };
+    };
+    AppliedChangeInput: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      origin: "email" | "csv" | "proposal" | "user" | "engine";
+      entityType: string;
+      /** Format: uuid */
+      entityId: string;
+      entityName: string | null;
+      before: {
+        [key: string]: unknown;
+      } | null;
+      after: {
+        [key: string]: unknown;
+      };
+      appliedBy: string | null;
+      /** Format: date-time */
+      appliedAt: string;
+      undoUntil: string | null;
+      undoneAt: string | null;
+      undoneBy: string | null;
+      undoable: boolean;
+    };
+    AppliedChangePageInput: {
+      data: components["schemas"]["AppliedChangeInput"][];
+      nextCursor: string | null;
+    };
+    ReviewDecisionInput: {
+      item: components["schemas"]["ReviewItemInput"];
+      appliedChange: components["schemas"]["AppliedChangeInput"] | null;
+      plan: {
+        /** @description Integer cents */
+        safeToSpendCents: number;
+      } | null;
+    };
+    SenderRuleInput: {
+      /** Format: uuid */
+      id: string;
+      domain: string;
+      /** @enum {string} */
+      rule: "watch" | "ignore";
+      categoryHint:
+        | (
+            | "housing"
+            | "utilities"
+            | "childcare"
+            | "transport"
+            | "debt"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "vehicle_home"
+            | "income"
+            | "other"
+          )
+        | null;
+      createdBy: string | null;
+    };
+    PutSenderRuleInput: {
+      domain: string;
+      /** @enum {string} */
+      rule: "watch" | "ignore";
+      categoryHint?:
+        | (
+            | "housing"
+            | "utilities"
+            | "childcare"
+            | "transport"
+            | "debt"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "vehicle_home"
+            | "income"
+            | "other"
+          )
+        | null;
+    };
+    SenderRuleListInput: {
+      data: components["schemas"]["SenderRuleInput"][];
+    };
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -3902,6 +4627,214 @@ export interface components {
         /** @description Integer cents */
         monthlyCents: number;
       }[];
+    };
+    ExtractedFields: {
+      /** @enum {string} */
+      docType:
+        | "bill"
+        | "statement"
+        | "renewal_notice"
+        | "price_change"
+        | "receipt"
+        | "enrollment_deadline"
+        | "payment_confirmation"
+        | "irrelevant";
+      providerName: string | null;
+      category:
+        | (
+            | "housing"
+            | "utilities"
+            | "childcare"
+            | "transport"
+            | "debt"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "vehicle_home"
+            | "income"
+            | "other"
+          )
+        | null;
+      insuranceType:
+        ("auto" | "motorcycle" | "health" | "dental" | "home" | "renters" | "life" | "pet" | "other") | null;
+      amountDueCents: number | null;
+      previousAmountCents: number | null;
+      dueDate: string | null;
+      renewalDate: string | null;
+      cancelByDate: string | null;
+      decisionByDate: string | null;
+      frequency:
+        ("monthly" | "every_2_months" | "quarterly" | "every_6_months" | "yearly" | "one_time") | null;
+      autoRenews: boolean | null;
+      accountLast4: string | null;
+      providerDomain: string | null;
+    };
+    EvidenceQuote: {
+      field: string;
+      quote: string;
+    };
+    ReviewMessage: {
+      fromDomain: string;
+      subject: string | null;
+      /** Format: date-time */
+      receivedAt: string;
+    };
+    ReviewEffect: {
+      summary: string;
+      planDelta: {
+        /** @description Integer cents */
+        safeToSpendCents: number;
+      } | null;
+    };
+    ReviewItem: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      source: "email" | "csv";
+      /** @enum {string} */
+      state: "queued" | "auto_applied" | "confirmed" | "edited" | "ignored" | "expired";
+      /** @enum {string} */
+      matchType: "new" | "update" | "decision" | "duplicate";
+      matchItemId: string | null;
+      message: components["schemas"]["ReviewMessage"] | null;
+      fields: components["schemas"]["ExtractedFields"];
+      evidence: components["schemas"]["EvidenceQuote"][];
+      evidenceStale: boolean;
+      effect: components["schemas"]["ReviewEffect"];
+      decidedBy: string | null;
+      decidedAt: string | null;
+      appliedChangeId: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ReviewItemPage: {
+      data: components["schemas"]["ReviewItem"][];
+      nextCursor: string | null;
+    };
+    EditReviewItem: {
+      fields: {
+        /** @enum {string} */
+        docType?:
+          | "bill"
+          | "statement"
+          | "renewal_notice"
+          | "price_change"
+          | "receipt"
+          | "enrollment_deadline"
+          | "payment_confirmation"
+          | "irrelevant";
+        providerName?: string | null;
+        category?:
+          | (
+              | "housing"
+              | "utilities"
+              | "childcare"
+              | "transport"
+              | "debt"
+              | "subscription"
+              | "insurance"
+              | "membership"
+              | "vehicle_home"
+              | "income"
+              | "other"
+            )
+          | null;
+        insuranceType?:
+          | ("auto" | "motorcycle" | "health" | "dental" | "home" | "renters" | "life" | "pet" | "other")
+          | null;
+        amountDueCents?: number | null;
+        previousAmountCents?: number | null;
+        dueDate?: string | null;
+        renewalDate?: string | null;
+        cancelByDate?: string | null;
+        decisionByDate?: string | null;
+        frequency?:
+          ("monthly" | "every_2_months" | "quarterly" | "every_6_months" | "yearly" | "one_time") | null;
+        autoRenews?: boolean | null;
+        accountLast4?: string | null;
+        providerDomain?: string | null;
+      };
+    };
+    AppliedChange: {
+      /** Format: uuid */
+      id: string;
+      /** @enum {string} */
+      origin: "email" | "csv" | "proposal" | "user" | "engine";
+      entityType: string;
+      /** Format: uuid */
+      entityId: string;
+      entityName: string | null;
+      before: {
+        [key: string]: unknown;
+      } | null;
+      after: {
+        [key: string]: unknown;
+      };
+      appliedBy: string | null;
+      /** Format: date-time */
+      appliedAt: string;
+      undoUntil: string | null;
+      undoneAt: string | null;
+      undoneBy: string | null;
+      undoable: boolean;
+    };
+    AppliedChangePage: {
+      data: components["schemas"]["AppliedChange"][];
+      nextCursor: string | null;
+    };
+    ReviewDecision: {
+      item: components["schemas"]["ReviewItem"];
+      appliedChange: components["schemas"]["AppliedChange"] | null;
+      plan: {
+        /** @description Integer cents */
+        safeToSpendCents: number;
+      } | null;
+    };
+    SenderRule: {
+      /** Format: uuid */
+      id: string;
+      domain: string;
+      /** @enum {string} */
+      rule: "watch" | "ignore";
+      categoryHint:
+        | (
+            | "housing"
+            | "utilities"
+            | "childcare"
+            | "transport"
+            | "debt"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "vehicle_home"
+            | "income"
+            | "other"
+          )
+        | null;
+      createdBy: string | null;
+    };
+    PutSenderRule: {
+      domain: string;
+      /** @enum {string} */
+      rule: "watch" | "ignore";
+      categoryHint?:
+        | (
+            | "housing"
+            | "utilities"
+            | "childcare"
+            | "transport"
+            | "debt"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "vehicle_home"
+            | "income"
+            | "other"
+          )
+        | null;
+    };
+    SenderRuleList: {
+      data: components["schemas"]["SenderRule"][];
     };
   };
   responses: never;

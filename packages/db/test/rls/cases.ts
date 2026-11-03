@@ -97,4 +97,27 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
     update: (t) =>
       sql`update calc_snapshots set result = '{"tampered":true}'::jsonb where household_id = ${t.householdId}`,
   },
+  // ===== WP-14: review queue, applied changes, sender rules =====
+  {
+    table: "extracted_items",
+    insert: (
+      t,
+    ) => sql`insert into extracted_items (household_id, source, extractor_version, fields, evidence, checks, match_type)
+      values (${t.householdId}, 'email', 'probe', '{}', '[]', '{}', 'new')`,
+    update: (t) => sql`update extracted_items set state = 'ignored' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "applied_changes",
+    insert: (
+      t,
+    ) => sql`insert into applied_changes (household_id, origin, entity_type, entity_id, after, applied_by)
+      values (${t.householdId}, 'user', 'item', ${randomUUID()}, '{}', ${t.actorUserId})`,
+    update: (t) => sql`update applied_changes set undone_at = now() where household_id = ${t.householdId}`,
+  },
+  {
+    table: "sender_rules",
+    insert: (t) => sql`insert into sender_rules (household_id, domain, rule)
+      values (${t.householdId}, 'attacker.example', 'ignore')`,
+    update: (t) => sql`update sender_rules set rule = 'watch' where household_id = ${t.householdId}`,
+  },
 ];

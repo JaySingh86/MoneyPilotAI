@@ -2695,6 +2695,655 @@
           "byItem"
         ]
       },
+      "ExtractedFieldsInput": {
+        "type": "object",
+        "properties": {
+          "docType": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "statement",
+              "renewal_notice",
+              "price_change",
+              "receipt",
+              "enrollment_deadline",
+              "payment_confirmation",
+              "irrelevant"
+            ]
+          },
+          "providerName": {
+            "anyOf": [{ "type": "string", "minLength": 1, "maxLength": 120 }, { "type": "null" }]
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "housing",
+                  "utilities",
+                  "childcare",
+                  "transport",
+                  "debt",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "vehicle_home",
+                  "income",
+                  "other"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "insuranceType": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["auto", "motorcycle", "health", "dental", "home", "renters", "life", "pet", "other"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "amountDueCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "previousAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "dueDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "renewalDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "cancelByDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decisionByDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "frequency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["monthly", "every_2_months", "quarterly", "every_6_months", "yearly", "one_time"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "autoRenews": { "type": ["boolean", "null"] },
+          "accountLast4": {
+            "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{1,4}$" }, { "type": "null" }]
+          },
+          "providerDomain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "docType",
+          "providerName",
+          "category",
+          "insuranceType",
+          "amountDueCents",
+          "previousAmountCents",
+          "dueDate",
+          "renewalDate",
+          "cancelByDate",
+          "decisionByDate",
+          "frequency",
+          "autoRenews",
+          "accountLast4",
+          "providerDomain"
+        ],
+        "additionalProperties": false
+      },
+      "EvidenceQuoteInput": {
+        "type": "object",
+        "properties": {
+          "field": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "quote": { "type": "string", "minLength": 1, "maxLength": 140 }
+        },
+        "required": ["field", "quote"]
+      },
+      "ReviewMessageInput": {
+        "type": "object",
+        "properties": {
+          "fromDomain": { "type": "string", "maxLength": 253 },
+          "subject": { "anyOf": [{ "type": "string", "maxLength": 300 }, { "type": "null" }] },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": ["fromDomain", "subject", "receivedAt"]
+      },
+      "ReviewEffectInput": {
+        "type": "object",
+        "properties": {
+          "summary": { "type": "string", "maxLength": 300 },
+          "planDelta": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "safeToSpendCents": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "Integer cents"
+                  }
+                },
+                "required": ["safeToSpendCents"]
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["summary", "planDelta"]
+      },
+      "ReviewItemInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "source": { "type": "string", "enum": ["email", "csv"] },
+          "state": {
+            "type": "string",
+            "enum": ["queued", "auto_applied", "confirmed", "edited", "ignored", "expired"]
+          },
+          "matchType": { "type": "string", "enum": ["new", "update", "decision", "duplicate"] },
+          "matchItemId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "message": { "anyOf": [{ "$ref": "#/components/schemas/ReviewMessageInput" }, { "type": "null" }] },
+          "fields": { "$ref": "#/components/schemas/ExtractedFieldsInput" },
+          "evidence": { "type": "array", "items": { "$ref": "#/components/schemas/EvidenceQuoteInput" } },
+          "evidenceStale": { "type": "boolean" },
+          "effect": { "$ref": "#/components/schemas/ReviewEffectInput" },
+          "decidedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decidedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "appliedChangeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "state",
+          "matchType",
+          "matchItemId",
+          "message",
+          "fields",
+          "evidence",
+          "evidenceStale",
+          "effect",
+          "decidedBy",
+          "decidedAt",
+          "appliedChangeId",
+          "createdAt"
+        ]
+      },
+      "ReviewItemPageInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/ReviewItemInput" } },
+          "nextCursor": { "type": ["string", "null"] }
+        },
+        "required": ["data", "nextCursor"]
+      },
+      "EditReviewItemInput": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "properties": {
+              "docType": {
+                "type": "string",
+                "enum": [
+                  "bill",
+                  "statement",
+                  "renewal_notice",
+                  "price_change",
+                  "receipt",
+                  "enrollment_deadline",
+                  "payment_confirmation",
+                  "irrelevant"
+                ]
+              },
+              "providerName": {
+                "anyOf": [{ "type": "string", "minLength": 1, "maxLength": 120 }, { "type": "null" }]
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "housing",
+                      "utilities",
+                      "childcare",
+                      "transport",
+                      "debt",
+                      "subscription",
+                      "insurance",
+                      "membership",
+                      "vehicle_home",
+                      "income",
+                      "other"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "insuranceType": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "motorcycle",
+                      "health",
+                      "dental",
+                      "home",
+                      "renters",
+                      "life",
+                      "pet",
+                      "other"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "amountDueCents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000000,
+                    "description": "Integer cents"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "previousAmountCents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000000,
+                    "description": "Integer cents"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "renewalDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "cancelByDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "decisionByDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "frequency": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": ["monthly", "every_2_months", "quarterly", "every_6_months", "yearly", "one_time"]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "autoRenews": { "type": ["boolean", "null"] },
+              "accountLast4": {
+                "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{1,4}$" }, { "type": "null" }]
+              },
+              "providerDomain": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 120,
+                    "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["fields"]
+      },
+      "AppliedChangeInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "origin": { "type": "string", "enum": ["email", "csv", "proposal", "user", "engine"] },
+          "entityType": { "type": "string" },
+          "entityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "entityName": { "type": ["string", "null"] },
+          "before": {
+            "anyOf": [
+              { "type": "object", "propertyNames": { "type": "string" }, "additionalProperties": {} },
+              { "type": "null" }
+            ]
+          },
+          "after": { "type": "object", "propertyNames": { "type": "string" }, "additionalProperties": {} },
+          "appliedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "undoUntil": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "undoneAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "undoneBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "undoable": { "type": "boolean" }
+        },
+        "required": [
+          "id",
+          "origin",
+          "entityType",
+          "entityId",
+          "entityName",
+          "before",
+          "after",
+          "appliedBy",
+          "appliedAt",
+          "undoUntil",
+          "undoneAt",
+          "undoneBy",
+          "undoable"
+        ]
+      },
+      "AppliedChangePageInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/AppliedChangeInput" } },
+          "nextCursor": { "type": ["string", "null"] }
+        },
+        "required": ["data", "nextCursor"]
+      },
+      "ReviewDecisionInput": {
+        "type": "object",
+        "properties": {
+          "item": { "$ref": "#/components/schemas/ReviewItemInput" },
+          "appliedChange": {
+            "anyOf": [{ "$ref": "#/components/schemas/AppliedChangeInput" }, { "type": "null" }]
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "safeToSpendCents": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "Integer cents"
+                  }
+                },
+                "required": ["safeToSpendCents"]
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["item", "appliedChange", "plan"]
+      },
+      "SenderRuleInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 120,
+            "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+          },
+          "rule": { "type": "string", "enum": ["watch", "ignore"] },
+          "categoryHint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "housing",
+                  "utilities",
+                  "childcare",
+                  "transport",
+                  "debt",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "vehicle_home",
+                  "income",
+                  "other"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["id", "domain", "rule", "categoryHint", "createdBy"]
+      },
+      "PutSenderRuleInput": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "maxLength": 120,
+            "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+          },
+          "rule": { "type": "string", "enum": ["watch", "ignore"] },
+          "categoryHint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "housing",
+                  "utilities",
+                  "childcare",
+                  "transport",
+                  "debt",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "vehicle_home",
+                  "income",
+                  "other"
+                ]
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["domain", "rule"],
+        "additionalProperties": false
+      },
+      "SenderRuleListInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/SenderRuleInput" } }
+        },
+        "required": ["data"]
+      },
       "ProblemField": {
         "type": "object",
         "properties": {
@@ -5452,6 +6101,666 @@
           "byItem"
         ],
         "additionalProperties": false
+      },
+      "ExtractedFields": {
+        "type": "object",
+        "properties": {
+          "docType": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "statement",
+              "renewal_notice",
+              "price_change",
+              "receipt",
+              "enrollment_deadline",
+              "payment_confirmation",
+              "irrelevant"
+            ]
+          },
+          "providerName": {
+            "anyOf": [{ "type": "string", "minLength": 1, "maxLength": 120 }, { "type": "null" }]
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "housing",
+                  "utilities",
+                  "childcare",
+                  "transport",
+                  "debt",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "vehicle_home",
+                  "income",
+                  "other"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "insuranceType": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["auto", "motorcycle", "health", "dental", "home", "renters", "life", "pet", "other"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "amountDueCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "previousAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "dueDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "renewalDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "cancelByDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decisionByDate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "frequency": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["monthly", "every_2_months", "quarterly", "every_6_months", "yearly", "one_time"]
+              },
+              { "type": "null" }
+            ]
+          },
+          "autoRenews": { "type": ["boolean", "null"] },
+          "accountLast4": {
+            "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{1,4}$" }, { "type": "null" }]
+          },
+          "providerDomain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "docType",
+          "providerName",
+          "category",
+          "insuranceType",
+          "amountDueCents",
+          "previousAmountCents",
+          "dueDate",
+          "renewalDate",
+          "cancelByDate",
+          "decisionByDate",
+          "frequency",
+          "autoRenews",
+          "accountLast4",
+          "providerDomain"
+        ],
+        "additionalProperties": false
+      },
+      "EvidenceQuote": {
+        "type": "object",
+        "properties": {
+          "field": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "quote": { "type": "string", "minLength": 1, "maxLength": 140 }
+        },
+        "required": ["field", "quote"],
+        "additionalProperties": false
+      },
+      "ReviewMessage": {
+        "type": "object",
+        "properties": {
+          "fromDomain": { "type": "string", "maxLength": 253 },
+          "subject": { "anyOf": [{ "type": "string", "maxLength": 300 }, { "type": "null" }] },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": ["fromDomain", "subject", "receivedAt"],
+        "additionalProperties": false
+      },
+      "ReviewEffect": {
+        "type": "object",
+        "properties": {
+          "summary": { "type": "string", "maxLength": 300 },
+          "planDelta": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "safeToSpendCents": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "Integer cents"
+                  }
+                },
+                "required": ["safeToSpendCents"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["summary", "planDelta"],
+        "additionalProperties": false
+      },
+      "ReviewItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "source": { "type": "string", "enum": ["email", "csv"] },
+          "state": {
+            "type": "string",
+            "enum": ["queued", "auto_applied", "confirmed", "edited", "ignored", "expired"]
+          },
+          "matchType": { "type": "string", "enum": ["new", "update", "decision", "duplicate"] },
+          "matchItemId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "message": { "anyOf": [{ "$ref": "#/components/schemas/ReviewMessage" }, { "type": "null" }] },
+          "fields": { "$ref": "#/components/schemas/ExtractedFields" },
+          "evidence": { "type": "array", "items": { "$ref": "#/components/schemas/EvidenceQuote" } },
+          "evidenceStale": { "type": "boolean" },
+          "effect": { "$ref": "#/components/schemas/ReviewEffect" },
+          "decidedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decidedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "appliedChangeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "state",
+          "matchType",
+          "matchItemId",
+          "message",
+          "fields",
+          "evidence",
+          "evidenceStale",
+          "effect",
+          "decidedBy",
+          "decidedAt",
+          "appliedChangeId",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ReviewItemPage": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/ReviewItem" } },
+          "nextCursor": { "type": ["string", "null"] }
+        },
+        "required": ["data", "nextCursor"],
+        "additionalProperties": false
+      },
+      "EditReviewItem": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "object",
+            "properties": {
+              "docType": {
+                "type": "string",
+                "enum": [
+                  "bill",
+                  "statement",
+                  "renewal_notice",
+                  "price_change",
+                  "receipt",
+                  "enrollment_deadline",
+                  "payment_confirmation",
+                  "irrelevant"
+                ]
+              },
+              "providerName": {
+                "anyOf": [{ "type": "string", "minLength": 1, "maxLength": 120 }, { "type": "null" }]
+              },
+              "category": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "housing",
+                      "utilities",
+                      "childcare",
+                      "transport",
+                      "debt",
+                      "subscription",
+                      "insurance",
+                      "membership",
+                      "vehicle_home",
+                      "income",
+                      "other"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "insuranceType": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "motorcycle",
+                      "health",
+                      "dental",
+                      "home",
+                      "renters",
+                      "life",
+                      "pet",
+                      "other"
+                    ]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "amountDueCents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000000,
+                    "description": "Integer cents"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "previousAmountCents": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100000000000,
+                    "description": "Integer cents"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "dueDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "renewalDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "cancelByDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "decisionByDate": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "frequency": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": ["monthly", "every_2_months", "quarterly", "every_6_months", "yearly", "one_time"]
+                  },
+                  { "type": "null" }
+                ]
+              },
+              "autoRenews": { "type": ["boolean", "null"] },
+              "accountLast4": {
+                "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{1,4}$" }, { "type": "null" }]
+              },
+              "providerDomain": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 120,
+                    "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["fields"],
+        "additionalProperties": false
+      },
+      "AppliedChange": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "origin": { "type": "string", "enum": ["email", "csv", "proposal", "user", "engine"] },
+          "entityType": { "type": "string" },
+          "entityId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "entityName": { "type": ["string", "null"] },
+          "before": {
+            "anyOf": [
+              { "type": "object", "propertyNames": { "type": "string" }, "additionalProperties": {} },
+              { "type": "null" }
+            ]
+          },
+          "after": { "type": "object", "propertyNames": { "type": "string" }, "additionalProperties": {} },
+          "appliedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "undoUntil": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "undoneAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "undoneBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "undoable": { "type": "boolean" }
+        },
+        "required": [
+          "id",
+          "origin",
+          "entityType",
+          "entityId",
+          "entityName",
+          "before",
+          "after",
+          "appliedBy",
+          "appliedAt",
+          "undoUntil",
+          "undoneAt",
+          "undoneBy",
+          "undoable"
+        ],
+        "additionalProperties": false
+      },
+      "AppliedChangePage": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/AppliedChange" } },
+          "nextCursor": { "type": ["string", "null"] }
+        },
+        "required": ["data", "nextCursor"],
+        "additionalProperties": false
+      },
+      "ReviewDecision": {
+        "type": "object",
+        "properties": {
+          "item": { "$ref": "#/components/schemas/ReviewItem" },
+          "appliedChange": {
+            "anyOf": [{ "$ref": "#/components/schemas/AppliedChange" }, { "type": "null" }]
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "safeToSpendCents": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "Integer cents"
+                  }
+                },
+                "required": ["safeToSpendCents"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["item", "appliedChange", "plan"],
+        "additionalProperties": false
+      },
+      "SenderRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 120,
+            "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+          },
+          "rule": { "type": "string", "enum": ["watch", "ignore"] },
+          "categoryHint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "housing",
+                  "utilities",
+                  "childcare",
+                  "transport",
+                  "debt",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "vehicle_home",
+                  "income",
+                  "other"
+                ]
+              },
+              { "type": "null" }
+            ]
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["id", "domain", "rule", "categoryHint", "createdBy"],
+        "additionalProperties": false
+      },
+      "PutSenderRule": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "maxLength": 120,
+            "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+          },
+          "rule": { "type": "string", "enum": ["watch", "ignore"] },
+          "categoryHint": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "housing",
+                  "utilities",
+                  "childcare",
+                  "transport",
+                  "debt",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "vehicle_home",
+                  "income",
+                  "other"
+                ]
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["domain", "rule"],
+        "additionalProperties": false
+      },
+      "SenderRuleList": {
+        "type": "object",
+        "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/SenderRule" } } },
+        "required": ["data"],
+        "additionalProperties": false
       }
     }
   },
@@ -6863,6 +8172,430 @@
             "content": {
               "application/json": { "schema": { "$ref": "#/components/schemas/RenewalsSummary" } }
             }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/review-items": {
+      "get": {
+        "summary": "Review queue (email and CSV extractions)",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": {
+              "default": "queued",
+              "type": "string",
+              "enum": ["queued", "auto_applied", "confirmed", "edited", "ignored", "expired"]
+            },
+            "in": "query",
+            "name": "state",
+            "required": false
+          },
+          {
+            "schema": { "default": 50, "type": "integer", "minimum": 1, "maximum": 100 },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "minLength": 1, "maxLength": 512 },
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewItemPage" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/review-items/{id}": {
+      "get": {
+        "summary": "One review item",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewItem" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/review-items/{id}/confirm": {
+      "post": {
+        "summary": "Confirm: apply the extracted change",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewDecision" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/review-items/{id}/edit": {
+      "post": {
+        "summary": "Edit the extracted fields, then apply",
+        "tags": ["review"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/EditReviewItemInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewDecision" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/review-items/{id}/ignore": {
+      "post": {
+        "summary": "Ignore: nothing changes",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewDecision" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/applied-changes": {
+      "get": {
+        "summary": "Applied automatically and confirmed changes, newest first",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": { "default": 50, "type": "integer", "minimum": 1, "maximum": 100 },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "minLength": 1, "maxLength": 512 },
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/AppliedChangePage" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/applied-changes/{id}/undo": {
+      "post": {
+        "summary": "Undo a change within its 30-day window",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppliedChange" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/sender-rules": {
+      "get": {
+        "summary": "The household's watch and ignore sender rules",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SenderRuleList" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Watch or ignore a sender domain (changes the rule when the domain already has one)",
+        "tags": ["review"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PutSenderRuleInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SenderRule" } } }
+          },
+          "201": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SenderRule" } } }
           },
           "4XX": {
             "description": "Client error (RFC 9457 problem details)",

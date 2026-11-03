@@ -209,6 +209,20 @@ export async function putRenewal(
        price_changed_on = excluded.price_changed_on`);
 }
 
+export async function deleteRenewal(tx: Tx, itemId: string): Promise<void> {
+  await tx.execute(sql`delete from renewal_details where item_id = ${itemId}`);
+}
+
+export async function deleteHistoryPoint(tx: Tx, itemId: string, occurredOn: string): Promise<void> {
+  await tx.execute(sql`delete from item_amount_history
+    where item_id = ${itemId} and occurred_on = ${occurredOn}::date and source = 'manual'`);
+}
+
+/** Names the queued review item an insert is made for, for this transaction only (policy `recurring_items_api_insert_review`). */
+export async function allowReviewInsert(tx: Tx, reviewItemId: string): Promise<void> {
+  await tx.execute(sql`select set_config('app.review_item_id', ${reviewItemId}, true)`);
+}
+
 export async function listHistory(tx: Tx, itemId: string) {
   const res =
     await tx.execute(sql`select id, occurred_on::text as occurred_on, amount_cents::text as amount_cents, source

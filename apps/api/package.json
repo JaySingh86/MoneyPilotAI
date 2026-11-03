@@ -20,6 +20,7 @@
     "@mp/db": "workspace:*",
     "@mp/engine": "workspace:*",
     "@mp/observability": "workspace:*",
+    "@mp/review-rules": "workspace:*",
     "aws-jwt-verify": "5.2.1",
     "drizzle-orm": "^0.45.4",
     "fastify": "^5.5.0",

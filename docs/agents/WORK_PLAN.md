@@ -31,7 +31,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | done (G3 open: live eval pending) |
 | WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | done |
 | WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | in-progress (wp-builder, wp/13-goals-tasks) |
-| WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | in-progress (wp-builder, wp/14-review-queue) |
+| WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | done |
 | WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | todo |
 | WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | todo |
 | WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | in-progress (wp-builder, wp/17-web-overview) |
@@ -333,6 +333,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Use `@mp/review-rules` (WP-14) for the decide policy and apply planning, through a worker-side items-apply port with the same guards as the API; `applied_by` null, `origin` email, undo window from the shared helper.
   - [ ] Map the WP-11 snake_case extraction (fields and evidence field names) to the camelCase review contracts explicitly, with tests.
   - [ ] Run the subject through the WP-19 redactor before writing `extracted_items.message_meta`; `domainMatch` comes only from `isDomainMatch`, and `senderFirstSeen` defaults to true on any error.
+  - [ ] The worker writes `providerDomain: null` in `extracted_items.fields` (a model-supplied domain is never trusted; only a user edit sets it), with a test.
 - **Gate:** G3 before `auto_apply` is enabled for any household.
 
 ## WP-23 · Web: Email & imports, Members & privacy, setup, review UI

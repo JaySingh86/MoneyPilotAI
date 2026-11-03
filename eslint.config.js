@@ -59,7 +59,7 @@ export default tseslint.config(
   },
   {
     // ADR-005 / hard rule 2: the engine is deterministic. asOf is always an input.
-    files: ["packages/engine/**/*.ts"],
+    files: ["packages/engine/**/*.ts", "packages/review-rules/**/*.ts"],
     rules: {
       "no-restricted-properties": [
         "error",

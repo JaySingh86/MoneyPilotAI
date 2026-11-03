@@ -68,6 +68,9 @@ importers:
       '@mp/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+      '@mp/review-rules':
+        specifier: workspace:*
+        version: link:../../packages/review-rules
       aws-jwt-verify:
         specifier: 5.2.1
         version: 5.2.1
@@ -269,6 +272,12 @@ importers:
       pino:
         specifier: ^9.5.0
         version: 9.14.0
+
+  packages/review-rules:
+    dependencies:
+      '@mp/contracts':
+        specifier: workspace:*
+        version: link:../contracts
 
   packages/ui:
     dependencies:

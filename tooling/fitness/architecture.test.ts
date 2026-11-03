@@ -39,6 +39,25 @@ describe("dependency rules (ARCHITECTURE §3)", () => {
     expect(rules).toContain("engine-npm-allowlist");
   });
 
+  it("rejects review-rules that does I/O or imports another internal package", async () => {
+    const rules = await violationsIn([`${FIX}/packages/review-rules/impure.ts`]);
+    expect(rules).toContain("review-rules-is-pure");
+    expect(rules).toContain("review-rules-no-io");
+  });
+
+  it("rejects review-rules using an npm package or a run-time import from contracts", async () => {
+    expect(await violationsIn([`${FIX}/packages/review-rules/uses-npm.ts`])).toContain(
+      "review-rules-npm-allowlist",
+    );
+    expect(await violationsIn([`${FIX}/packages/review-rules/runtime-contracts.ts`])).toContain(
+      "review-rules-contracts-types-only",
+    );
+  });
+
+  it("lets review-rules import types from contracts", async () => {
+    expect(await violationsIn([`${FIX}/packages/review-rules/types-only.ts`])).toEqual([]);
+  });
+
   it("rejects adapters importing each other", async () => {
     expect(await violationsIn([`${FIX}/packages/ai/src/imports-db.ts`])).toContain("adapters-isolated");
   });

@@ -10,6 +10,9 @@ const ADAPTERS = "db|email|ai|notify|billing|bank|crypto";
 // Third-party packages the pure engine may use (ADR-006, ADR-007). Extend only with an ADR.
 const ENGINE_NPM_ALLOWLIST = ["@js-temporal/polyfill", "rrule"];
 
+// npm packages the pure review-rules package may use in production code (none today).
+const REVIEW_RULES_NPM_ALLOWLIST = [];
+
 module.exports = {
   forbidden: [
     {
@@ -84,6 +87,41 @@ module.exports = {
       severity: "error",
       from: { pathNot: ["\\.test\\.ts$", "(^|/)packages/engine/src/testing/", "(^|/)packages/[a-z]+/test/"] },
       to: { path: "(^|/)packages/engine/src/testing/" },
+    },
+    {
+      name: "review-rules-is-pure",
+      comment:
+        "packages/review-rules must not import apps or other internal packages. It shares the auto-apply policy " +
+        "between api and worker, so it may only use TYPES from packages/contracts (see the next rule).",
+      severity: "error",
+      from: { path: pkg("review-rules") },
+      to: { path: ["(^|/)packages/(?!review-rules/|contracts/)", "(^|/)apps/"] },
+    },
+    {
+      name: "review-rules-contracts-types-only",
+      comment: "packages/review-rules imports only types from packages/contracts (no run-time dependency).",
+      severity: "error",
+      from: { path: pkg("review-rules") },
+      to: { path: pkg("contracts"), dependencyTypesNot: ["type-only"] },
+    },
+    {
+      name: "review-rules-no-io",
+      comment: "packages/review-rules must not import any Node core module (no I/O, clock, randomness).",
+      severity: "error",
+      from: { path: pkg("review-rules"), pathNot: "\\.test\\.ts$" },
+      to: { dependencyTypes: ["core"] },
+    },
+    {
+      name: "review-rules-npm-allowlist",
+      comment: `packages/review-rules may use no npm packages in production code (allowlist: ${REVIEW_RULES_NPM_ALLOWLIST.length === 0 ? "none" : REVIEW_RULES_NPM_ALLOWLIST.join(", ")}). Extend only with an ADR.`,
+      severity: "error",
+      from: { path: pkg("review-rules"), pathNot: "\\.test\\.ts$" },
+      to: {
+        dependencyTypes: ["npm", "npm-dev", "npm-optional", "npm-peer", "npm-no-pkg", "npm-unknown"],
+        pathNot: REVIEW_RULES_NPM_ALLOWLIST.length
+          ? `node_modules/(${REVIEW_RULES_NPM_ALLOWLIST.map((p) => p.replace("/", "\\/")).join("|")})/`
+          : "^$",
+      },
     },
     {
       name: "packages-never-import-apps",

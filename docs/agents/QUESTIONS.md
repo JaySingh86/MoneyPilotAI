@@ -14,6 +14,61 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-126 · WP-14 · Consented eval feed from edited review items
+- Asked by: wp-builder/wp/14-review-queue · 2026-11-03
+- Where: BACKEND_PLAN §8.2 (`edit` "feeds eval data (with consent)"); BACKEND_PLAN §7.9 (evals); G3
+- Question: An edit now keeps the original extraction in `extracted_items.original_fields` and marks `evidence_stale`, so the corrected values and what the model produced are both available. The feed itself is not built: which household setting records consent, what is copied (fields only, never the subject or evidence quotes), where it goes (the eval dataset in `packages/ai`), how long it is kept, and whether it is redacted again. Decide at G3.
+- Options considered: (a) opt-in household setting, fields and doc type only, redacted, 90 days; (b) no feed until a separate consent flow exists.
+- Blocking: no.
+- Answer:
+
+## Q-125 · WP-14 · Where does the auto-apply policy live, and who applies an automatic change?
+- Asked by: wp-builder/wp/14-review-queue · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (decide); ARCHITECTURE §3 (dependency rules); WORK_PLAN WP-14 / WP-22
+- Question: WP-14 owns only `apps/api/src/modules/review/**`, so the pure policy `decideExtraction` is in `apps/api/src/modules/review/decide.ts`. It takes `domainMatch: boolean` (the caller passes `isDomainMatch(match)`), because apps/api may not import `@mp/email` (rule `only-worker-touches-secrets`). Two things need a decision for WP-22: (1) may the worker import `apps/api/src/modules/review/decide.ts`, or should the policy move to a shared package (for example `packages/contracts` or a new `packages/review`)? (2) Auto-apply must edit items and write `applied_changes` as `mp_worker`, but the items service (`apps/api/src/modules/items/service.ts`) is bound to `ApiDb`. Should WP-22 get a worker-side port of that apply path, or should the items rules move into a shared package?
+- Options considered: (a) leave as is and let WP-22 import across apps (no depcruise rule forbids worker to api); (b) move policy and apply planning (`decide.ts`, `apply.ts`) to a package; (c) worker enqueues an API call with a service token.
+- Blocking: no. The policy is implemented and tested; `applied_changes` and `extracted_items` already grant the worker the insert and update it needs.
+- Answer: Answered (tech lead for owner, 2026-11-03): (b). The policy and the pure apply planning live in `packages/review-rules` (`@mp/review-rules`), a pure package like the engine (types-only imports from contracts, enforced by dependency-cruiser and a fitness test). apps/api uses it now; WP-22's worker uses it through a worker-side items-apply port with the same guards.
+
+## Q-124 · WP-14 · Source of items created from a confirmed email
+- Asked by: wp-builder/wp/14-review-queue · 2026-11-03
+- Where: BACKEND_PLAN §5.2 (`recurring_items.source`); migration `202610281300_wp06_items-schedules.sql` (insert policy)
+- Question: Confirming a `new` extraction creates an item through the WP-06 items service. The mp_api insert policy forces `source = 'manual'`, so the item is not marked `email` (or `csv`). The owner is the person who confirmed. Is that right, or should a confirmed email item carry `source = 'email'` (needs a policy change so mp_api may insert `email`/`csv` when it comes from a confirm) and should the owner be asked for?
+- Options considered: (a) keep `manual` and the confirmer as owner (implemented); (b) widen the policy and set the source; (c) add `ownerUserId` to the edit body.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): the source comes from the server, never the client. mp_api's general insert policy stays manual-only; a second policy lets it insert an `email`/`csv` item only inside a decision about a still-queued extracted item of the same household and the same source. The confirmer stays the owner.
+
+## Q-123 · WP-14 · Hard-coded rules for turning an extraction into a new item
+- Asked by: wp-builder/wp/14-review-queue · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (extraction schema), §5.2 (`recurring_items`)
+- Question: The spec says what is queued but not how a confirmed `new` item is built. `apply.ts` (`itemFromFields`) uses: name = provider name; due date (else renewal date) = schedule start; frequency maps to a schedule (monthly, every 2 months, quarterly, every 6 months, yearly; `one_time` is yearly ending the same day); a missing name, date or frequency asks the user to edit instead of guessing; category `debt` becomes kind `loan`, `income` becomes an inflow; amount type is `statement` for bills and statements, `fixed` for notices, `estimated` when there is no amount. Please confirm or correct.
+- Options considered: as listed.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): approved as written. Fixtures added for the debt to loan and income mappings.
+
+## Q-122 · WP-14 · Undo cannot delete a renewal record or an amount-history point
+- Asked by: wp-builder/wp/14-review-queue · 2026-11-03
+- Where: BACKEND_PLAN §8.2 (`PUT …/renewal`, `GET …/history`); `apps/api/src/modules/items/service.ts`
+- Question: Undo restores values through the items service, which can set renewal details but not remove them, and `patchOccurrence` adds an amount-history point when an actual amount is set. After undoing a change on an item that had no renewal, it keeps an empty renewal record (it would list in Subscriptions & renewals with no dates), and an undone actual amount stays in the item's amount history. Should WP-06 add `deleteRenewal` and a history delete (or make `putRenewal` accept null to clear)?
+- Options considered: (a) accept the leftovers (implemented); (b) add the two operations to the items service.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): (b). `deleteRenewal` and `deleteHistoryPoint` are added to the WP-06 items service, guarded like other partner-item writes; undo uses them and leaves no empty renewal or leftover history point.
+
+## Q-121 · WP-14 · Plan delta and number-free summary on the review card
+- Asked by: wp-builder/wp/14-review-queue · 2026-11-03
+- Where: BACKEND_PLAN §8.3 (`effect.planDelta`, `effect.summary` example "flags a $19 increase")
+- Question: `effect.planDelta.safeToSpendCents` needs a plan computed with and without the change, which needs the plan service (WP-12). It is `null` for now. `effect.summary` is built from templates without any amount (for example "Updates Renters insurance and flags a price change."), because a "$19" difference would be arithmetic on money outside `packages/engine` (hard rule 4). Should the summary carry the difference (computed by the engine and formatted by `packages/format`) once WP-12 lands?
+- Options considered: (a) null delta and no amounts (implemented); (b) engine-computed delta and increase in a follow-up.
+- Blocking: no. The card shows `fields` (new and previous amount) as they are.
+- Answer: Answered (tech lead for owner, 2026-11-03): accepted. `planDelta` stays null and the summary stays number-free. A `plan` field on the decision response is added only with WP-12/WP-23 and never computed by the review service.
+
+## Q-120 · WP-14 · `email_messages` does not exist yet, so `extracted_items.message_id` has no foreign key
+- Asked by: wp-builder/wp/14-review-queue · 2026-11-03
+- Where: BACKEND_PLAN §5.2 (`extracted_items.message_id`, `email_messages`); WORK_PLAN WP-20 owns the `email_messages` migration
+- Question: `extracted_items` references `email_messages(id)`, but that table is created by WP-20. Migrations are expand-only and cannot reference a missing table, so `message_id` is a plain uuid for now and WP-20 adds the foreign key (`on delete set null`). Also, the review payload needs the sender domain, subject and received time (§8.3 `message`), so `extracted_items.message_meta` (jsonb: `fromDomain`, `subject`, `receivedAt`) holds a copy; no body is stored. Is the denormalized `message_meta` acceptable, or should the API join `email_messages` once it exists (CSV items have no message)?
+- Options considered: (a) `message_meta` copy (implemented); (b) join `email_messages` for email and nothing for CSV.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): accepted. The WP-20 foreign key comes later; the retention purge (WP-24) nulls `message_meta`.
 ## Q-107 · WP-12 · An estimated item with no amount history
 - Asked by: wp-builder/wp/12-planning-api · 2026-11-03
 - Where: `packages/db/src/planning/engine-input.ts`; engine `validateInput` ("an estimated amount needs history"); contracts `CreateItem` (only `fixed` requires `amountCents`)

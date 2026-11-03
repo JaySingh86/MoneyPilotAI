@@ -1,0 +1,17 @@
+{
+  "name": "@mp/review-rules",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure auto-apply policy and apply planning for the review queue (BACKEND_PLAN §7.8.2). No I/O, no clock, no randomness. Shared by apps/api and apps/worker. Built in WP-14.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mp/contracts": "workspace:*"
+  }
+}

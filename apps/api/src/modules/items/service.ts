@@ -135,9 +135,25 @@ export async function getItem(deps: ItemsDeps, a: Actor, id: string): Promise<It
   });
 }
 
-export async function createItem(deps: ItemsDeps, a: Actor, body: CreateItem): Promise<Item> {
+/**
+ * The queued review item an item is being created from (WP-14, Q-124). The server reads `source` from the
+ * extracted item itself; a client never names a source. The database re-checks it (policy
+ * `recurring_items_api_insert_review`: same household, still queued, same source).
+ */
+export interface CreatedFromReview {
+  reviewItemId: string;
+  source: "email" | "csv";
+}
+
+export async function createItem(
+  deps: ItemsDeps,
+  a: Actor,
+  body: CreateItem,
+  fromReview?: CreatedFromReview,
+): Promise<Item> {
   return inTx(deps, a, async (tx) => {
     await checkOwner(tx, a, body.ownerType, body.ownerUserId);
+    if (fromReview) await repo.allowReviewInsert(tx, fromReview.reviewItemId);
     const id = await repo.insertItem(tx, a.householdId, a.userId, {
       direction: body.direction,
       kind: body.kind,
@@ -152,7 +168,7 @@ export async function createItem(deps: ItemsDeps, a: Actor, body: CreateItem): P
       owner_type: body.ownerType,
       owner_user_id: body.ownerUserId ?? null,
       status: body.status,
-      source: "manual",
+      source: fromReview?.source ?? "manual",
       account_last4: body.accountLast4 ?? null,
       paid_from: body.paidFrom,
       marked_possibly_unused: body.markedPossiblyUnused,
@@ -310,6 +326,36 @@ export async function putRenewal(
     const item = await repo.getItem(tx, a.householdId, id);
     if (!item) throw notFound("Item");
     return item;
+  });
+}
+
+/**
+ * Removes the renewal details of an item (WP-14 undo, Q-122). Guarded like other writes to the partner's item:
+ * the other member's item needs their approval.
+ */
+export async function deleteRenewal(deps: ItemsDeps, a: Actor, id: string): Promise<void> {
+  await inTx(deps, a, async (tx) => {
+    const current = await repo.getItem(tx, a.householdId, id, true);
+    if (!current) throw notFound("Item");
+    if (ownedByPartner(current, a.userId)) throw approvalRequired();
+    await repo.deleteRenewal(tx, id);
+    await repo.audit(tx, a.householdId, a.userId, "item.renewal_deleted", "item", id);
+  });
+}
+
+/** Removes the hand-entered amount-history point of a date (WP-14 undo of an actual amount, Q-122). */
+export async function deleteHistoryPoint(
+  deps: ItemsDeps,
+  a: Actor,
+  id: string,
+  occurredOn: string,
+): Promise<void> {
+  await inTx(deps, a, async (tx) => {
+    const current = await repo.getItem(tx, a.householdId, id, true);
+    if (!current) throw notFound("Item");
+    if (ownedByPartner(current, a.userId)) throw approvalRequired();
+    await repo.deleteHistoryPoint(tx, id, occurredOn);
+    await repo.audit(tx, a.householdId, a.userId, "item.history_point_deleted", "item", id);
   });
 }
 
