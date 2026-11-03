@@ -14,13 +14,16 @@ export interface ItemsWorldRows {
   goalId: string;
   itemId: string;
   occurrenceId: string;
+  goalEventId: string;
+  proposalId: string;
+  taskId: string;
 }
 
 export async function seedItemsWorld(db: ApiDb, hh: Seeded): Promise<ItemsWorldRows> {
   const goalId = randomUUID();
   const itemId = randomUUID();
   const ctx = { userId: hh.creator.id, householdId: hh.id };
-  // mp_api cannot write goals until WP-13 (Q-050); the worker role creates the victim goal.
+  // The victim goal is created by the worker role (as the seed does).
   const worker = createWorkerDb({ connectionString: inject("workerDatabaseUrl"), max: 1 });
   try {
     await worker.withJobTx(hh.id, (tx) =>
@@ -54,5 +57,28 @@ export async function seedItemsWorld(db: ApiDb, hh: Seeded): Promise<ItemsWorldR
     if (!id) throw new Error("occurrence insert returned no id");
     return id;
   });
-  return { goalId, itemId, occurrenceId };
+  // WP-13 rows, written the way the API writes them.
+  const wp13 = await db.withHouseholdTx(ctx, async (tx) => {
+    const event = await tx.execute<{ id: string }>(sql`insert into goal_events
+        (household_id, goal_id, kind, amount_cents, occurred_on, recorded_by)
+      values (${hh.id}, ${goalId}, 'deposit', 30000, '2026-10-06', ${hh.creator.id}) returning id`);
+    const proposal = await tx.execute<{ id: string }>(sql`insert into proposals
+        (household_id, kind, payload, proposed_by, expires_at)
+      values (${hh.id}, 'goal_change',
+        ${JSON.stringify({ type: "goal_delete", goalId, goalName: "Emergency fund" })}::jsonb, ${hh.creator.id},
+        now() + interval '7 days') returning id`);
+    const task = await tx.execute<{ id: string }>(sql`insert into tasks
+        (household_id, title, owner_type, due_on, linked_item_id, source, created_by)
+      values (${hh.id}, 'Review rent', 'both', '2026-11-02', ${itemId}, 'user', ${hh.creator.id}) returning id`);
+    return { goalEventId: event.rows[0]?.id, proposalId: proposal.rows[0]?.id, taskId: task.rows[0]?.id };
+  });
+  if (!wp13.goalEventId || !wp13.proposalId || !wp13.taskId) throw new Error("WP-13 world insert failed");
+  return {
+    goalId,
+    itemId,
+    occurrenceId,
+    goalEventId: wp13.goalEventId,
+    proposalId: wp13.proposalId,
+    taskId: wp13.taskId,
+  };
 }

@@ -7,8 +7,10 @@ import { createApiDb, type ApiDb } from "@mp/db";
 import { buildServer, type ApiServer } from "../../server";
 import { createHouseholdsModule } from "../../modules/households";
 import { createIdentityModule } from "../../modules/identity";
+import { createWp13Modules } from "../../modules/goals";
 import { createItemsModule } from "../../modules/items";
 import { createPlanningModule } from "../../modules/planning";
+import { tasksSummaryBadges } from "../../modules/tasks/badges";
 import { createAuthenticator } from "../authenticator";
 import { createCognitoProvider } from "../cognito";
 import type { ApiRuntime, InviteSender } from "../runtime";
@@ -47,7 +49,13 @@ export interface TestUser {
   headers: Record<string, string>;
 }
 
-export async function createTestApi(): Promise<TestApi> {
+export interface TestApiOptions {
+  /** The API clock (UTC instant). Default: the fixture date, 2026-10-27. */
+  now?: () => string;
+}
+
+export async function createTestApi(options: TestApiOptions = {}): Promise<TestApi> {
+  const now = options.now ?? (() => "2026-10-27T16:00:00Z");
   const issuer = await FakeIssuer.create();
   const db = createApiDb({ connectionString: inject("apiDatabaseUrl"), max: 4 });
   const provider = createCognitoProvider(issuer.cognitoConfig());
@@ -72,9 +80,10 @@ export async function createTestApi(): Promise<TestApi> {
     authenticate: createAuthenticator({ provider, db }),
     modules: [
       createIdentityModule(() => rt),
-      createHouseholdsModule(() => rt),
-      createItemsModule(() => rt, { now: () => "2026-10-27T16:00:00Z" }),
-      createPlanningModule(() => rt, { now: () => "2026-10-27T16:00:00Z" }),
+      createHouseholdsModule(() => rt, undefined, tasksSummaryBadges(now)),
+      createItemsModule(() => rt, { now }),
+      ...createWp13Modules(() => rt, { now }),
+      createPlanningModule(() => rt, { now }),
     ],
   });
   await app.ready();

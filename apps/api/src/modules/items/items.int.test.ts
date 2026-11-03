@@ -9,6 +9,7 @@ import { createWorkerDb, type WorkerDb } from "@mp/db";
 import { planningUuid, seedFixture, seedPlanning, type SeedResult } from "@mp/db/testing";
 import { createTestApi, key as idemKey, type TestApi, type TestUser } from "../../auth/testing/app";
 import { expectProblem } from "../../lib/testing";
+import type { LightMyRequestResponse } from "fastify";
 
 let t: TestApi;
 let worker: WorkerDb;
@@ -49,6 +50,23 @@ afterAll(async () => {
 });
 
 const key = idemKey;
+
+/** A change to the partner's item is not applied: 202 with a pending proposal (WP-13, BACKEND_PLAN §7.3). */
+async function expectProposal(
+  res: LightMyRequestResponse,
+): Promise<{ id: string; payload: { type: string } }> {
+  expect(res.statusCode, res.body).toBe(202);
+  const body = res.json() as { id: string; status: string; payload: { type: string } };
+  expect(body.status).toBe("pending");
+  // One pending proposal per target (M4): decide it, as the other member, so the next case can ask again.
+  const proposer = (res.json() as { proposedBy: string }).proposedBy;
+  await app.inject({
+    method: "POST",
+    url: `${base()}/proposals/${body.id}/reject`,
+    headers: { ...(proposer === SAM() ? jordan() : sam()), ...key() },
+  });
+  return body;
+}
 
 const newBill = (over: Record<string, unknown> = {}) => ({
   direction: "outflow",
@@ -509,7 +527,7 @@ describe("tenant isolation", () => {
 });
 
 // ===== G1 round: M-1 interim approval guard, L-3, source, household primary income, leave =====
-describe("M-1: the other member's item needs approval until proposals exist (WP-13)", () => {
+describe("M-1: the other member's item needs approval (a proposal, WP-13)", () => {
   const etag = async (headers: Record<string, string>, id: string) =>
     (await app.inject({ method: "GET", url: `${base()}/items/${id}`, headers })).headers.etag as string;
   const patchItem = async (headers: Record<string, string>, id: string, payload: object) =>
@@ -542,27 +560,19 @@ describe("M-1: the other member's item needs approval until proposals exist (WP-
 
   describe.each(directions)("%s", (_name, actor, itemId, actorId) => {
     it("cannot delete it, change its owner or status", async () => {
-      expectProblem(
+      await expectProposal(
         await app.inject({ method: "DELETE", url: `${base()}/items/${itemId()}`, headers: actor() }),
-        403,
-        "approval_required",
       );
-      expectProblem(
-        await patchItem(actor(), itemId(), { ownerType: "both", ownerUserId: null }),
-        403,
-        "approval_required",
-      );
-      expectProblem(await patchItem(actor(), itemId(), { status: "paused" }), 403, "approval_required");
-      expectProblem(
+      await expectProposal(await patchItem(actor(), itemId(), { ownerType: "both", ownerUserId: null }));
+      await expectProposal(await patchItem(actor(), itemId(), { status: "paused" }));
+      await expectProposal(
         await patchItem(actor(), itemId(), { ownerType: "member", ownerUserId: actorId() }),
-        403,
-        "approval_required",
       );
     });
 
     it("cannot move one of its occurrences, but can mark it paid and edit its notes", async () => {
       const o = await firstOccurrence(actor(), itemId());
-      expectProblem(await move(actor(), o, "2026-11-25"), 403, "approval_required");
+      await expectProposal(await move(actor(), o, "2026-11-25"));
       const paid = await app.inject({
         method: "PATCH",
         url: `${base()}/occurrences/${o.id}`,
@@ -790,7 +800,7 @@ describe("leave: the leaver's items go to the remaining member (LeaveHooks.reass
   });
 });
 
-describe("M-1 round 2: schedule, skip and planned expenses of the partner's items", () => {
+describe("M-1 round 2: schedule, skip and planned expenses of the partner's items become proposals", () => {
   const getEtag = async (headers: Record<string, string>, url: string) =>
     (await app.inject({ method: "GET", url, headers })).headers.etag as string;
   const patchItem = async (headers: Record<string, string>, id: string, payload: object) =>
@@ -812,18 +822,12 @@ describe("M-1 round 2: schedule, skip and planned expenses of the partner's item
     it("cannot change its schedule or weekend rule, but a no-op PATCH of the same values works", async () => {
       const before = await getItem(actor(), itemId());
       expect(before.ownerUserId).toBe(ownerId());
-      expectProblem(
+      await expectProposal(
         await patchItem(actor(), itemId(), {
           schedule: { ...before.schedule, type: "monthly_day", day: 28 },
         }),
-        403,
-        "approval_required",
       );
-      expectProblem(
-        await patchItem(actor(), itemId(), { weekendRule: "next_business_day" }),
-        403,
-        "approval_required",
-      );
+      await expectProposal(await patchItem(actor(), itemId(), { weekendRule: "next_business_day" }));
       const same = await patchItem(actor(), itemId(), {
         schedule: before.schedule,
         weekendRule: before.weekendRule,
@@ -849,7 +853,7 @@ describe("M-1 round 2: schedule, skip and planned expenses of the partner's item
           headers: { ...actor(), "if-match": `"${o?.version}"` },
           payload,
         });
-      expectProblem(await patch(first, { status: "skipped" }), 403, "approval_required");
+      await expectProposal(await patch(first, { status: "skipped" }));
       expect((await patch(second, { status: "paid" })).statusCode).toBe(200);
     });
   });
@@ -906,17 +910,11 @@ describe("M-1 round 2: schedule, skip and planned expenses of the partner's item
 
     it("cannot delete it, change its owner, or move its date; other edits work", async () => {
       const p = await create();
-      expectProblem(
+      await expectProposal(
         await app.inject({ method: "DELETE", url: `${base()}/planned-expenses/${p.id}`, headers: actor() }),
-        403,
-        "approval_required",
       );
-      expectProblem(
-        await patch(p.id, p.version, { ownerType: "both", ownerUserId: null }),
-        403,
-        "approval_required",
-      );
-      expectProblem(await patch(p.id, p.version, { dueOn: "2026-12-05" }), 403, "approval_required");
+      await expectProposal(await patch(p.id, p.version, { ownerType: "both", ownerUserId: null }));
+      await expectProposal(await patch(p.id, p.version, { dueOn: "2026-12-05" }));
       const ok = await patch(p.id, p.version, { name: "Dentist (copay)", dueOn: "2026-11-20" });
       expect(ok.statusCode, ok.body).toBe(200);
     });

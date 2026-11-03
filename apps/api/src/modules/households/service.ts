@@ -42,6 +42,23 @@ export const noopLeaveHooks: LeaveHooks = {
   async revokeEmailConnections() {},
 };
 
+/**
+ * Nav badge counts that other modules own (BACKEND_PLAN §7.4, §8.2). Filled in by the tasks module (WP-13);
+ * the review queue count (`reviewQueue`) stays zero until WP-14.
+ */
+export interface SummaryBadges {
+  counts(
+    tx: Tx,
+    input: { householdId: string; userId: string; timezone: string },
+  ): Promise<{ tasksDue: number; proposalsPending: number }>;
+}
+
+export const zeroBadges: SummaryBadges = {
+  async counts() {
+    return { tasksDue: 0, proposalsPending: 0 };
+  },
+};
+
 /** Invites one user may create per rolling 24 hours (BACKEND_PLAN §6). */
 export const DAILY_INVITE_LIMIT = 5;
 
@@ -138,6 +155,7 @@ export class HouseholdService {
     private readonly db: ApiDb,
     private readonly inviteSender: InviteSender,
     private readonly hooks: LeaveHooks = noopLeaveHooks,
+    private readonly badges: SummaryBadges = zeroBadges,
   ) {}
 
   private ctx(caller: CallerContext, householdId: string | null): ApiContext {
@@ -253,6 +271,11 @@ export class HouseholdService {
       if (!household) throw notFound();
       const members = await repo.listActiveMembers(tx, householdId);
       const open = await repo.findOpenInvite(tx, householdId);
+      const counts = await this.badges.counts(tx, {
+        householdId,
+        userId: caller.userId,
+        timezone: household.timezone,
+      });
       return {
         household: toHousehold(household),
         members: members.map((m) => ({
@@ -264,8 +287,8 @@ export class HouseholdService {
           joinedAt: m.joinedAt.toISOString(),
         })),
         openInvite: open ? toInvite(open) : null,
-        // Stubbed until the review queue, tasks and proposals modules land.
-        badges: { reviewQueue: 0, tasksDue: 0, proposalsPending: 0 },
+        // The review queue count is stubbed until WP-14; tasks and proposals come from WP-13.
+        badges: { reviewQueue: 0, tasksDue: counts.tasksDue, proposalsPending: counts.proposalsPending },
         entitlements: { plan: household.plan, maxAdults: MAX_ADULTS },
         // Stubbed until WP-21 (email connections).
         connections: { emailConnections: 0 },

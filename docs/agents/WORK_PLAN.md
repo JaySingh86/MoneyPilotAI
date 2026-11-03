@@ -30,7 +30,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | done |
 | WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | done (G3 open: live eval pending) |
 | WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | done |
-| WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | in-progress (wp-builder, wp/13-goals-tasks) |
+| WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | done |
 | WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | done |
 | WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | todo |
 | WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | todo |
@@ -240,7 +240,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] The nightly occurrence sweep is registered in pg-boss and fans out with `app_list_household_ids()` (WP-06, Q-051).
 
 ## WP-13 · Goals, proposals, tasks
-- **Owns:** `apps/api/src/modules/{goals,tasks}/**`, `apps/worker/src/jobs/{proposals,tasks}/**`, related migrations and contracts.
+- **Owns:** `apps/api/src/modules/{goals,tasks,proposals}/**`, `apps/worker/src/jobs/{proposals,tasks}/**`, related migrations and contracts.
 - **Read first:** BACKEND_PLAN §7.3, §7.4; ARCHITECTURE §4.5; DESIGN_SPEC §5.1 Goals and Tasks.
 - **Acceptance:**
   - [ ] A proposer can’t approve their own proposal; a stale proposal becomes `superseded`; proposals expire after 7 days.

@@ -12,6 +12,7 @@ import { expandSchedule, parseDate, scheduleToRRule, type Schedule, type Weekday
 import { materializeHousehold } from "../items/materialize";
 import type { ApiDb, Tx, WorkerDb } from "../tx";
 import { fixtureUuid, type SeedResult } from "./rivera";
+import { seedTasks } from "./tasks";
 
 /**
  * Deterministic id of a seeded row, scoped to the household so two seeded households (for example in
@@ -445,7 +446,10 @@ export async function seedPlanning(
     );
     return res.rows[0];
   });
-  if (state?.primary_income_item_id) return { created: false, items: 0, occurrences: 0 };
+  if (state?.primary_income_item_id) {
+    await seedTasks(dbs.worker, seeded, fixture, userIdForMember, planningUuid);
+    return { created: false, items: 0, occurrences: 0 };
+  }
   if (Number(state?.items ?? 0) > 0) {
     throw new Error("The household is partly seeded; reset the database and seed again.");
   }
@@ -466,7 +470,7 @@ export async function seedPlanning(
          ${creatorId})`);
   });
 
-  return dbs.api.withHouseholdTx(creatorCtx, async (tx) => {
+  const result = await dbs.api.withHouseholdTx(creatorCtx, async (tx) => {
     for (const p of plan.plannedExpenses) {
       const isMember = p.owner !== "both" && p.owner !== "split";
       await tx.execute(sql`insert into planned_expenses
@@ -485,4 +489,6 @@ export async function seedPlanning(
       where id = ${householdId}`);
     return { created: true, items: plan.items.length, occurrences: materialized.inserted };
   });
+  await seedTasks(dbs.worker, seeded, fixture, userIdForMember, planningUuid);
+  return result;
 }

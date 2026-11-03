@@ -5,6 +5,7 @@
 // run `pnpm contracts:gen` and commit the regenerated files in packages/contracts/src/openapi.
 import type { ApiModule } from "../lib/module";
 import { identityModules } from "./identity";
+import { wp13Modules } from "./goals";
 import { itemsModule } from "./items";
 import { planningModule } from "./planning";
 import { reviewModule } from "./review";
@@ -15,4 +16,5 @@ export const modules: readonly ApiModule[] = [
   itemsModule,
   planningModule, // WP-12: plan, what-if, calendar, renewals
   reviewModule, // WP-14
+  ...wp13Modules, // WP-13: goals, proposals, tasks
 ];

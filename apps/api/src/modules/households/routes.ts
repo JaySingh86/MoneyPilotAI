@@ -18,7 +18,14 @@ import type { RuntimeSource } from "../../auth/runtime";
 import { requireIfMatch, setVersionTag } from "../../lib/if-match";
 import { requireUser, requireUserId } from "../../plugins/request-context";
 import { requestMeta } from "../identity/audit";
-import { HouseholdService, noopLeaveHooks, type CallerContext, type LeaveHooks } from "./service";
+import {
+  HouseholdService,
+  noopLeaveHooks,
+  zeroBadges,
+  type CallerContext,
+  type LeaveHooks,
+  type SummaryBadges,
+} from "./service";
 
 function caller(request: Parameters<typeof requireUser>[0]): CallerContext {
   const user = requireUser(request);
@@ -28,8 +35,9 @@ function caller(request: Parameters<typeof requireUser>[0]): CallerContext {
 export function householdRoutes(
   source: RuntimeSource,
   hooks: LeaveHooks = noopLeaveHooks,
+  badges: SummaryBadges = zeroBadges,
 ): FastifyPluginAsyncZod {
-  const service = () => new HouseholdService(source().db, source().inviteSender, hooks);
+  const service = () => new HouseholdService(source().db, source().inviteSender, hooks, badges);
 
   return async (scope) => {
     scope.post(

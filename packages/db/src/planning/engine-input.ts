@@ -84,6 +84,11 @@ export interface LoadOptions {
    * that has neither yet still loads, with placeholders the engine never reads for those figures.
    */
   lenient?: boolean | undefined;
+  /**
+   * Default true: no balance is `no_balance`. Goal reads (status, suggestions) don't depend on the balance
+   * and pass false; shortfall options and proposal effects keep the default (WP-13).
+   */
+  requireBalance?: boolean | undefined;
 }
 
 const RENEWAL_CATEGORIES: readonly string[] = ["insurance", "subscription", "membership", "vehicle_home"];
@@ -155,7 +160,8 @@ export async function loadEngineInput(
       from balances where household_id = ${householdId} and as_of <= ${asOf}::date
       order by as_of desc, created_at desc, id desc limit 1`)
   ).rows[0];
-  if (!balance && !options.lenient) return { ready: false, householdId, reason: "no_balance", asOf, today };
+  if (!balance && !options.lenient && options.requireBalance !== false)
+    return { ready: false, householdId, reason: "no_balance", asOf, today };
 
   const itemRows = (
     await tx.execute<Row>(sql`select i.id, i.name, i.direction, i.kind, i.category, i.amount_type,

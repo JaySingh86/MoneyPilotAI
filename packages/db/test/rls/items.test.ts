@@ -294,19 +294,15 @@ describe("G1 L-1: an item or planned expense is owned by a member of its househo
   });
 });
 
-describe("Q-050: goals are read-only for mp_api", () => {
-  it("mp_api can read goals but not insert or update them", async () => {
+describe("Q-050: goals are written through the API only after WP-13 (proposal gate in the service)", () => {
+  it("mp_api reads goals, inserts its own household's goals as itself, and never hard deletes", async () => {
     expect(
       await asA((tx) => count(tx, sql`select 1 from goals where household_id = ${world.a.id}`)),
     ).toBeGreaterThan(0);
-    await expectDenied(() =>
-      asA((tx) =>
-        tx.execute(sql`insert into goals (household_id, name, type, target_cents, created_by)
-          values (${world.a.id}, 'Mine', 'savings', 100, ${world.a.creator.id})`),
-      ),
-    );
-    await expectDenied(() =>
-      asA((tx) => tx.execute(sql`update goals set name = 'x' where id = ${rowsA.goalId}`)),
+    // WP-13 grants (see test/rls/wp13.test.ts for the full set of rules).
+    await asA((tx) =>
+      tx.execute(sql`insert into goals (household_id, name, type, target_cents, created_by)
+        values (${world.a.id}, 'Mine', 'savings', 100, ${world.a.creator.id})`),
     );
     await expectDenied(() => asA((tx) => tx.execute(sql`delete from goals where id = ${rowsA.goalId}`)));
   });

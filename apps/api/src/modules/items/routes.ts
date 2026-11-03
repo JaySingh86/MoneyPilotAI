@@ -27,6 +27,7 @@ import {
   PlannedExpense,
   PlannedExpenseList,
   PlannedExpenseListQuery,
+  Proposal,
   PutRenewalDetails,
   Uuid,
   page,
@@ -108,30 +109,32 @@ export function itemsRoutes(deps: () => ItemsDeps): FastifyPluginAsyncZod {
     scope.patch(
       "/households/:hid/items/:id",
       {
-        schema: { params: ItemParams, body: PatchItem, response: { 200: Item } },
+        schema: { params: ItemParams, body: PatchItem, response: { 200: Item, 202: Proposal } },
         config: { idempotency: "optional" },
       },
       async (request, reply) => {
         const expected = requireIfMatch(request);
-        const item = await service.patchItem(
+        const result = await service.patchItem(
           deps(),
           actor(request),
           request.params.id,
           expected,
           request.body,
         );
-        return setVersionTag(reply, item.version).send(item);
+        if ("proposal" in result) return reply.code(202).send(result.proposal);
+        return setVersionTag(reply, result.applied.version).send(result.applied);
       },
     );
 
     scope.delete(
       "/households/:hid/items/:id",
       {
-        schema: { params: ItemParams, response: { 204: z.null() } },
+        schema: { params: ItemParams, response: { 204: z.null(), 202: Proposal } },
         config: { idempotency: "optional" },
       },
       async (request, reply) => {
-        await service.deleteItem(deps(), actor(request), request.params.id);
+        const result = await service.deleteItem(deps(), actor(request), request.params.id);
+        if ("proposal" in result) return reply.code(202).send(result.proposal);
         return reply.code(204).send(null);
       },
     );
@@ -174,19 +177,24 @@ export function itemsRoutes(deps: () => ItemsDeps): FastifyPluginAsyncZod {
     scope.patch(
       "/households/:hid/occurrences/:id",
       {
-        schema: { params: OccurrenceParams, body: PatchOccurrence, response: { 200: Occurrence } },
+        schema: {
+          params: OccurrenceParams,
+          body: PatchOccurrence,
+          response: { 200: Occurrence, 202: Proposal },
+        },
         config: { idempotency: "optional" },
       },
       async (request, reply) => {
         const expected = requireIfMatch(request);
-        const occurrence = await service.patchOccurrence(
+        const result = await service.patchOccurrence(
           deps(),
           actor(request),
           request.params.id,
           expected,
           request.body,
         );
-        return setVersionTag(reply, occurrence.version).send(occurrence);
+        if ("proposal" in result) return reply.code(202).send(result.proposal);
+        return setVersionTag(reply, result.applied.version).send(result.applied);
       },
     );
 
@@ -221,30 +229,36 @@ export function itemsRoutes(deps: () => ItemsDeps): FastifyPluginAsyncZod {
     scope.patch(
       "/households/:hid/planned-expenses/:id",
       {
-        schema: { params: PlannedParams, body: PatchPlannedExpense, response: { 200: PlannedExpense } },
+        schema: {
+          params: PlannedParams,
+          body: PatchPlannedExpense,
+          response: { 200: PlannedExpense, 202: Proposal },
+        },
         config: { idempotency: "optional" },
       },
       async (request, reply) => {
         const expected = requireIfMatch(request);
-        const updated = await service.patchPlanned(
+        const result = await service.patchPlanned(
           deps(),
           actor(request),
           request.params.id,
           expected,
           request.body,
         );
-        return setVersionTag(reply, updated.version).send(updated);
+        if ("proposal" in result) return reply.code(202).send(result.proposal);
+        return setVersionTag(reply, result.applied.version).send(result.applied);
       },
     );
 
     scope.delete(
       "/households/:hid/planned-expenses/:id",
       {
-        schema: { params: PlannedParams, response: { 204: z.null() } },
+        schema: { params: PlannedParams, response: { 204: z.null(), 202: Proposal } },
         config: { idempotency: "optional" },
       },
       async (request, reply) => {
-        await service.deletePlanned(deps(), actor(request), request.params.id);
+        const result = await service.deletePlanned(deps(), actor(request), request.params.id);
+        if ("proposal" in result) return reply.code(202).send(result.proposal);
         return reply.code(204).send(null);
       },
     );

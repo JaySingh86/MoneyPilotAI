@@ -12,6 +12,7 @@ import type { ApiRuntime } from "../../auth/runtime";
 import { buildServer, type ApiServer } from "../../server";
 import { createHouseholdsModule } from "../households";
 import { createIdentityModule } from "../identity";
+import { createWp13Modules } from "../goals";
 import { createItemsModule } from "../items";
 import { createReviewModule } from "./index";
 
@@ -39,6 +40,7 @@ export async function createReviewTestApi(startNow = "2026-11-03T16:00:00Z"): Pr
       createIdentityModule(() => rt),
       createHouseholdsModule(() => rt),
       createItemsModule(() => rt, { now: clock }),
+      ...createWp13Modules(() => rt, { now: clock }),
       createReviewModule(() => rt, { now: clock }),
     ],
   });

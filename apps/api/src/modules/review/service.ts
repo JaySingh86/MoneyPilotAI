@@ -453,7 +453,16 @@ export async function undo(deps: ReviewDeps, a: Actor, id: string): Promise<Appl
     if (before === null) {
       // The change created the item: undo removes it (soft delete, like any delete), unless it is in use.
       if (await itemInUse(d, a, row.entityId)) throw gone();
-      await items.deleteItem(d, a, row.entityId).catch(notFoundAsGone);
+      const removed = await items.deleteItem(d, a, row.entityId).catch(notFoundAsGone);
+      // The other member's item would become a proposal; an undo is all or nothing, so it stays blocked (the
+      // proposal row is rolled back with this transaction).
+      if (removed && "proposal" in removed) {
+        throw new AppError(
+          "approval_required",
+          403,
+          "This item belongs to your partner. Ask them to undo this change.",
+        );
+      }
     } else {
       if (before.occurrence) {
         const day = await items.listOccurrences(

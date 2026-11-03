@@ -7,3 +7,6 @@ export * from "./households";
 export * from "./items";
 export * from "./planning";
 export * from "./review";
+export * from "./goals";
+export * from "./proposals";
+export * from "./tasks";

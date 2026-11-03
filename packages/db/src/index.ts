@@ -51,3 +51,5 @@ export {
   type PlannedOccurrence,
   type ScheduledItem,
 } from "./items/materialize";
+export { expireProposals } from "./proposals/expire";
+export { autoCompleteTasks, type AutoCompleteEvent, type AutoCompleted } from "./tasks/auto-complete";

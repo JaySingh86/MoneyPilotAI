@@ -14,6 +14,85 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-119 · WP-13 · The split's "(rest)" planned expense is attributed to the approver, not the proposer
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: Q-116 answer; `planned_expenses_api_insert` (WP-06, G1 L-1: rows the API creates are attributed to the caller)
+- Question: The tech lead asked for the "(rest)" row of an approved split to carry the proposer as `created_by`. The WP-06 insert policy only lets mp_api insert with `created_by = app_user_id()`, and the approver is the signed-in user, so the row is attributed to the approver. Relaxing the policy to "any active member of the household" would allow the attribution but weakens the G1 rule for every planned-expense insert. Which do you want?
+- Options considered: (a) keep the approver (built); (b) relax the policy to any active member; (c) a SECURITY DEFINER function that inserts on behalf of the proposer, with its own G1 sign-off.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): (a). Keep the approver as `created_by` on the split's "(rest)" row. Do not relax the insert policy or add a definer function. The proposal row records the proposer, and the audit trail links both.
+
+## Q-118 · WP-13 · Goals read needs a primary income; the error code is `conflict`, not `plan_not_ready`
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: BACKEND_PLAN §8.1 (`plan_not_ready`, added with WP-12 in e5d8cd3), WP-13 `loadEngineInput`
+- Question: Goal status needs the primary payday (deposit dates) and a plan. A household with no primary income gets 409 `conflict` ("Choose a primary income before goals can be planned") from `GET …/goals`, `…/options` and the proposal routes. WP-12 adds the code `plan_not_ready` with a `reason`. Once WP-12 is merged, should these routes throw it too (and should a goal list without a primary income instead return the goals with no engine progress)? A missing balance is not an error here: the loader uses a $0 balance as of today, since goal status does not depend on it.
+- Options considered: (a) `conflict` (built); (b) `plan_not_ready` with `reason: "no_primary_income"`; (c) list goals with `progress: null` until the household is set up.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): use `plan_not_ready` (reasons `no_primary_income` and `no_balance`), now that WP-12 has added the code. Built: goal reads need a primary income but not a balance; shortfall options and proposal effects need both.
+
+## Q-117 · WP-13 · Queue wiring for the two WP-13 jobs, and who triggers `item_reviewed`
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: BACKEND_PLAN §7.4 (auto-complete rules), §9 (`proposals.expire` hourly, `tasks.auto_complete` events), WORK_PLAN WP-12 (pg-boss registration), WP-14 (review confirm)
+- Question: The worker has no pg-boss runtime yet, so the jobs exist as handlers only: `apps/worker/src/jobs/proposals/expire.ts` and `apps/worker/src/jobs/tasks/auto-complete.ts` (singleton keys included), both calling shared functions in `@mp/db` (`expireProposals`, `autoCompleteTasks`). Registration, the hourly cron and the per-household fan-out (`app_list_household_ids()`) belong to WP-12's worker runtime. Until then the API covers both paths itself: a pending proposal past its expiry reads and behaves as `expired` (list, get, approve), and the API runs `autoCompleteTasks` in the same transaction for an actual amount typed in (`actual_amount_received`) and for a decided proposal (`proposal_decided`). The `item_reviewed` event has no trigger yet: WP-14's confirm/edit should call `autoCompleteTasks(tx, hid, { type: "item_reviewed", itemId }, userId)`, and WP-22 should enqueue `tasks.auto_complete` when an actual amount arrives by email or CSV. OK?
+- Options considered: n/a
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): accepted.
+
+## Q-116 · WP-13 · What an approved shortfall option changes
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: BACKEND_PLAN §7.3 ("a shortfall option" is a proposal), DESIGN_SPEC §5.3 (ways to cover the gap), hard rule 5 (never move money)
+- Question: What should approving each option write? Built: (1) "Move from the emergency fund" records a `withdrawal` goal event and lowers the fund's saved amount; it does not touch the account balance (the household moves the money itself and then enters the new balance, so the plan only improves after that). (2) "Move {bill} to payday" moves the next occurrence's due date (`moved_by` = the proposer). (3) "Split {expense}" lowers the planned expense to the "now" half and adds a second planned expense "{name} (rest)" on the day after payday, same owner and goal. All three are re-checked against the engine's current options at approval: if the option is gone or its numbers differ, the proposal is `superseded`. Is that the intended meaning, in particular that (1) does not create a balance row?
+- Options considered: (1) also insert a manual balance row with the amount added; rejected because it would invent a balance the household never entered.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): accepted. The split's "(rest)" row is attributed to the approver (`created_by`), the proposer being on the proposal row and in the audit trail (Q-119).
+
+## Q-115 · WP-13 · Notifications, `applied_changes` and `calc_snapshot_id` are not written
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: BACKEND_PLAN §7.3 steps 2 and 4 and §7.3 "notify Sam" on supersede; ARCHITECTURE §4.5 (`applied_changes`, `calc_snapshot_id`)
+- Question: Three pieces of the proposal flow depend on tables other packages own and are skipped: (a) the `proposal` notification to the other member, and the notification to the proposer when a proposal is superseded (the `notifications` table and delivery are WP-15); (b) the `applied_changes` row on approval (WP-14 owns that table and its undo semantics; a proposal's approval is recorded in the audit log, `proposals.decided_by` and the applied status instead); (c) `proposals.calc_snapshot_id` stays null, because the snapshot store is WP-12's. Each proposal payload carries the engine's before and after safe-to-spend instead, so the screen can show "See the math" for a proposal. WP-15, WP-14 and WP-12 should hook in at `proposals/service.ts` (create, approve, supersede). Should approval also write `applied_changes` (with an undo), or is the audit log enough for proposals?
+- Options considered: n/a
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): accepted; the notification, `applied_changes` and snapshot hooks are tracked on WP-14, WP-15 and WP-12.
+
+## Q-114 · WP-13 · Rules chosen for what counts as "stale", mixed requests and repeated proposals
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: BACKEND_PLAN §7.3 step 3 ("re-validates the payload against current data")
+- Question: Confirm the choices behind `superseded`: (1) A proposal is stale when the row it touches is gone or has a different owner, or when the stored "before" values of the guarded fields differ from the current ones (owner, status, schedule and weekend rule for an item; owner and date for a planned expense; due date and `scheduled` status for an occurrence; the monthly amount for a goal; the engine's current shortfall option for a shortfall proposal). An unrelated edit (a rename, a note) does not make it stale, and the rest of a PATCH body is applied as written. (2) A request that needs approval and also carries other fields (for example a date move plus an actual amount, or a monthly amount plus a name) is refused with 400 rather than half applied or silently dropped; the client sends them separately. (3) Nothing stops several pending proposals for the same target; the second one to be approved finds the first changed the data and is superseded. (4) A household with one adult applies goal changes directly (no one else can approve); `POST /proposals` returns 409 there. (5) Approving credits the change to the proposer (`moved_by`, `marked_by`) and records the approver as `decided_by`, in the audit log, and as the signed-in actor of the rows RLS requires to name them.
+- Options considered: version-only staleness (any edit supersedes); rejected as too noisy for a two-person household.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): items 1, 2, 4 and 5 accepted. Item 3 changed: one pending proposal per (household, payload type, target), as a partial unique index plus a friendly 409, and at most 20 pending per household. Overdue pending proposals are recorded as expired before an insert so they never block one. A failed apply that is not `Superseded` (a rule broken, an owner who left) also ends the proposal as `superseded`. Built.
+
+## Q-113 · WP-13 · Which goal edits are gated, and creating a goal with a monthly amount
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: BACKEND_PLAN §7.3 ("goal monthly amount" needs approval; renaming and your own items do not), DESIGN_SPEC §5.1 Goals ("Changes apply only after both partners approve")
+- Question: Built (`requiresApproval` in `@mp/contracts`): a change to `monthlyCents` on an existing goal is a proposal; deleting a goal that still has a monthly amount is a proposal; everything else applies at once, namely creating a goal (including with a non-zero monthly amount, since nobody else has a stake in a goal that did not exist), renaming, changing the target amount or date, the colour, archiving, and recording a deposit or withdrawal. Is a goal's target or date shared-plan impact (the suggested monthly amount follows from them), and should creating a goal with a monthly amount also be a proposal?
+- Options considered: gating target and date as well; gating creation with `monthlyCents > 0`.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): creating a goal with `monthlyCents > 0` creates it with monthly 0 plus a pending `goal_monthly` proposal (202 with both). Target and date edits stay direct, because the engine derives deposits from the monthly amount only (asserted in `wp13-fix.int.test.ts`). Archiving or restoring a goal with a monthly amount is a `goal_status` proposal. Built. Correction (security re-check): the engine skips transfers to a goal once saved >= target, so deposits do not depend on the monthly amount alone. A target change that crosses the saved amount, with a monthly amount, is a `goal_target` proposal in both directions (lowering to at most saved, raising on a reached goal), with the engine's before and after effect and a re-check on apply. Other target and date edits stay direct. A direct deposit that reaches the target is accepted as the household's own money event.
+
+## Q-112 · WP-13 · Goal events and the saved amount
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: BACKEND_PLAN §5.2 `goal_events` (kinds `deposit`, `withdrawal`, `adjustment`), §7.3 ("deposits are recorded by the user")
+- Question: The DDL gives only the kinds. Built: a deposit or withdrawal is a positive amount and the kind gives the direction; an adjustment is signed and non-zero; the goal's `saved_cents` is updated in the same transaction (the API cannot write it any other way) and may not go below $0; `status` follows the saved amount (`reached` when saved ≥ target, back to `active` below it). Events are append-only for both app roles, with an optional note up to 200 characters (a new column, `note`). The fixture's goals are seeded with their saved amounts and no events, so history starts at 0 events. Is a negative adjustment, and the `note` column, acceptable?
+- Options considered: signed amounts for every kind.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): accepted. Withdrawals and negative adjustments from the emergency fund or a goal with a monthly amount need approval (a `goal_withdrawal` proposal); deposits stay direct. Built. A database trigger tying `saved_cents` changes to a same-transaction `goal_events` insert was not added: the only role that can write `saved_cents` is mp_api, through the one service function, and a trigger would have to compare transaction ids across subtransactions. Revisit if another writer appears.
+
+## Q-111 · WP-13 · A second copy of the engine-input projection
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: WORK_PLAN WP-12 ("the engine input projection"), WP-13 (goal numbers only from `@mp/engine`)
+- Question: Goal status and the shortfall effects need a full `EngineInput` (goal deposit dates come from the primary income schedule, the effect on safe to spend from the whole plan). WP-12 builds that projection in parallel and is not merged, so WP-13 has its own reader, `apps/api/src/modules/goals/engine-input.ts`, which maps the same rows (items with amount history, materialized occurrences, planned expenses, non-archived goals, the latest balance, cushion and primary income) with no renewals. The two should become one: after WP-12 merges, `loadEngineInput` should delegate to WP-12's projection, and the golden values in `goals/wp13.int.test.ts` (550 · 7,970 · 0, the three shortfall options 507 / 107 / -109) must keep passing. Who does the swap?
+- Options considered: wait for WP-12 (blocks WP-13); import WP-12's code across the parallel branch (not possible).
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): one projection. WP-13 now uses `packages/db/src/planning/loadEngineInput` (with a new `requireBalance` option, default true; goal reads pass false) and `goals/engine-input.ts` is deleted. A parity test (`goals/wp13-fix.int.test.ts`) compares the loader's safe to spend with the engine's Rivera plan.
+
+## Q-110 · WP-13 · The fixture's tasks have no source, link or auto-complete rule
+- Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
+- Where: `design/fixtures/rivera-household.json` `tasks` (id, title, owner, dueOn, dueHint, completed only), BACKEND_PLAN §5.2 `tasks` (source, linked_item_id, auto_complete_rule), DESIGN_SPEC §5.1 Tasks (source labels)
+- Question: The seed has to choose them, and the fixture must not change (hard rule 10). `packages/db/src/seed/tasks.ts` maps by fixture id: t1 "Review 2 flagged subscriptions" → engine; t2 "Enter the actual electricity amount" → engine, linked to the electricity bill, auto-completes on `actual_amount_received` (the spec's own example); t3 car insurance quote → renewal, linked to car insurance; t4 "Choose a 2027 health plan" → email, linked to the health plan; t5 antivirus, t6 renters insurance, t7 car registration → renewal, linked to their renewal items; d1 to d3 → setup, completed by Sam on the due date. Counts as of the fixture date (Oct 27): 3 due this week, 4 later, 3 done, nav badge 3, verified against `tasksDueThisWeek`. Please confirm the sources and links, or add them to the fixture with a spec change.
+- Options considered: add `source`, `linkedItemId` and `autoComplete` to the fixture.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): accepted: sources, links and the electricity auto-complete rule stay as seeded.
 ## Q-126 · WP-14 · Consented eval feed from edited review items
 - Asked by: wp-builder/wp/14-review-queue · 2026-11-03
 - Where: BACKEND_PLAN §8.2 (`edit` "feeds eval data (with consent)"); BACKEND_PLAN §7.9 (evals); G3

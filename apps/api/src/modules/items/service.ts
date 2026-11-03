@@ -1,8 +1,13 @@
 // Business rules for items, renewals, occurrences, planned expenses and balances. Routes stay thin and
 // SQL lives in repo.ts. Every function runs in one `withHouseholdTx` transaction, so a stale If-Match,
 // a failed rebuild or a constraint error leaves nothing half written.
+//
+// Changes to the other member's item that move the shared plan (BACKEND_PLAN §7.3) do not apply: they
+// become a proposal the other member approves (`requiresApproval`, packages/contracts). The caller answers
+// 202 with the proposal. A member's own items, and Both and Split items, stay directly editable.
 import {
   AppError,
+  requiresApproval,
   type Balance,
   type CreateItem,
   type Item,
@@ -10,58 +15,36 @@ import {
   type PatchItem,
   type PatchOccurrence,
   type PlannedExpense,
+  type ProposalPayload,
   type RenewalDetails,
 } from "@mp/contracts";
-import {
-  extendOccurrences,
-  householdToday,
-  loadBillsAverages,
-  rebuildFutureOccurrences,
-  type ApiContext,
-  type ApiDb,
-  type Tx,
-} from "@mp/db";
-import { EngineError, scheduleToRRule } from "@mp/engine";
+import { extendOccurrences, loadBillsAverages, type ApiContext, type ApiDb, type Tx } from "@mp/db";
 import { assertVersion } from "../../lib/if-match";
+import { insertProposal, type Gated } from "../proposals/core";
+import {
+  applyItemDelete,
+  applyItemPatch,
+  applyOccurrencePatch,
+  applyPlannedDelete,
+  applyPlannedPatch,
+  checkOwner,
+  invalid,
+  itemEdits,
+  notFound,
+  scheduleColumns,
+  todayFor,
+  type ChangeDeps,
+} from "./changes";
 import * as repo from "./repo";
 
-export interface ItemsDeps {
+export interface ItemsDeps extends ChangeDeps {
   db: ApiDb;
-  /** UTC instant as ISO 8601. Calendar dates are derived with the household timezone. */
-  now: () => string;
 }
 
 export interface Actor {
   ctx: ApiContext;
   userId: string;
   householdId: string;
-}
-
-function notFound(what: string): AppError {
-  return new AppError("not_found", 404, `${what} not found.`);
-}
-
-/**
- * Interim guard until WP-13 ships proposals (BACKEND_PLAN §7.3, owner decision 2026-11-03): some changes to
- * the other member's item need their approval. A member's own items, and Both and Split items, stay directly
- * editable. Thrown as 403 `approval_required`.
- */
-function approvalRequired(): AppError {
-  return new AppError(
-    "approval_required",
-    403,
-    "This item belongs to your partner. Ask them to approve the change.",
-  );
-}
-
-function ownedByPartner(owner: { ownerType: string; ownerUserId: string | null }, userId: string): boolean {
-  return owner.ownerType === "member" && owner.ownerUserId !== null && owner.ownerUserId !== userId;
-}
-
-function invalid(path: string, message: string): AppError {
-  return new AppError("validation_failed", 400, "The request has invalid fields.", {
-    fields: [{ in: "body", path, message }],
-  });
 }
 
 /** Maps constraint failures that a client can cause to problem responses. */
@@ -83,28 +66,6 @@ async function inTx<T>(deps: ItemsDeps, a: Actor, fn: (tx: Tx) => Promise<T>): P
     return await deps.db.withHouseholdTx(a.ctx, fn);
   } catch (err) {
     return mapDbError(err);
-  }
-}
-
-async function todayFor(tx: Tx, deps: ItemsDeps, householdId: string): Promise<string> {
-  const tz = await repo.householdTimezone(tx, householdId);
-  if (!tz) throw notFound("Household");
-  return householdToday(deps.now(), tz);
-}
-
-function scheduleColumns(schedule: Item["schedule"]): Record<string, unknown> {
-  try {
-    const parts = scheduleToRRule(schedule);
-    return { rrule: parts.rrule, dtstart: parts.dtstart, until: parts.until };
-  } catch (err) {
-    if (err instanceof EngineError) throw invalid("schedule", "That schedule is not valid.");
-    throw err;
-  }
-}
-
-async function checkOwner(tx: Tx, a: Actor, ownerType: string, ownerUserId: string | null | undefined) {
-  if (ownerType === "member" && ownerUserId && !(await repo.isMember(tx, a.householdId, ownerUserId))) {
-    throw invalid("ownerUserId", "The owner must be a member of this household.");
   }
 }
 
@@ -152,7 +113,7 @@ export async function createItem(
   fromReview?: CreatedFromReview,
 ): Promise<Item> {
   return inTx(deps, a, async (tx) => {
-    await checkOwner(tx, a, body.ownerType, body.ownerUserId);
+    await checkOwner(tx, a.householdId, body.ownerType, body.ownerUserId);
     if (fromReview) await repo.allowReviewInsert(tx, fromReview.reviewItemId);
     const id = await repo.insertItem(tx, a.householdId, a.userId, {
       direction: body.direction,
@@ -185,26 +146,38 @@ export async function createItem(
   });
 }
 
-const PATCH_COLUMNS: Readonly<Record<string, string>> = {
-  kind: "kind",
-  category: "category",
-  name: "name",
-  providerName: "provider_name",
-  providerDomain: "provider_domain",
-  amountType: "amount_type",
-  amountCents: "amount_cents",
-  weekendRule: "weekend_rule",
-  ownerType: "owner_type",
-  ownerUserId: "owner_user_id",
-  status: "status",
-  accountLast4: "account_last4",
-  paidFrom: "paid_from",
-  markedPossiblyUnused: "marked_possibly_unused",
-  subcategory: "subcategory",
-  movable: "movable",
-  onBillsPage: "on_bills_page",
-  notes: "notes",
-};
+/** The stored values of the fields a change touches, compared again when a proposal is approved. */
+/**
+ * Undoing an applied review change (WP-14) removes renewal details or an amount-history point of the other
+ * member's item. That is one all-or-nothing transaction, so it can't become a proposal (the proposal would be
+ * rolled back with the failed undo, and a deferred half-undo would leave the item inconsistent). It stays
+ * blocked: 403 `approval_required`. The owner can undo their own items.
+ */
+function approvalRequired(): AppError {
+  return new AppError(
+    "approval_required",
+    403,
+    "This item belongs to your partner. Ask them to undo this change.",
+  );
+}
+
+function isPartners(owner: { ownerType: string; ownerUserId: string | null }, userId: string): boolean {
+  return owner.ownerType === "member" && owner.ownerUserId !== null && owner.ownerUserId !== userId;
+}
+
+function snapshot(current: object, changes: object): Record<string, unknown> {
+  const now = current as Record<string, unknown>;
+  return Object.fromEntries(Object.keys(changes).map((k) => [k, now[k] ?? null]));
+}
+
+async function propose(tx: Tx, deps: ItemsDeps, a: Actor, payload: ProposalPayload) {
+  return insertProposal(tx, {
+    householdId: a.householdId,
+    proposedBy: a.userId,
+    payload,
+    nowIso: deps.now(),
+  });
+}
 
 export async function patchItem(
   deps: ItemsDeps,
@@ -212,94 +185,53 @@ export async function patchItem(
   id: string,
   expected: number,
   body: PatchItem,
-): Promise<Item> {
+): Promise<Gated<Item>> {
   return inTx(deps, a, async (tx) => {
     const current = await repo.getItem(tx, a.householdId, id, true);
     if (!current) throw notFound("Item");
     assertVersion(expected, current);
-    // What actually changes (a PATCH that repeats the stored values is a no-op and needs no approval).
-    const scheduleParts = body.schedule ? scheduleColumns(body.schedule) : null;
-    const currentParts = scheduleColumns(current.schedule);
-    const scheduleEdited =
-      scheduleParts !== null &&
-      (scheduleParts.rrule !== currentParts.rrule ||
-        scheduleParts.dtstart !== currentParts.dtstart ||
-        scheduleParts.until !== currentParts.until);
-    const weekendEdited = body.weekendRule !== undefined && body.weekendRule !== current.weekendRule;
-    const statusEdited = body.status !== undefined && body.status !== current.status;
-    const ownerEdited =
-      (body.ownerType !== undefined && body.ownerType !== current.ownerType) ||
-      (body.ownerUserId !== undefined && body.ownerUserId !== current.ownerUserId);
-    // Schedule and weekend rule move every future due date, so they need approval like a status or owner change.
-    if (
-      ownedByPartner(current, a.userId) &&
-      (ownerEdited || statusEdited || scheduleEdited || weekendEdited)
-    ) {
-      throw approvalRequired();
+    // Schedule and weekend rule move every future due date, so they need approval like a status or owner
+    // change. A PATCH that repeats the stored values is a no-op and needs none.
+    const edits = itemEdits(current, body);
+    const owner = { ownerType: current.ownerType, ownerUserId: current.ownerUserId };
+    const needsApproval =
+      (edits.owner && requiresApproval({ type: "item_owner", ...owner }, a.userId)) ||
+      (edits.status && requiresApproval({ type: "item_status", ...owner }, a.userId)) ||
+      ((edits.schedule || edits.weekendRule) &&
+        requiresApproval({ type: "item_schedule", ...owner }, a.userId));
+    if (needsApproval) {
+      return {
+        proposal: await propose(tx, deps, a, {
+          type: "item_patch",
+          itemId: id,
+          itemName: current.name,
+          ownerUserId: current.ownerUserId,
+          changes: body,
+          before: snapshot(current, body),
+        }),
+      };
     }
-
-    const columns: Record<string, unknown> = {};
-    for (const [key, column] of Object.entries(PATCH_COLUMNS)) {
-      const value = (body as Record<string, unknown>)[key];
-      if (value !== undefined) columns[column] = value;
-    }
-    const ownerType = body.ownerType ?? current.ownerType;
-    const ownerUserId = body.ownerUserId !== undefined ? body.ownerUserId : current.ownerUserId;
-    if (body.ownerType !== undefined || body.ownerUserId !== undefined) {
-      if ((ownerType === "member") !== (ownerUserId != null)) {
-        throw invalid("ownerUserId", "A member owner needs ownerUserId; both and split must not have one.");
-      }
-      columns.owner_type = ownerType;
-      columns.owner_user_id = ownerUserId ?? null;
-      await checkOwner(tx, a, ownerType, ownerUserId);
-    }
-    const amountType = body.amountType ?? current.amountType;
-    const amountCents = body.amountCents !== undefined ? body.amountCents : current.amountCents;
-    // Q-107: no amount type may end up without an amount. Existing estimated items imported with only
-    // history stay editable until their amount fields are touched.
-    const amountTouched = body.amountType !== undefined || body.amountCents !== undefined;
-    if ((amountType === "fixed" || amountTouched) && amountCents == null)
-      throw invalid(
-        "amountCents",
-        "An item needs amountCents (the estimate or last statement for variable bills).",
-      );
-
-    if (scheduleParts) Object.assign(columns, scheduleParts);
-    const scheduleChanged = scheduleEdited || weekendEdited || statusEdited;
-
-    if (
-      body.status !== undefined &&
-      body.status !== "active" &&
-      (await repo.isPrimaryIncome(tx, a.householdId, id))
-    ) {
-      throw new AppError("conflict", 409, "Choose another primary income before pausing or ending this one.");
-    }
-    if (!(await repo.updateItem(tx, id, expected, columns))) {
-      const latest = await repo.getItem(tx, a.householdId, id);
-      throw new AppError("conflict", 409, "This was changed by someone else. Review the latest version.", {
-        current: latest,
-      });
-    }
-    // Only schedule-affecting edits touch occurrences (future `scheduled` rows; paid ones stay).
-    if (scheduleChanged) await rebuildFutureOccurrences(tx, id, await todayFor(tx, deps, a.householdId));
-    await repo.audit(tx, a.householdId, a.userId, "item.updated", "item", id);
-    const item = await repo.getItem(tx, a.householdId, id);
-    if (!item) throw notFound("Item");
-    return item;
+    return { applied: await applyItemPatch(tx, deps, a, current, body) };
   });
 }
 
-export async function deleteItem(deps: ItemsDeps, a: Actor, id: string): Promise<void> {
-  await inTx(deps, a, async (tx) => {
+export async function deleteItem(deps: ItemsDeps, a: Actor, id: string): Promise<Gated<null>> {
+  return inTx(deps, a, async (tx) => {
     const current = await repo.getItem(tx, a.householdId, id, true);
     if (!current) throw notFound("Item");
-    if (ownedByPartner(current, a.userId)) throw approvalRequired();
-    if (await repo.isPrimaryIncome(tx, a.householdId, id)) {
-      throw new AppError("conflict", 409, "Choose another primary income before deleting this one.");
+    const owner = { ownerType: current.ownerType, ownerUserId: current.ownerUserId };
+    if (requiresApproval({ type: "item_delete", ...owner }, a.userId)) {
+      return {
+        proposal: await propose(tx, deps, a, {
+          type: "item_delete",
+          itemId: id,
+          itemName: current.name,
+          ownerUserId: current.ownerUserId,
+        }),
+      };
     }
-    await repo.softDeleteItem(tx, id);
-    await rebuildFutureOccurrences(tx, id, await todayFor(tx, deps, a.householdId));
-    await repo.audit(tx, a.householdId, a.userId, "item.deleted", "item", id);
+    await applyItemDelete(tx, deps, a, current);
+    return { applied: null };
   });
 }
 
@@ -337,7 +269,7 @@ export async function deleteRenewal(deps: ItemsDeps, a: Actor, id: string): Prom
   await inTx(deps, a, async (tx) => {
     const current = await repo.getItem(tx, a.householdId, id, true);
     if (!current) throw notFound("Item");
-    if (ownedByPartner(current, a.userId)) throw approvalRequired();
+    if (isPartners(current, a.userId)) throw approvalRequired();
     await repo.deleteRenewal(tx, id);
     await repo.audit(tx, a.householdId, a.userId, "item.renewal_deleted", "item", id);
   });
@@ -353,7 +285,7 @@ export async function deleteHistoryPoint(
   await inTx(deps, a, async (tx) => {
     const current = await repo.getItem(tx, a.householdId, id, true);
     if (!current) throw notFound("Item");
-    if (ownedByPartner(current, a.userId)) throw approvalRequired();
+    if (isPartners(current, a.userId)) throw approvalRequired();
     await repo.deleteHistoryPoint(tx, id, occurredOn);
     await repo.audit(tx, a.householdId, a.userId, "item.history_point_deleted", "item", id);
   });
@@ -379,71 +311,42 @@ export async function patchOccurrence(
   id: string,
   expected: number,
   body: PatchOccurrence,
-): Promise<Occurrence> {
+): Promise<Gated<Occurrence>> {
   return inTx(deps, a, async (tx) => {
     const found = await repo.getOccurrence(tx, a.householdId, id);
     if (!found) throw notFound("Occurrence");
-    const { occurrence, direction } = found;
+    const { occurrence } = found;
     assertVersion(expected, occurrence);
     // Moving a due date or skipping an occurrence of the partner's item needs their approval; paying is fine.
-    if (
-      ownedByPartner(found, a.userId) &&
-      (body.dueOn !== undefined || (body.status === "skipped" && occurrence.status !== "skipped"))
-    ) {
-      throw approvalRequired();
-    }
-
-    const status = body.status ?? occurrence.status;
-    if (body.status === "paid" && direction !== "outflow")
-      throw invalid("status", "Only a bill can be marked as paid.");
-    if (body.status === "received" && direction !== "inflow") {
-      throw invalid("status", "Only income can be marked as received.");
-    }
-    if (body.dueOn !== undefined && status !== "scheduled") {
-      throw invalid("dueOn", "Only an upcoming occurrence can be moved.");
-    }
-    if (body.paidOn !== undefined && status !== "paid" && status !== "received") {
-      throw invalid("paidOn", "A paid date needs a paid or received status.");
-    }
-
-    const columns: Record<string, unknown> = {};
-    if (body.status !== undefined && body.status !== occurrence.status) {
-      columns.status = body.status;
-      if (body.status === "paid" || body.status === "received") {
-        columns.paid_on = body.paidOn ?? (await todayFor(tx, deps, a.householdId));
-        columns.marked_by = a.userId;
-      } else {
-        columns.paid_on = null;
-        columns.marked_by = body.status === "skipped" ? a.userId : null;
+    const moving = body.dueOn !== undefined && body.dueOn !== occurrence.dueOn;
+    const skipping = body.status === "skipped" && occurrence.status !== "skipped";
+    const owner = { ownerType: found.ownerType, ownerUserId: found.ownerUserId };
+    const gate =
+      (moving && requiresApproval({ type: "occurrence_move", ...owner }, a.userId)) ||
+      (skipping && requiresApproval({ type: "occurrence_skip", ...owner }, a.userId));
+    if (gate) {
+      // The proposal carries one change; anything sent beside it would be dropped silently.
+      const extra = Object.keys(body).filter((k) => k !== (moving ? "dueOn" : "status"));
+      if (extra.length > 0) {
+        throw invalid(extra[0] ?? "", "A change that needs approval must be sent on its own.");
       }
-    } else if (body.paidOn !== undefined) {
-      columns.paid_on = body.paidOn;
+      const item = await repo.getItem(tx, a.householdId, occurrence.itemId);
+      if (!item) throw notFound("Item");
+      const base = { occurrenceId: id, itemId: item.id, itemName: item.name, ownerUserId: item.ownerUserId };
+      return {
+        proposal: await propose(
+          tx,
+          deps,
+          a,
+          moving && body.dueOn !== undefined
+            ? { type: "occurrence_move", ...base, fromDueOn: occurrence.dueOn, toDueOn: body.dueOn }
+            : { type: "occurrence_skip", ...base, dueOn: occurrence.dueOn },
+        ),
+      };
     }
-    if (body.dueOn !== undefined) {
-      columns.due_on = body.dueOn;
-      columns.moved_by = a.userId;
-    }
-    if (body.actualAmountCents !== undefined) columns.actual_amount_cents = body.actualAmountCents;
-
-    // Repeating the stored values changes nothing: answer with the current occurrence.
-    if (Object.keys(columns).length === 0) return occurrence;
-    if (!(await repo.updateOccurrence(tx, id, expected, columns))) {
-      throw new AppError("conflict", 409, "This was changed by someone else. Review the latest version.");
-    }
-    // An actual amount is also a data point for the item's estimate (rule 6).
-    if (typeof body.actualAmountCents === "number") {
-      await repo.upsertHistory(
-        tx,
-        a.householdId,
-        occurrence.itemId,
-        (columns.due_on as string | undefined) ?? occurrence.dueOn,
-        body.actualAmountCents,
-      );
-    }
-    await repo.audit(tx, a.householdId, a.userId, "occurrence.updated", "occurrence", id);
-    const updated = await repo.getOccurrence(tx, a.householdId, id);
-    if (!updated) throw notFound("Occurrence");
-    return updated.occurrence;
+    // A date repeated unchanged is not a move: leave `moved_by` alone.
+    const { dueOn: _same, ...rest } = body;
+    return { applied: await applyOccurrencePatch(tx, deps, a, found, moving ? body : rest) };
   });
 }
 
@@ -466,7 +369,7 @@ export async function createPlanned(
   },
 ): Promise<PlannedExpense> {
   return inTx(deps, a, async (tx) => {
-    await checkOwner(tx, a, body.ownerType, body.ownerUserId);
+    await checkOwner(tx, a.householdId, body.ownerType, body.ownerUserId);
     const id = await repo.insertPlanned(tx, a.householdId, a.userId, {
       ...body,
       ownerUserId: body.ownerUserId ?? null,
@@ -485,59 +388,53 @@ export async function patchPlanned(
   id: string,
   expected: number,
   body: Record<string, unknown>,
-): Promise<PlannedExpense> {
+): Promise<Gated<PlannedExpense>> {
   return inTx(deps, a, async (tx) => {
     const current = await repo.getPlanned(tx, a.householdId, id);
     if (!current) throw notFound("Planned expense");
     assertVersion(expected, current);
-    // Interim guard (see approvalRequired): the partner's planned expense can't be re-owned or re-dated.
+    // The partner's planned expense can't be re-owned or re-dated without their approval.
+    const owner = { ownerType: current.ownerType, ownerUserId: current.ownerUserId };
+    const ownerEdited =
+      (body.ownerType !== undefined && body.ownerType !== current.ownerType) ||
+      (body.ownerUserId !== undefined && body.ownerUserId !== current.ownerUserId);
+    const moved = body.dueOn !== undefined && body.dueOn !== current.dueOn;
     if (
-      ownedByPartner(current, a.userId) &&
-      ((body.ownerType !== undefined && body.ownerType !== current.ownerType) ||
-        (body.ownerUserId !== undefined && body.ownerUserId !== current.ownerUserId) ||
-        (body.dueOn !== undefined && body.dueOn !== current.dueOn))
+      (ownerEdited && requiresApproval({ type: "planned_owner", ...owner }, a.userId)) ||
+      (moved && requiresApproval({ type: "planned_move", ...owner }, a.userId))
     ) {
-      throw approvalRequired();
+      return {
+        proposal: await propose(tx, deps, a, {
+          type: "planned_patch",
+          plannedExpenseId: id,
+          name: current.name,
+          ownerUserId: current.ownerUserId,
+          changes: body,
+          before: snapshot(current, body),
+        }),
+      };
     }
-    const map: Record<string, string> = {
-      name: "name",
-      amountCents: "amount_cents",
-      dueOn: "due_on",
-      ownerType: "owner_type",
-      ownerUserId: "owner_user_id",
-      goalId: "goal_id",
-      status: "status",
-    };
-    const columns: Record<string, unknown> = {};
-    for (const [k, col] of Object.entries(map)) if (body[k] !== undefined) columns[col] = body[k];
-    const ownerType = (body.ownerType as string | undefined) ?? current.ownerType;
-    const ownerUserId =
-      body.ownerUserId !== undefined ? (body.ownerUserId as string | null) : current.ownerUserId;
-    if ((ownerType === "member") !== (ownerUserId != null)) {
-      throw invalid("ownerUserId", "A member owner needs ownerUserId; both and split must not have one.");
-    }
-    if (body.ownerType !== undefined || body.ownerUserId !== undefined) {
-      columns.owner_type = ownerType;
-      columns.owner_user_id = ownerUserId;
-      await checkOwner(tx, a, ownerType, ownerUserId);
-    }
-    if (!(await repo.updatePlanned(tx, id, expected, columns))) {
-      throw new AppError("conflict", 409, "This was changed by someone else. Review the latest version.");
-    }
-    await repo.audit(tx, a.householdId, a.userId, "planned_expense.updated", "planned_expense", id);
-    const updated = await repo.getPlanned(tx, a.householdId, id);
-    if (!updated) throw notFound("Planned expense");
-    return updated;
+    return { applied: await applyPlannedPatch(tx, a, current, body) };
   });
 }
 
-export async function deletePlanned(deps: ItemsDeps, a: Actor, id: string): Promise<void> {
-  await inTx(deps, a, async (tx) => {
+export async function deletePlanned(deps: ItemsDeps, a: Actor, id: string): Promise<Gated<null>> {
+  return inTx(deps, a, async (tx) => {
     const current = await repo.getPlanned(tx, a.householdId, id);
     if (!current) throw notFound("Planned expense");
-    if (ownedByPartner(current, a.userId)) throw approvalRequired();
-    await repo.deletePlanned(tx, id);
-    await repo.audit(tx, a.householdId, a.userId, "planned_expense.deleted", "planned_expense", id);
+    const owner = { ownerType: current.ownerType, ownerUserId: current.ownerUserId };
+    if (requiresApproval({ type: "planned_delete", ...owner }, a.userId)) {
+      return {
+        proposal: await propose(tx, deps, a, {
+          type: "planned_delete",
+          plannedExpenseId: id,
+          name: current.name,
+          ownerUserId: current.ownerUserId,
+        }),
+      };
+    }
+    await applyPlannedDelete(tx, a, current);
+    return { applied: null };
   });
 }
 

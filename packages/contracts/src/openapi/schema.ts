@@ -846,6 +846,15 @@ export interface paths {
       requestBody?: never;
       responses: {
         /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Default Response */
         204: {
           headers: {
             [name: string]: unknown;
@@ -897,6 +906,15 @@ export interface paths {
           };
           content: {
             "application/json": components["schemas"]["Item"];
+          };
+        };
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
           };
         };
         /** @description Client error (RFC 9457 problem details) */
@@ -1136,6 +1154,15 @@ export interface paths {
             "application/json": components["schemas"]["Occurrence"];
           };
         };
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
         /** @description Client error (RFC 9457 problem details) */
         "4XX": {
           headers: {
@@ -1281,6 +1308,15 @@ export interface paths {
       requestBody?: never;
       responses: {
         /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Default Response */
         204: {
           headers: {
             [name: string]: unknown;
@@ -1332,6 +1368,15 @@ export interface paths {
           };
           content: {
             "application/json": components["schemas"]["PlannedExpense"];
+          };
+        };
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
           };
         };
         /** @description Client error (RFC 9457 problem details) */
@@ -2284,6 +2329,883 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/goals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Goals with status, suggestions and the savings KPIs */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["GoalList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Add a goal */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateGoalInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Goal"];
+          };
+        };
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["CreateGoalPending"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/goals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One goal */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Goal"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    /** Delete a goal; one with a monthly amount returns 202 with a proposal */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    /** Edit a goal; a new monthly amount returns 202 with a proposal for the other member */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchGoalInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Goal"];
+          };
+        };
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/v1/households/{hid}/goals/{id}/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Record a deposit or withdrawal (nothing is transferred) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateGoalEventInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["GoalEventResult"];
+          };
+        };
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/goals/{id}/options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Ways to stay on track (rule 10) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["GoalOptions"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/proposals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Proposals, newest first */
+    get: {
+      parameters: {
+        query?: {
+          status?: "pending" | "approved" | "rejected" | "expired" | "applied" | "superseded";
+          limit?: number;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ProposalList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Ask the other member to approve a goal or shortfall change */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateProposalInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/proposals/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One proposal */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/proposals/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Approve and apply a proposal (not your own) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/proposals/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reject a proposal (not your own) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["RejectProposalBodyInput"] | null;
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Proposal"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Tasks grouped as due this week, later and done, with the nav badge */
+    get: {
+      parameters: {
+        query?: {
+          owner?: string | ("both" | "split");
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["TaskGroups"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    /** Add a task */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateTaskInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Task"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/tasks/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One task */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Task"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Edit, complete or reopen a task */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchTaskInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Task"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
     trace?: never;
   };
 }
@@ -3563,6 +4485,484 @@ export interface components {
     SenderRuleListInput: {
       data: components["schemas"]["SenderRuleInput"][];
     };
+    ProposalEffectInput: {
+      /** @description Integer cents */
+      safeToSpendBeforeCents: number;
+      /** @description Integer cents */
+      safeToSpendAfterCents: number;
+    };
+    ProposalPayloadInput:
+      | {
+          /** @constant */
+          type: "goal_monthly";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @description Integer cents */
+          fromMonthlyCents: number;
+          /** @description Integer cents */
+          toMonthlyCents: number;
+          effect: components["schemas"]["ProposalEffectInput"];
+        }
+      | {
+          /** @constant */
+          type: "goal_delete";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+        }
+      | {
+          /** @constant */
+          type: "goal_status";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @enum {string} */
+          fromStatus: "active" | "reached" | "archived";
+          /** @enum {string} */
+          toStatus: "active" | "archived";
+          /** @description Integer cents */
+          monthlyCents: number;
+          effect: components["schemas"]["ProposalEffectInput"];
+        }
+      | {
+          /** @constant */
+          type: "goal_target";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @description Integer cents */
+          fromTargetCents: number;
+          /** @description Integer cents */
+          toTargetCents: number;
+          /** @description Integer cents */
+          monthlyCents: number;
+          effect: components["schemas"]["ProposalEffectInput"];
+        }
+      | {
+          /** @constant */
+          type: "goal_withdrawal";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @enum {string} */
+          kind: "withdrawal" | "adjustment";
+          /** @description Integer cents */
+          amountCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          occurredOn: string;
+          note: string | null;
+        }
+      | {
+          /** @constant */
+          type: "shortfall_move_from_fund";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @description Integer cents */
+          amountCents: number;
+          /** @description Integer cents */
+          fundBalanceCents: number;
+          effect: components["schemas"]["ProposalEffectInput"];
+        }
+      | {
+          /** @constant */
+          type: "shortfall_split_expense";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          name: string;
+          /** @description Integer cents */
+          amountCents: number;
+          /** @description Integer cents */
+          amountNowCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          nowOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          laterOn: string;
+          effect: components["schemas"]["ProposalEffectInput"];
+        }
+      | {
+          /** @constant */
+          type: "shortfall_move_bill";
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          scheduledOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          fromDate: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDate: string;
+          /** @description Integer cents */
+          amountCents: number;
+          effect: components["schemas"]["ProposalEffectInput"];
+        }
+      | {
+          /** @constant */
+          type: "item_delete";
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+        }
+      | {
+          /** @constant */
+          type: "item_patch";
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+          changes: components["schemas"]["PatchItemInput"];
+          before: {
+            [key: string]: unknown;
+          };
+        }
+      | {
+          /** @constant */
+          type: "occurrence_move";
+          /** Format: uuid */
+          occurrenceId: string;
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          fromDueOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDueOn: string;
+        }
+      | {
+          /** @constant */
+          type: "occurrence_skip";
+          /** Format: uuid */
+          occurrenceId: string;
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dueOn: string;
+        }
+      | {
+          /** @constant */
+          type: "planned_delete";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          name: string;
+          ownerUserId: string | null;
+        }
+      | {
+          /** @constant */
+          type: "planned_patch";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          name: string;
+          ownerUserId: string | null;
+          changes: components["schemas"]["PatchPlannedExpenseInput"];
+          before: {
+            [key: string]: unknown;
+          };
+        };
+    ProposalInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      /** @enum {string} */
+      kind: "goal_change" | "item_change" | "shortfall_option" | "plan_option";
+      payload: components["schemas"]["ProposalPayloadInput"];
+      calcSnapshotId: string | null;
+      /** Format: uuid */
+      proposedBy: string;
+      /** @enum {string} */
+      status: "pending" | "approved" | "rejected" | "expired" | "applied" | "superseded";
+      decidedBy: string | null;
+      decidedAt: string | null;
+      decisionNote: string | null;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ProposalListInput: {
+      data: components["schemas"]["ProposalInput"][];
+    };
+    CreateProposalInput:
+      | {
+          /** @constant */
+          type: "goal_monthly";
+          /** Format: uuid */
+          goalId: string;
+          /** @description Integer cents */
+          monthlyCents: number;
+        }
+      | {
+          /** @constant */
+          type: "shortfall_option";
+          /** @enum {string} */
+          option: "move_from_emergency_fund" | "split_expense" | "move_bill_to_payday";
+        };
+    RejectProposalBodyInput: {
+      note?: string;
+    };
+    GoalProgressInput: {
+      /** @enum {string} */
+      status:
+        | "reached"
+        | "reach_month"
+        | "no_monthly_amount"
+        | "unreachable"
+        | "on_track"
+        | "behind"
+        | "to_set_aside";
+      percent: number;
+      /** @description Integer cents */
+      remainingCents: number;
+      reachMonth: string | null;
+      contributionsByTarget: number | null;
+      projectedByTargetCents: number | null;
+      gapCents: number | null;
+      suggestedMonthlyCents: number | null;
+      alternativeTargetDate: string | null;
+    };
+    GoalInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      name: string;
+      /** @enum {string} */
+      type: "savings" | "planned_expense";
+      /** @description Integer cents */
+      targetCents: number;
+      /** @description Integer cents */
+      savedCents: number;
+      /** @description Integer cents */
+      monthlyCents: number;
+      targetDate: string | null;
+      colorSlot: number;
+      isEmergencyFund: boolean;
+      /** @enum {string} */
+      status: "active" | "reached" | "archived";
+      progress: components["schemas"]["GoalProgressInput"];
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    GoalListInput: {
+      /** @description Integer cents */
+      savingEachMonthCents: number;
+      /** @description Integer cents */
+      savedSoFarCents: number;
+      /** @description Integer cents */
+      effectOnSafeToSpendCents: number;
+      nextTransferOn: string | null;
+      data: components["schemas"]["GoalInput"][];
+    };
+    CreateGoalPendingInput: {
+      goal: components["schemas"]["GoalInput"];
+      proposal: components["schemas"]["ProposalInput"];
+    };
+    CreateGoalInput: {
+      name: string;
+      /** @enum {string} */
+      type: "savings" | "planned_expense";
+      /** @description Integer cents */
+      targetCents: number;
+      /**
+       * @description Integer cents
+       * @default 0
+       */
+      monthlyCents: number;
+      targetDate?: string | null;
+      /** @default 1 */
+      colorSlot: number;
+      /**
+       * @description Integer cents
+       * @default 0
+       */
+      savedCents: number;
+      /** @default false */
+      isEmergencyFund: boolean;
+    };
+    PatchGoalInput: {
+      name?: string;
+      /** @description Integer cents */
+      targetCents?: number;
+      /** @description Integer cents */
+      monthlyCents?: number;
+      targetDate?: string | null;
+      colorSlot?: number;
+      /** @enum {string} */
+      status?: "active" | "archived";
+    };
+    GoalEventInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      goalId: string;
+      /** @enum {string} */
+      kind: "deposit" | "withdrawal" | "adjustment";
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      occurredOn: string;
+      note: string | null;
+      recordedBy: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateGoalEventInput: {
+      /** @enum {string} */
+      kind: "deposit" | "withdrawal" | "adjustment";
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      occurredOn?: string;
+      note?: string;
+    };
+    GoalEventResultInput: {
+      event: components["schemas"]["GoalEventInput"];
+      goal: components["schemas"]["GoalInput"];
+    };
+    GoalOptionInput:
+      | {
+          /** @constant */
+          kind: "raise_monthly";
+          /** @description Integer cents */
+          monthlyCents: number;
+        }
+      | {
+          /** @constant */
+          kind: "move_date";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          targetDate: string;
+        }
+      | {
+          /** @constant */
+          kind: "lower_target";
+          /** @description Integer cents */
+          targetCents: number;
+        };
+    GoalOptionsInput: {
+      /** Format: uuid */
+      goalId: string;
+      /** @enum {string} */
+      status:
+        | "reached"
+        | "reach_month"
+        | "no_monthly_amount"
+        | "unreachable"
+        | "on_track"
+        | "behind"
+        | "to_set_aside";
+      options: components["schemas"]["GoalOptionInput"][];
+    };
+    AutoCompleteRuleInput:
+      | {
+          /** @constant */
+          type: "actual_amount_received";
+          /** Format: uuid */
+          itemId: string;
+        }
+      | {
+          /** @constant */
+          type: "item_reviewed";
+          /** Format: uuid */
+          itemId: string;
+        }
+      | {
+          /** @constant */
+          type: "proposal_decided";
+          /** Format: uuid */
+          proposalId: string;
+        };
+    TaskInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      title: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId: string | null;
+      dueOn: string | null;
+      dueHint: string | null;
+      linkedItemId: string | null;
+      linkedItemName: string | null;
+      /** @enum {string} */
+      source: "user" | "engine" | "email" | "renewal" | "setup";
+      autoCompleteRule: components["schemas"]["AutoCompleteRuleInput"] | null;
+      completed: boolean;
+      completedAt: string | null;
+      completedBy: string | null;
+      completedReason: string | null;
+      version: number;
+      createdBy: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    TaskGroupsInput: {
+      dueThisWeek: components["schemas"]["TaskInput"][];
+      later: components["schemas"]["TaskInput"][];
+      done: components["schemas"]["TaskInput"][];
+      navBadge: number;
+    };
+    CreateTaskInput: {
+      title: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      dueOn?: string | null;
+      dueHint?: string | null;
+    };
+    PatchTaskInput: {
+      title?: string;
+      /** @enum {string} */
+      ownerType?: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      dueOn?: string | null;
+      dueHint?: string | null;
+      completed?: boolean;
+    };
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -4835,6 +6235,484 @@ export interface components {
     };
     SenderRuleList: {
       data: components["schemas"]["SenderRule"][];
+    };
+    ProposalEffect: {
+      /** @description Integer cents */
+      safeToSpendBeforeCents: number;
+      /** @description Integer cents */
+      safeToSpendAfterCents: number;
+    };
+    ProposalPayload:
+      | {
+          /** @constant */
+          type: "goal_monthly";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @description Integer cents */
+          fromMonthlyCents: number;
+          /** @description Integer cents */
+          toMonthlyCents: number;
+          effect: components["schemas"]["ProposalEffect"];
+        }
+      | {
+          /** @constant */
+          type: "goal_delete";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+        }
+      | {
+          /** @constant */
+          type: "goal_status";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @enum {string} */
+          fromStatus: "active" | "reached" | "archived";
+          /** @enum {string} */
+          toStatus: "active" | "archived";
+          /** @description Integer cents */
+          monthlyCents: number;
+          effect: components["schemas"]["ProposalEffect"];
+        }
+      | {
+          /** @constant */
+          type: "goal_target";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @description Integer cents */
+          fromTargetCents: number;
+          /** @description Integer cents */
+          toTargetCents: number;
+          /** @description Integer cents */
+          monthlyCents: number;
+          effect: components["schemas"]["ProposalEffect"];
+        }
+      | {
+          /** @constant */
+          type: "goal_withdrawal";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @enum {string} */
+          kind: "withdrawal" | "adjustment";
+          /** @description Integer cents */
+          amountCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          occurredOn: string;
+          note: string | null;
+        }
+      | {
+          /** @constant */
+          type: "shortfall_move_from_fund";
+          /** Format: uuid */
+          goalId: string;
+          goalName: string;
+          /** @description Integer cents */
+          amountCents: number;
+          /** @description Integer cents */
+          fundBalanceCents: number;
+          effect: components["schemas"]["ProposalEffect"];
+        }
+      | {
+          /** @constant */
+          type: "shortfall_split_expense";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          name: string;
+          /** @description Integer cents */
+          amountCents: number;
+          /** @description Integer cents */
+          amountNowCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          nowOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          laterOn: string;
+          effect: components["schemas"]["ProposalEffect"];
+        }
+      | {
+          /** @constant */
+          type: "shortfall_move_bill";
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          scheduledOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          fromDate: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDate: string;
+          /** @description Integer cents */
+          amountCents: number;
+          effect: components["schemas"]["ProposalEffect"];
+        }
+      | {
+          /** @constant */
+          type: "item_delete";
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+        }
+      | {
+          /** @constant */
+          type: "item_patch";
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+          changes: components["schemas"]["PatchItem"];
+          before: {
+            [key: string]: unknown;
+          };
+        }
+      | {
+          /** @constant */
+          type: "occurrence_move";
+          /** Format: uuid */
+          occurrenceId: string;
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          fromDueOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDueOn: string;
+        }
+      | {
+          /** @constant */
+          type: "occurrence_skip";
+          /** Format: uuid */
+          occurrenceId: string;
+          /** Format: uuid */
+          itemId: string;
+          itemName: string;
+          ownerUserId: string | null;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dueOn: string;
+        }
+      | {
+          /** @constant */
+          type: "planned_delete";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          name: string;
+          ownerUserId: string | null;
+        }
+      | {
+          /** @constant */
+          type: "planned_patch";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          name: string;
+          ownerUserId: string | null;
+          changes: components["schemas"]["PatchPlannedExpense"];
+          before: {
+            [key: string]: unknown;
+          };
+        };
+    Proposal: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      /** @enum {string} */
+      kind: "goal_change" | "item_change" | "shortfall_option" | "plan_option";
+      payload: components["schemas"]["ProposalPayload"];
+      calcSnapshotId: string | null;
+      /** Format: uuid */
+      proposedBy: string;
+      /** @enum {string} */
+      status: "pending" | "approved" | "rejected" | "expired" | "applied" | "superseded";
+      decidedBy: string | null;
+      decidedAt: string | null;
+      decisionNote: string | null;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ProposalList: {
+      data: components["schemas"]["Proposal"][];
+    };
+    CreateProposal:
+      | {
+          /** @constant */
+          type: "goal_monthly";
+          /** Format: uuid */
+          goalId: string;
+          /** @description Integer cents */
+          monthlyCents: number;
+        }
+      | {
+          /** @constant */
+          type: "shortfall_option";
+          /** @enum {string} */
+          option: "move_from_emergency_fund" | "split_expense" | "move_bill_to_payday";
+        };
+    RejectProposalBody: {
+      note?: string;
+    };
+    GoalProgress: {
+      /** @enum {string} */
+      status:
+        | "reached"
+        | "reach_month"
+        | "no_monthly_amount"
+        | "unreachable"
+        | "on_track"
+        | "behind"
+        | "to_set_aside";
+      percent: number;
+      /** @description Integer cents */
+      remainingCents: number;
+      reachMonth: string | null;
+      contributionsByTarget: number | null;
+      projectedByTargetCents: number | null;
+      gapCents: number | null;
+      suggestedMonthlyCents: number | null;
+      alternativeTargetDate: string | null;
+    };
+    Goal: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      name: string;
+      /** @enum {string} */
+      type: "savings" | "planned_expense";
+      /** @description Integer cents */
+      targetCents: number;
+      /** @description Integer cents */
+      savedCents: number;
+      /** @description Integer cents */
+      monthlyCents: number;
+      targetDate: string | null;
+      colorSlot: number;
+      isEmergencyFund: boolean;
+      /** @enum {string} */
+      status: "active" | "reached" | "archived";
+      progress: components["schemas"]["GoalProgress"];
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    GoalList: {
+      /** @description Integer cents */
+      savingEachMonthCents: number;
+      /** @description Integer cents */
+      savedSoFarCents: number;
+      /** @description Integer cents */
+      effectOnSafeToSpendCents: number;
+      nextTransferOn: string | null;
+      data: components["schemas"]["Goal"][];
+    };
+    CreateGoalPending: {
+      goal: components["schemas"]["Goal"];
+      proposal: components["schemas"]["Proposal"];
+    };
+    CreateGoal: {
+      name: string;
+      /** @enum {string} */
+      type: "savings" | "planned_expense";
+      /** @description Integer cents */
+      targetCents: number;
+      /**
+       * @description Integer cents
+       * @default 0
+       */
+      monthlyCents: number;
+      targetDate?: string | null;
+      /** @default 1 */
+      colorSlot: number;
+      /**
+       * @description Integer cents
+       * @default 0
+       */
+      savedCents: number;
+      /** @default false */
+      isEmergencyFund: boolean;
+    };
+    PatchGoal: {
+      name?: string;
+      /** @description Integer cents */
+      targetCents?: number;
+      /** @description Integer cents */
+      monthlyCents?: number;
+      targetDate?: string | null;
+      colorSlot?: number;
+      /** @enum {string} */
+      status?: "active" | "archived";
+    };
+    GoalEvent: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      goalId: string;
+      /** @enum {string} */
+      kind: "deposit" | "withdrawal" | "adjustment";
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      occurredOn: string;
+      note: string | null;
+      recordedBy: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateGoalEvent: {
+      /** @enum {string} */
+      kind: "deposit" | "withdrawal" | "adjustment";
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      occurredOn?: string;
+      note?: string;
+    };
+    GoalEventResult: {
+      event: components["schemas"]["GoalEvent"];
+      goal: components["schemas"]["Goal"];
+    };
+    GoalOption:
+      | {
+          /** @constant */
+          kind: "raise_monthly";
+          /** @description Integer cents */
+          monthlyCents: number;
+        }
+      | {
+          /** @constant */
+          kind: "move_date";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          targetDate: string;
+        }
+      | {
+          /** @constant */
+          kind: "lower_target";
+          /** @description Integer cents */
+          targetCents: number;
+        };
+    GoalOptions: {
+      /** Format: uuid */
+      goalId: string;
+      /** @enum {string} */
+      status:
+        | "reached"
+        | "reach_month"
+        | "no_monthly_amount"
+        | "unreachable"
+        | "on_track"
+        | "behind"
+        | "to_set_aside";
+      options: components["schemas"]["GoalOption"][];
+    };
+    AutoCompleteRule:
+      | {
+          /** @constant */
+          type: "actual_amount_received";
+          /** Format: uuid */
+          itemId: string;
+        }
+      | {
+          /** @constant */
+          type: "item_reviewed";
+          /** Format: uuid */
+          itemId: string;
+        }
+      | {
+          /** @constant */
+          type: "proposal_decided";
+          /** Format: uuid */
+          proposalId: string;
+        };
+    Task: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      title: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId: string | null;
+      dueOn: string | null;
+      dueHint: string | null;
+      linkedItemId: string | null;
+      linkedItemName: string | null;
+      /** @enum {string} */
+      source: "user" | "engine" | "email" | "renewal" | "setup";
+      autoCompleteRule: components["schemas"]["AutoCompleteRule"] | null;
+      completed: boolean;
+      completedAt: string | null;
+      completedBy: string | null;
+      completedReason: string | null;
+      version: number;
+      createdBy: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    TaskGroups: {
+      dueThisWeek: components["schemas"]["Task"][];
+      later: components["schemas"]["Task"][];
+      done: components["schemas"]["Task"][];
+      navBadge: number;
+    };
+    CreateTask: {
+      title: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      dueOn?: string | null;
+      dueHint?: string | null;
+    };
+    PatchTask: {
+      title?: string;
+      /** @enum {string} */
+      ownerType?: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      dueOn?: string | null;
+      dueHint?: string | null;
+      completed?: boolean;
     };
   };
   responses: never;

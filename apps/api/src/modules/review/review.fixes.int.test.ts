@@ -342,6 +342,29 @@ describe("undoing a created item (M4)", () => {
     expectProblem(await call("POST", `/applied-changes/${change.id}/undo`, sam), 409, "conflict");
   });
 
+  it("is blocked for the other member's item, and leaves no proposal behind (WP-13)", async () => {
+    const id = await queue({ matchType: "new", fields: newItemFields() });
+    const change = (await call("POST", `/review-items/${id}/confirm`, jordan)).json().appliedChange as {
+      id: string;
+      entityId: string;
+    };
+    const read = await t.app.inject({
+      method: "GET",
+      url: `${base()}/items/${change.entityId}`,
+      headers: sam,
+    });
+    expect(read.json().ownerUserId).toBe(jordanId);
+    expectProblem(await call("POST", `/applied-changes/${change.id}/undo`, sam), 403, "approval_required");
+    expect(
+      (await t.app.inject({ method: "GET", url: `${base()}/items/${change.entityId}`, headers: sam }))
+        .statusCode,
+    ).toBe(200);
+    const proposals = (await call("GET", "/proposals?status=pending", sam)).json().data as {
+      payload: { itemId?: string };
+    }[];
+    expect(proposals.some((p) => p.payload.itemId === change.entityId)).toBe(false);
+  });
+
   it("works when nothing changed", async () => {
     const change = await created();
     expect((await call("POST", `/applied-changes/${change.id}/undo`, sam)).statusCode).toBe(200);

@@ -120,4 +120,27 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
       values (${t.householdId}, 'attacker.example', 'ignore')`,
     update: (t) => sql`update sender_rules set rule = 'watch' where household_id = ${t.householdId}`,
   },
+  // ===== WP-13: goal events, proposals, tasks =====
+  {
+    table: "goal_events",
+    insert: (
+      t,
+    ) => sql`insert into goal_events (household_id, goal_id, kind, amount_cents, occurred_on, recorded_by)
+      values (${t.householdId}, ${randomUUID()}, 'deposit', 100, '2026-11-01', ${t.actorUserId})`,
+    update: (t) => sql`update goal_events set amount_cents = 1 where household_id = ${t.householdId}`,
+  },
+  {
+    table: "proposals",
+    insert: (t) => sql`insert into proposals (household_id, kind, payload, proposed_by, expires_at)
+      values (${t.householdId}, 'goal_change', '{"type":"goal_delete"}'::jsonb, ${t.actorUserId ?? t.someUserId},
+        now() + interval '7 days')`,
+    update: (t) => sql`update proposals set status = 'rejected', decided_by = ${t.actorUserId}
+      where household_id = ${t.householdId}`,
+  },
+  {
+    table: "tasks",
+    insert: (t) => sql`insert into tasks (household_id, title, owner_type, source, created_by)
+      values (${t.householdId}, 'Attacker task', 'both', 'user', ${t.actorUserId})`,
+    update: (t) => sql`update tasks set title = 'tampered' where household_id = ${t.householdId}`,
+  },
 ];
