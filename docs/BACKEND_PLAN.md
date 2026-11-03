@@ -845,7 +845,7 @@ export interface PlanResult {
 | `calendarMonth` | — | Chip data for web and mobile calendars. |
 
 - **Versioning:** `engineVersion` is semver. Any change to an output for the same input is a minor or major bump and needs updated golden tests. Results are stored in `calc_snapshots` (deduplicated by `inputs_hash`), and AI text and proposals reference the snapshot ID, so “See the math” always matches what was said.
-- **Recompute triggers:** any write to items, occurrences, balances, planned expenses or goals enqueues `plan.recompute` (a singleton per household, 2 s debounce). The plan endpoint also computes on read when the snapshot is stale, at about 5 ms for a typical household.
+- **Recompute triggers (Q-102):** until the queue role from Q-105 exists (WP-09), plans are computed on read (the snapshot is keyed by an input hash, so results are always current), and `plan.recompute` is only a background warm-up. After WP-09, any write to items, occurrences, balances, planned expenses or goals enqueues `plan.recompute` (a singleton per household, 2 s debounce). The plan endpoint also computes on read when the snapshot is stale, at about 5 ms for a typical household.
 - **Tests:**
   - **Golden:** load `design/fixtures/rivera-household.json` and assert every value under `expected` and `scenarios.shortfall.expected`.
   - **Property** (fast-check):
@@ -1110,7 +1110,7 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 - **Pagination:** cursor-based (`?limit=50&cursor=…`) → `{ data: [...], nextCursor }`.
 - **Writes** accept `Idempotency-Key` (required on POSTs that create things). Repeats within 24 h return the stored response.
 - **Optimistic concurrency:** resources carry `version`. `PATCH` requires `If-Match: <version>`, and a mismatch returns 409 with the current resource. Exception: `PATCH /me` is last-write-wins, since only the user edits their own profile (Q-084). This matters because partners edit the same data.
-- **Errors:** RFC 9457 `application/problem+json`, e.g. `{ type, title, status, detail, code, fields? }`. Codes include `validation_failed`, `not_found`, `forbidden`, `conflict`, `entitlement_required`, `mfa_required`, `rate_limited`, `approval_required` (403: the change needs the other member's approval, §7.3).
+- **Errors:** RFC 9457 `application/problem+json`, e.g. `{ type, title, status, detail, code, fields? }`. Codes include `validation_failed`, `not_found`, `forbidden`, `conflict`, `entitlement_required`, `mfa_required`, `rate_limited`, `approval_required` (403: the change needs the other member's approval, §7.3), `plan_not_ready` (409: the household has no balance or primary income yet; `reason` says which).
 - **Rate limits** (per user): 600 req/min overall; auth-sensitive endpoints 20/min; Ask 30/day; exports 3/day. Returns 429 with `Retry-After`. Per-minute limits are kept in memory per API instance. The daily caps are enforced in their own services by counting today’s `ai_runs` (Ask) and `data_requests` (exports) rows, so they hold across instances (Q-031).
 - **Problem `type`** is the relative URI `/problems/<code>`. Entitlement and MFA failures return 403 with codes `entitlement_required` and `mfa_required`; clients branch on `code`, not status (Q-030).
 - OpenAPI is generated from Zod and published at `/v1/openapi.json`. The web and mobile clients are generated from it in CI. A contract test fails if a client and the server disagree.
@@ -1157,6 +1157,8 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 | `GET /households/:hid/events` (SSE, P1) | Realtime invalidation (`plan.updated`, `review.created`, …) | Postgres LISTEN/NOTIFY fan-out |
 
 ### 8.3 Key payloads
+
+> The examples below are abridged. The plan, what-if and calendar responses mirror the engine's `FullPlanResult` field names (Q-100); the Zod contracts in `packages/contracts/src/planning` and the generated OpenAPI are the source of truth for exact shapes. A plan read before onboarding returns 409 `plan_not_ready` with a `reason` (Q-101). `asOf` is limited to household-local today ±400 days, and only today's plan is stored as a snapshot (WP-12 security review).
 
 **`GET /v1/households/:hid/plan`** (abridged; the values match the fixture):
 

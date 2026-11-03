@@ -200,6 +200,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] The pre-token-generation trigger emits `email`, `email_verified`, `mfa_enabled` and `mfa_verified_at` (ADR-018); federated sign-ins must pass our TOTP challenge before `mfa_verified_at` is set.
   - [ ] Account linking (if any) links two identities only when both have a verified email (Q-083); the pool forbids unverified email attribute updates.
   - [ ] The API exits at startup in production when `COGNITO_*` is missing or inconsistent.
+  - [ ] A dedicated `mp_queue` database role (no BYPASSRLS, no access to `public` tables) owns pg-boss; the `pgboss` schema is created by a migration step and pg-boss runs with `migrate: false` in production (Q-105). The API may enqueue only through a narrow SECURITY DEFINER function for allowlisted queues with a household uuid, never raw INSERT on `pgboss.job`.
 - **Gate:** G2 (human applies to AWS).
 
 ## WP-10 · UI kit
@@ -347,6 +348,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] The retention purge follows the schedule table.
   - [ ] Account deletion anonymizes `ip` and `user_agent` on that user's household-less audit events, which otherwise live 2 years (WP-03 G1 re-review).
   - [ ] The retention purge nulls `extracted_items.message_meta` and `evidence` after 13 months and expires `queued` review items after the configured age; soft-deleted items and goals are hard-deleted after the retention period (WP-06 Q-055).
+  - [ ] The purge covers `calc_snapshots` older than 90 days that no `ai_texts` row or proposal references, through a SECURITY DEFINER function (Q-104).
 - **Gate:** G2.
 
 ## WP-25 · Billing + entitlements
@@ -364,6 +366,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] SAST, dependency and DAST scans are clean or triaged.
   - [ ] Runbooks exist: token key rotation, watch outage, SES bounce spike, restore from PITR.
   - [ ] The idempotency store is database-backed, so a repeated key within 24 h returns the stored response across API instances (§8.1).
+  - [ ] Writes to items, occurrences, balances, planned expenses and goals enqueue `plan.recompute` after commit, through WP-09's enqueue function (Q-102).
 - **Gate:** G4.
 
 ## P1 packages (start only after the Day-60 decision gate)
