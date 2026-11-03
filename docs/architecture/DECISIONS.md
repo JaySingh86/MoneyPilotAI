@@ -24,7 +24,8 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 | 014 | Agent-driven delivery: work packages, path ownership, CI as the contract | Accepted |
 | 015 | Timestamped SQL migrations, expand/contract | Accepted |
 | 016 | Mobile app on the React Native CLI (no Expo) | Accepted |
-| 017 | Auth on AWS Cognito behind the adapter | Accepted |
+| 017 | Auth on AWS Cognito behind the adapter | Accepted (step-up amended by 018) |
+| 018 | Step-up requires proof that MFA was used | Accepted |
 
 ---
 
@@ -138,4 +139,14 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 - The sign-in UI is ours to build, since Cognito's managed login isn't used for the in-app look.
 - It is cheaper at scale and stays in one cloud.
 - `app_sync_auth_user` becomes callable by `mp_api`; the email argument may only come from a verified `email_verified = true` claim.
+
+## ADR-018 Step-up requires proof that MFA was used (amends ADR-017)
+**Context:** the G1 review of WP-05 found that `mfa_enabled` + `auth_time` proves a recent sign-in, not that a second factor was used. A federated (Google) sign-in, or a pool with optional MFA, could pass step-up with only a stolen password or session.
+**Decision:**
+- The pre-token-generation trigger adds `mfa_verified_at` (epoch seconds) only when the session's sign-in completed a second-factor challenge. It keeps the value across token refreshes and never invents it.
+- Step-up requires `mfa_verified_at` at most 10 minutes old. `mfa_enabled` stays as an informational "enrolled" flag.
+- MFA stays optional for everyday use (owner decision, 2026-11-03). Federated sign-ins must complete our TOTP challenge before step-up actions.
+- WP-09 implements the trigger. If Cognito can't provide this signal reliably, WP-09 files a question; the fallback is pool-level MFA REQUIRED.
+
+**Consequences:** sensitive actions (connect email, export, delete, leave) can't be reached with a password alone. WP-05 tests must cover a missing, stale and string-typed `mfa_verified_at`.
 

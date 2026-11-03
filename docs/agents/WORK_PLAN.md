@@ -166,6 +166,8 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] RLS tests cover all new tables.
   - [ ] `recurring_items.subcategory`, `movable`, `on_bills_page` and `goals.is_emergency_fund` exist (BACKEND_PLAN §5.2). Seeding the fixture stores each renewal as an item; renewal-only ones get `on_bills_page = false`, and r-car links to the car insurance item (Q-020).
   - [ ] The engine input carries `onBillsPage`, and `billsAverages` skips items where it is false (small cross-WP change in `packages/engine`), so the bills page still shows 18 rows and $4,956.94 (DESIGN_SPEC §6 rule 17).
+  - [ ] Household PATCH accepts `primaryIncomeItemId`, checked to be an income item in the same household (Q-086); a cushion change recomputes the plan.
+  - [ ] WP-05's leave hook reassigns the leaver's owned items to the remaining member (`LeaveHooks.reassignOwnedItems`).
 - **Gate:** G1.
 
 ## WP-07 · Engine rules complete
@@ -195,6 +197,9 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] `cdk synth` is clean; `cdk diff` is reviewed by a human.
   - [ ] The api task role cannot `kms:Decrypt` with the token key (IAM policy test / cdk-nag).
   - [ ] cdk-nag passes, with justified suppressions only.
+  - [ ] The pre-token-generation trigger emits `email`, `email_verified`, `mfa_enabled` and `mfa_verified_at` (ADR-018); federated sign-ins must pass our TOTP challenge before `mfa_verified_at` is set.
+  - [ ] Account linking (if any) links two identities only when both have a verified email (Q-083); the pool forbids unverified email attribute updates.
+  - [ ] The API exits at startup in production when `COGNITO_*` is missing or inconsistent.
 - **Gate:** G2 (human applies to AWS).
 
 ## WP-10 · UI kit
@@ -254,6 +259,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Send times equal 09:00 household local time across the DST boundary (test with Nov 1, 2026).
   - [ ] Paying or moving an occurrence cancels and re-plans its future notifications.
   - [ ] SES bounce events update delivery status; a hard bounce disables the email channel.
+  - [ ] `packages/notify` provides WP-05's `InviteSender` (link `/invite?token=`, names escaped, per-user send quota) and the `invite.accepted` notification to the creator (Q-081, Q-087).
 
 ## WP-16 · CSV import + recurring detection
 - **Owns:** `packages/detection/**`, `apps/api/src/modules/imports/**`, `apps/worker/src/jobs/imports/**`, migrations for `imports`, `transactions`.
@@ -272,6 +278,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Layout matches at 1440, 1024 and 390 widths (Playwright screenshots attached next to the canvas frames).
   - [ ] WP-10 follow-ups: add 1440 visual baselines for RunwayChart and HeroCard, and assert no horizontal page scroll at 1440/1024/390; apply Q-045 to Q-049 in `packages/ui` (icon button 18/`text.secondary`, error banner 12×14 radius lg, calendar cell named from visible content and the axe exemption removed); if CI runs on x86, regenerate the visual baselines there or run the job on an arm64 runner.
   - [ ] Loading, empty and error states exist; axe passes; keyboard navigation works through the calendar grid.
+  - [ ] The web app calls `POST /me/bootstrap` after sign-in and token refresh, so email and MFA changes sync promptly.
 
 ## WP-18 · Web: Bills, Renewals, Goals, Tasks
 - **Owns:** `apps/web/app/(app)/{bills,renewals,goals,tasks}/**`
@@ -305,6 +312,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Watch and subscription renewal runs daily; expiry within 24 h raises an alert.
   - [ ] Disconnect revokes at the provider, stops the watch, deletes the token and writes an audit event.
   - [ ] Against fake providers: backfill resumes after interruption; duplicate pushes create no duplicate messages.
+  - [ ] WP-05's leave hook revokes the leaver's email connections (`LeaveHooks.revokeEmailConnections`) and the household summary reports the real connection status.
 - **Gate:** G2 before any real inbox, including staff test accounts.
 
 ## WP-22 · Email processing pipeline
@@ -347,6 +355,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Dashboards and alerts exist for every §12 metric.
   - [ ] SAST, dependency and DAST scans are clean or triaged.
   - [ ] Runbooks exist: token key rotation, watch outage, SES bounce spike, restore from PITR.
+  - [ ] The idempotency store is database-backed, so a repeated key within 24 h returns the stored response across API instances (§8.1).
 - **Gate:** G4.
 
 ## P1 packages (start only after the Day-60 decision gate)

@@ -10,7 +10,13 @@
     },
     "test": {
       "dependsOn": ["^typecheck"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": [
+        "DOCKER_HOST",
+        "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE",
+        "TESTCONTAINERS_HOST_OVERRIDE",
+        "TESTCONTAINERS_RYUK_DISABLED"
+      ]
     },
     "dev": {
       "cache": false,

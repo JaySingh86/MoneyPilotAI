@@ -207,7 +207,7 @@ create table users (
   first_name    text not null,
   last_name     text,
   timezone      text not null default 'America/New_York',
-  mfa_enabled   boolean not null default false,    -- mirrored from auth webhook
+  mfa_enabled   boolean not null default false,    -- synced from verified token claims (ADR-017)
   created_at    timestamptz not null default now(),
   deleted_at    timestamptz
 );
@@ -743,16 +743,20 @@ Extra rules:
 
 **MFA policy:**
 - Encouraged at signup.
-- **Required before connecting an email account, exporting data, or deleting the household** (step-up). The API checks the `mfa_enabled` claim and the authentication age from `auth_time` (≤ 10 min for destructive actions).
+- **Required before connecting an email account, exporting data, deleting the household, or leaving it** (step-up). The API requires the `mfa_verified_at` claim (ADR-018): the time this session last completed a second-factor challenge, at most 10 min old. `mfa_enabled` (enrolled) and `auth_time` alone never satisfy step-up. MFA stays optional for everyday use; federated (Google) sign-ins must complete our TOTP challenge to get `mfa_verified_at`.
 
 **Household creation:**
 - Creates the `households` row and a `household_members` row (creator → `partnerA`, `is_creator = true`) in one transaction.
+- **One active household per user** (Q-085), enforced in the database (a partial unique index on active memberships). Creating or accepting into a second household returns 409 `conflict`.
+- The first name comes from the bootstrap request body (untrusted display text, escaped wherever rendered); the email only ever comes from verified token claims (Q-082).
 - The household's `forwarding_token` is a slug of the household name plus 3 random base32 characters, checked for uniqueness.
 
 **Invites (FR-01):**
-1. `POST /households/:id/invites` creates a 32-byte random token (only its sha256 is stored) and emails a link. It is limited to 1 open invite per household in the MVP (2 adults on Family Plus), with a 7-day expiry.
+1. `POST /households/:id/invites` creates a 32-byte random token (only its sha256 is stored) and emails a link. It is limited to 1 open invite per household in the MVP (2 adults on Family Plus), with a 7-day expiry, and to 5 invites per user per day. The email escapes the household and first names. The sender comes from `packages/notify` (WP-15); until it exists, invite creation fails in production instead of pretending to send (Q-081).
 2. `POST /invites/accept` requires a signed-in user whose email matches the invite (case-insensitive); otherwise it returns 403 with a "sign in with {masked email}" hint.
-3. Accepting creates the membership (`partnerB`), an audit event and a notification to the creator.
+3. Accepting creates the membership (`partnerB`), an audit event and a notification to the creator (the notification is wired by WP-15 on `invite.accepted`, Q-087).
+4. Invite failures use the standard codes: 404 `not_found`, 409 `conflict` (expired, revoked, already accepted), 403 `forbidden` with the masked-email hint (Q-080).
+5. One email on two sign-in methods returns 409 for now. Account linking (WP-09) links only when both identities have a verified email (Q-083).
 
 **Roles:**
 - Both adults have equal access to household data.
@@ -1100,7 +1104,7 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 - **Money:** integer cents (`amountCents`). **Dates:** `YYYY-MM-DD`. **Timestamps:** ISO 8601 UTC. **IDs:** UUID.
 - **Pagination:** cursor-based (`?limit=50&cursor=…`) → `{ data: [...], nextCursor }`.
 - **Writes** accept `Idempotency-Key` (required on POSTs that create things). Repeats within 24 h return the stored response.
-- **Optimistic concurrency:** resources carry `version`. `PATCH` requires `If-Match: <version>`, and a mismatch returns 409 with the current resource. This matters because partners edit the same data.
+- **Optimistic concurrency:** resources carry `version`. `PATCH` requires `If-Match: <version>`, and a mismatch returns 409 with the current resource. Exception: `PATCH /me` is last-write-wins, since only the user edits their own profile (Q-084). This matters because partners edit the same data.
 - **Errors:** RFC 9457 `application/problem+json`, e.g. `{ type, title, status, detail, code, fields? }`. Codes include `validation_failed`, `not_found`, `forbidden`, `conflict`, `entitlement_required`, `mfa_required`, `rate_limited`.
 - **Rate limits** (per user): 600 req/min overall; auth-sensitive endpoints 20/min; Ask 30/day; exports 3/day. Returns 429 with `Retry-After`. Per-minute limits are kept in memory per API instance. The daily caps are enforced in their own services by counting today’s `ai_runs` (Ask) and `data_requests` (exports) rows, so they hold across instances (Q-031).
 - **Problem `type`** is the relative URI `/problems/<code>`. Entitlement and MFA failures return 403 with codes `entitlement_required` and `mfa_required`; clients branch on `code`, not status (Q-030).
