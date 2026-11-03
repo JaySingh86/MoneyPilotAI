@@ -32,8 +32,8 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | done |
 | WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | done |
 | WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | done |
-| WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | todo |
-| WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | todo |
+| WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | in-progress (wp-builder, wp/15-notify) |
+| WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | in-progress (wp-builder, wp/16-csv-import) |
 | WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | in-progress (wp-builder, wp/17-web-overview) |
 | WP-18 | Web: Bills, Renewals, Goals, Tasks | 3 | WP-10, WP-08 (WP-12, WP-13 for live data) | L | — | todo |
 | WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | done |
@@ -42,7 +42,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | todo |
 | WP-23 | Web: Email & imports, Members & privacy, setup flow, review UI | 4 | WP-10, WP-14, WP-21 | L | — | todo |
 | WP-24 | Privacy ops: export, leave, delete, retention, activity | 4 | WP-05, WP-21 | M | G2 | todo |
-| WP-25 | Billing + entitlements | 4 | WP-05, WP-08 | M | — | todo |
+| WP-25 | Billing + entitlements | 4 | WP-05, WP-08 | M | — | in-progress (wp-builder, wp/25-billing) |
 | WP-26 | Hardening: security, observability, E2E, load | 4 | WP-12…WP-25 | L | G4 | todo |
 | WP-27 | P1 · Explain (AI text) + number validator | P1 | WP-11, WP-12 | M | G3 | todo |
 | WP-28 | P1 · Ask MoneyPilot (engine tools, SSE) | P1 | WP-27 | L | G3 | todo |
