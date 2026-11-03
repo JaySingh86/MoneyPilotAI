@@ -234,6 +234,8 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] With the fixture seeded, `GET /plan` returns exactly the `expected` values; the shortfall scenario seed returns `scenarios.shortfall.expected`.
   - [ ] p95 < 300 ms locally for the fixture household.
   - [ ] Snapshot deduplication by `inputs_hash`; `calcSnapshotId` is stable across identical reads.
+  - [ ] One shared DB pool provider for API modules (closed on shutdown), replacing per-module pools such as WP-06's items module.
+  - [ ] The nightly occurrence sweep is registered in pg-boss and fans out with `app_list_household_ids()` (WP-06, Q-051).
 
 ## WP-13 · Goals, proposals, tasks
 - **Owns:** `apps/api/src/modules/{goals,tasks}/**`, `apps/worker/src/jobs/{proposals,tasks}/**`, related migrations and contracts.
@@ -242,6 +244,8 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] A proposer can’t approve their own proposal; a stale proposal becomes `superseded`; proposals expire after 7 days.
   - [ ] Goals return the fixture `goalsPage` values; tasks return `tasks` counts and the nav badge of 3.
   - [ ] Auto-complete fires on `actual_amount_received`.
+  - [ ] Replace WP-06's interim `approval_required` guard with proposals: deleting a partner's item, changing its owner/status, and moving its due date create a proposal (§7.3). Add the goals write grants together with the proposal gate.
+  - [ ] Seed the fixture `tasks` (the 3 / 4 / 3 split, badge 3).
 
 ## WP-14 · Review queue + applied changes
 - **Owns:** `apps/api/src/modules/review/**`, migrations for `extracted_items`, `applied_changes`, `sender_rules`.

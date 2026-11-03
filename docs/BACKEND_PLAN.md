@@ -860,6 +860,7 @@ export interface PlanResult {
 - **A goal transfer reminder** is a synthetic event on the first primary payday of each month (rule 16). It is shown in the calendar and Goals screens, and it is **not** in the runway window that ends on that payday.
 - **Proposal flow:**
   1. Changes that affect the shared plan are created as a `proposals` row: goal monthly amount, a shortfall option, moving a bill, deleting an item owned by the partner.
+     - **Until WP-13 ships proposals (owner decision, 2026-11-03):** deleting the other member's item, changing its owner or status, or moving its occurrence's due date returns 403 `approval_required`. A member's own items and Both/Split items stay directly editable. Goals are read-only through the API until WP-13 adds the proposal gate.
   2. The other member gets a `proposal` notification.
   3. On approve, the API re-validates the payload against current data. If the data changed and the proposal is no longer valid, it is marked `superseded`.
   4. The change is applied in one transaction, with an `applied_changes` row and an audit event.
@@ -1109,7 +1110,7 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 - **Pagination:** cursor-based (`?limit=50&cursor=…`) → `{ data: [...], nextCursor }`.
 - **Writes** accept `Idempotency-Key` (required on POSTs that create things). Repeats within 24 h return the stored response.
 - **Optimistic concurrency:** resources carry `version`. `PATCH` requires `If-Match: <version>`, and a mismatch returns 409 with the current resource. Exception: `PATCH /me` is last-write-wins, since only the user edits their own profile (Q-084). This matters because partners edit the same data.
-- **Errors:** RFC 9457 `application/problem+json`, e.g. `{ type, title, status, detail, code, fields? }`. Codes include `validation_failed`, `not_found`, `forbidden`, `conflict`, `entitlement_required`, `mfa_required`, `rate_limited`.
+- **Errors:** RFC 9457 `application/problem+json`, e.g. `{ type, title, status, detail, code, fields? }`. Codes include `validation_failed`, `not_found`, `forbidden`, `conflict`, `entitlement_required`, `mfa_required`, `rate_limited`, `approval_required` (403: the change needs the other member's approval, §7.3).
 - **Rate limits** (per user): 600 req/min overall; auth-sensitive endpoints 20/min; Ask 30/day; exports 3/day. Returns 429 with `Retry-After`. Per-minute limits are kept in memory per API instance. The daily caps are enforced in their own services by counting today’s `ai_runs` (Ask) and `data_requests` (exports) rows, so they hold across instances (Q-031).
 - **Problem `type`** is the relative URI `/problems/<code>`. Entitlement and MFA failures return 403 with codes `entitlement_required` and `mfa_required`; clients branch on `code`, not status (Q-030).
 - OpenAPI is generated from Zod and published at `/v1/openapi.json`. The web and mobile clients are generated from it in CI. A contract test fails if a client and the server disagree.
