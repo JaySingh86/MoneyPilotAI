@@ -1,6 +1,7 @@
 // Drizzle mirror of migrations/202610271502_wp03_platform.sql (source of truth: the SQL).
 import {
   bigserial,
+  date,
   index,
   inet,
   integer,
@@ -56,3 +57,14 @@ export const webhookEvents = pgTable(
   },
   (t) => [primaryKey({ columns: [t.provider, t.eventId] })],
 );
+
+// Drizzle mirror of migrations/202611031300_wp12_calc-snapshots.sql (source of truth: the SQL).
+export const calcSnapshots = pgTable("calc_snapshots", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  householdId: uuid("household_id").notNull(),
+  engineVersion: text("engine_version").notNull(),
+  asOf: date("as_of", { mode: "string" }).notNull(),
+  inputsHash: bytea("inputs_hash").notNull(),
+  result: jsonb("result").$type<Record<string, unknown>>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

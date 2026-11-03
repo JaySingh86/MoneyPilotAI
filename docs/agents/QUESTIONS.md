@@ -14,6 +14,70 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-107 · WP-12 · An estimated item with no amount history
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: `packages/db/src/planning/engine-input.ts`; engine `validateInput` ("an estimated amount needs history"); contracts `CreateItem` (only `fixed` requires `amountCents`)
+- Question: A member can create an `estimated` item with neither history nor an amount. The engine refuses an estimated item without history, which would make `GET /plan` fail for the whole household because of one row. The projection uses the stored amount as a one-entry history, else `[0]`, so the bill is in the plan (at $0, flagged `estimate`) instead of the plan being unavailable. Is that right, or should `CreateItem` require an amount or a first history entry for estimated items (a WP-06 contract change)?
+- Options considered: (a) the fallback as built; (b) require `amountCents` for estimated and statement items at create and patch; (c) leave the item out of the plan and say so in a flag.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): (b) `amountCents` is required for estimated and statement items at create and patch (WP-06 contract and service). The projection fallback stays as a defensive path and raises a `data_missing` flag instead of a silent $0.
+
+## Q-106 · WP-12 · Plan for a past `asOf`: which balance, which occurrences?
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: BACKEND_PLAN §8.2 (`GET /plan?asOf=`), DESIGN_SPEC §6 rule 7
+- Question: `asOf` before the latest balance's date would make the engine refuse the input (balance after asOf). The projection picks the latest balance dated on or before `asOf`, and the occurrence rows as they are today (paid marks made later still show). So a past `asOf` is a recomputation with today's data, not a historical replay. Is that the intended meaning (the web never sends `asOf`; it is for tests and the weekly digest), or must past plans be reproduced from their stored snapshot?
+- Options considered: (a) as built; (b) `asOf` earlier than today returns the stored snapshot for that date if there is one, else 404.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): Keep (recompute from today's data). `asOf` is bounded to local today +-400 days and only today's plan is stored.
+
+## Q-105 · WP-12 · Which database role runs pg-boss, and who may enqueue from the API?
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: BACKEND_PLAN §9, ADR-004 (jobs enqueued in the same transaction as the data change); `apps/worker/src/index.ts`
+- Question: pg-boss creates and migrates its own `pgboss` schema on start, which needs the right to create a schema; `mp_worker` has no such right and `mp_api` cannot enqueue at all. Locally the worker starts pg-boss with `PGBOSS_DATABASE_URL`, falling back to the migrator URL. What should AWS use (a dedicated `mp_queue` role with USAGE on `pgboss` and the schema created by a migration step; or run `getConstructionPlans` output as a migration), and may `mp_api` get INSERT on `pgboss.job` so the API can enqueue in the data-change transaction? The pgboss tables have no `household_id`, are outside `public`, and are not covered by the RLS suite; jobs carry only a household id and ids.
+- Options considered: (a) migrator creates the schema in a migration, a `mp_queue` role runs the worker's pg-boss and the API enqueues through `mp_queue` grants; (b) pg-boss runs as migrator everywhere (not acceptable for a long-running process).
+- Blocking: no for local and tests. The API does not enqueue yet (Q-102).
+- Answer: Answered (tech lead for owner, 2026-11-03): WP-09 adds an `mp_queue` role (on its checklist). Locally the migrator fallback stays; in production the worker refuses to start without `PGBOSS_DATABASE_URL` and checks the role.
+
+## Q-104 · WP-12 · Retention of `calc_snapshots`
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: BACKEND_PLAN §5.2 (`calc_snapshots`), §7.11 (retention)
+- Question: `GET /plan` stores one immutable snapshot per distinct input (so also one per day, because `asOf` is part of the input). Neither app role may delete them (no DELETE grant), so they only grow: roughly one per household per active day plus one per edit. Explain texts and proposals will reference some of them. How long are snapshots kept, and which ones are exempt (those referenced by `ai_texts` or proposals)? Needs a definer purge function like Q-055, in WP-24.
+- Options considered: keep 90 days plus anything referenced; keep the last N per household.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): WP-24 does the purge (on its checklist).
+
+## Q-103 · WP-12 · Bills averages: `?include=averages` on the items list, or their own endpoint?
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: WORK_PLAN WP-12 ("bills averages (on the items list response)"), BACKEND_PLAN §8.2 (no averages endpoint listed), DESIGN_SPEC §6 rule 17
+- Question: Built as the work plan says: `GET /households/:hid/items?include=averages` adds `averages` ({ rows, monthlyBillsAverageCents, monthlyIncomeAverageCents, leftAfterBillsCents, estimatesToConfirm, byItem }) to the page. The averages always cover every Bills & recurring item of the household, whatever filters, owner or cursor the list uses (they are the screen's KPI strip, not a total of the visible page). Is that the intended meaning, and should the web call it once with the first page only? The extra field is optional, so existing clients are unaffected.
+- Options considered: (a) as built; (b) a separate `GET /households/:hid/bills/averages` (the web would not need a list call for the KPIs).
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): Keep. The web calls it on page 1 only.
+
+## Q-102 · WP-12 · Who enqueues `plan.recompute` after a data change?
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: BACKEND_PLAN §7.2 ("any write to items, occurrences, balances, planned expenses or goals enqueues `plan.recompute`"), WORK_PLAN WP-12, QUESTIONS Q-056
+- Question: The job (debounced singleton, 2 s) and `enqueuePlanRecompute(sender, householdId)` exist in `apps/worker/src/jobs/plan/recompute.ts`, but nothing calls it: the writes live in WP-05 (cushion, primary income), WP-06 (items, occurrences, planned expenses, balances) and WP-13 (goals), the API has no pg-boss connection (Q-105), and WP-12 may not edit those modules. Correctness does not depend on the job: `GET /plan` computes on read and dedupes by `inputs_hash`, so a cushion or primary-income change gives a new `calcSnapshotId` and new values on the next read (tested). Should each write path call an `onPlanInputsChanged(tx, householdId)` hook from its own transaction (once Q-105 is answered), or is a database trigger that records the change for the worker preferred?
+- Options considered: (a) a hook in each owning module, enqueue after commit; (b) pg-boss `send` inside the write transaction (needs INSERT on `pgboss.job`); (c) a trigger on the input tables writing an outbox row that the worker polls.
+- Blocking: no. Compute-on-read covers the acceptance item "recompute when the cushion or primary income changes".
+- Answer: Answered (tech lead for owner, 2026-11-03): Compute-on-read stays. Enqueue hooks come after the queue role (WP-09/WP-26 checklists). `enqueuePlanRecompute` is marked not yet wired.
+
+## Q-101 · WP-12 · Which error answers a plan request before onboarding is complete?
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: BACKEND_PLAN §8.1 (error codes), §8.2
+- Question: `GET /plan`, `/calendar` and `/plan/what-if` need a primary income and a balance. Without them the API answers 409 `conflict` with a static message ("Enter your current balance before planning."). There is no code the web can switch on to show the empty/onboarding state, so it would have to read `detail`. Should we add `plan_not_ready` (409) to the error codes? `/renewals`, `/renewals/summary` and the bills averages work without either.
+- Options considered: (a) 409 `conflict` as built; (b) a new `plan_not_ready` code with a `reason` of `no_primary_income` or `no_balance`.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03): Add a `plan_not_ready` 409 code with a static `reason` (`no_balance` or `no_primary_income`). Built.
+
+## Q-100 · WP-12 · The plan payload follows the engine's result, not the abridged §8.3 example
+- Asked by: wp-builder/wp/12-planning-api · 2026-11-03
+- Where: BACKEND_PLAN §8.3 (`GET /plan` payload), `packages/engine/src/types.ts` (`FullPlanResult`), WP-17 mocks
+- Question: §8.3 is marked abridged and differs from the engine in places: runway events there are `{ type, itemId, name, amountCents }`, the engine's are `{ kind, sourceId, occurrenceId, name, owner, amountCents, date, scheduledOn, dueOn, status, isEstimate }`; decisions there carry `impact` and a ready `templateText`, the engine's carry `rank`, `subjectId`, `params` and two template strings (the client fills them through packages/format, so every number stays engine-sourced); `flags` there use `type` and `itemId`, the engine's `code` and `subjectId`. Hard rule 4 and the precedence (engine and DESIGN_SPEC over an abridged example) point to the engine's shape, so `Plan` mirrors `FullPlanResult` field for field and adds `calcSnapshotId`, `cushionCents` and `aiText: null` (reserved for WP-27). `POST /plan/what-if` takes `move_occurrence` and `set_actual_amount` by `occurrenceId` (as in §8.3); the other changes use the engine's fields. The response is `{ before, after, diff }` where `before` and `after` are the plan headline (state, safe to spend, display values, lowest, belowCushionFrom, belowZeroDates, math) and `diff` is the engine's `PlanDiff`. Confirm, or list the fields the WP-17 mocks need to change.
+- Options considered: (a) the engine's shape (built; the contract test fails if the engine adds a field the schema lacks); (b) the §8.3 shape with an adapter in the API (a second source of names for the same numbers).
+- Blocking: no. WP-17 is built against mocks and needs the shape above to switch to the live API.
+- Answer: Answered (tech lead for owner, 2026-11-03): Keep the engine (`FullPlanResult`) shape. BACKEND_PLAN section 8.3 now says its examples are abridged and the contracts are the source of truth.
+
 ## Q-076 · WP-11 · Refusals in backfill batches get no fallback
 - Asked by: wp-builder/wp/11-ai · 2026-11-03
 - Where: BACKEND_PLAN §7.9 (fallbacks, Batch API); `packages/ai/src/sdk-transport.ts`

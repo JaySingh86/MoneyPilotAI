@@ -8,6 +8,7 @@ import {
   AmountHistory,
   AppError,
   Balance,
+  BillsAverages,
   CreateBalance,
   CreateItem,
   CreatePlannedExpense,
@@ -62,18 +63,20 @@ function checkRange(from: string, to: string): void {
 
 export function itemsRoutes(deps: () => ItemsDeps): FastifyPluginAsyncZod {
   return async (scope) => {
-    const ItemPage = page(Item);
+    // `?include=averages` adds the Bills & recurring monthly averages (rule 17, computed by the engine in WP-12).
+    const ItemPage = page(Item).extend({ averages: BillsAverages.optional() });
 
     scope.get(
       "/households/:hid/items",
       { schema: { params: HouseholdParams, querystring: ItemListQuery, response: { 200: ItemPage } } },
       async (request) => {
-        const { limit, cursor, ...filter } = request.query;
+        const { limit, cursor, include, ...filter } = request.query;
         return service.listItems(
           deps(),
           actor(request),
           { ...filter, ...(cursor ? { after: cursor } : {}) },
           limit,
+          include,
         );
       },
     );

@@ -22,6 +22,23 @@ export {
   runMigrations,
 } from "./migrate";
 export {
+  loadEngineInput,
+  MAX_PLAN_OFFSET_DAYS,
+  PlanDateRangeError,
+  withinPlanRange,
+  type LoadedPlanInput,
+  type LoadOptions,
+  type PlanNotReadyReason,
+} from "./planning/engine-input";
+export { loadBillsAverages } from "./planning/averages";
+export {
+  canonicalJson,
+  inputsHash,
+  recomputePlan,
+  storeSnapshot,
+  type RecomputeResult,
+} from "./planning/snapshot";
+export {
   extendOccurrences,
   householdToday,
   materializeForJob,

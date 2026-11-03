@@ -6,9 +6,11 @@
 import type { ApiModule } from "../lib/module";
 import { identityModules } from "./identity";
 import { itemsModule } from "./items";
+import { planningModule } from "./planning";
 
 export const modules: readonly ApiModule[] = [
   // Append new modules below this line, one per line.
   ...identityModules, // WP-05: identity, households
   itemsModule,
+  planningModule, // WP-12: plan, what-if, calendar, renewals
 ];

@@ -175,6 +175,33 @@ describe("items", () => {
     expectProblem(await post(newBill({ amountCents: 10.5 })), 400, "validation_failed");
   });
 
+  it("requires an amount for estimated and statement items, at create and patch (Q-107)", async () => {
+    const post = (payload: object) =>
+      app.inject({ method: "POST", url: `${base()}/items`, headers: { ...sam(), ...key() }, payload });
+    expectProblem(
+      await post(newBill({ amountType: "estimated", amountCents: null })),
+      400,
+      "validation_failed",
+    );
+    expectProblem(
+      await post(newBill({ amountType: "statement", amountCents: null })),
+      400,
+      "validation_failed",
+    );
+    const fixed = await createBill({ name: "Amount patch" });
+    const patch = (payload: object) =>
+      app.inject({
+        method: "PATCH",
+        url: `${base()}/items/${fixed.id}`,
+        headers: { ...sam(), "if-match": `"${fixed.version}"` },
+        payload,
+      });
+    expectProblem(await patch({ amountCents: null }), 400, "validation_failed");
+    const ok = await patch({ amountType: "estimated" }); // keeps the stored amount as its estimate
+    expect(ok.statusCode, ok.body).toBe(200);
+    expect(ok.json()).toMatchObject({ amountType: "estimated", amountCents: 4500 });
+  });
+
   it("answers a stale If-Match with 409 and the current item; a missing one with 428", async () => {
     const item = await createBill({ name: "Stale test" });
     const patch = (version: string, payload: object) =>

@@ -8,6 +8,7 @@ import { buildServer, type ApiServer } from "../../server";
 import { createHouseholdsModule } from "../../modules/households";
 import { createIdentityModule } from "../../modules/identity";
 import { createItemsModule } from "../../modules/items";
+import { createPlanningModule } from "../../modules/planning";
 import { createAuthenticator } from "../authenticator";
 import { createCognitoProvider } from "../cognito";
 import type { ApiRuntime, InviteSender } from "../runtime";
@@ -73,6 +74,7 @@ export async function createTestApi(): Promise<TestApi> {
       createIdentityModule(() => rt),
       createHouseholdsModule(() => rt),
       createItemsModule(() => rt, { now: () => "2026-10-27T16:00:00Z" }),
+      createPlanningModule(() => rt, { now: () => "2026-10-27T16:00:00Z" }),
     ],
   });
   await app.ready();

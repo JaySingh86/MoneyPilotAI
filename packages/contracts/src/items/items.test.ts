@@ -40,7 +40,10 @@ describe("items contracts", () => {
     expect(CreateItem.safeParse({ ...bill, ownerUserId: null }).success).toBe(false);
     expect(CreateItem.safeParse({ ...bill, ownerType: "both" }).success).toBe(false);
     expect(CreateItem.safeParse({ ...bill, amountCents: null }).success).toBe(false);
-    expect(CreateItem.safeParse({ ...bill, amountType: "estimated", amountCents: null }).success).toBe(true);
+    // Q-107: estimated and statement items need an amount too (the estimate, the last statement)
+    expect(CreateItem.safeParse({ ...bill, amountType: "estimated", amountCents: null }).success).toBe(false);
+    expect(CreateItem.safeParse({ ...bill, amountType: "statement", amountCents: null }).success).toBe(false);
+    expect(CreateItem.safeParse({ ...bill, amountType: "estimated", amountCents: 14200 }).success).toBe(true);
   });
 
   it("limits account numbers to the last 4 characters", () => {

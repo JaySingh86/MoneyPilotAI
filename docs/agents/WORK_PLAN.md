@@ -29,7 +29,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | todo |
 | WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | done |
 | WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | done (G3 open: live eval pending) |
-| WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | in-progress (wp-builder, wp/12-planning-api) |
+| WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | done |
 | WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | in-progress (wp-builder, wp/13-goals-tasks) |
 | WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | in-progress (wp-builder, wp/14-review-queue) |
 | WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | todo |

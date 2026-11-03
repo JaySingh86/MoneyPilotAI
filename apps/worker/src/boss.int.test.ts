@@ -1,0 +1,223 @@
+// Real pg-boss against a real Postgres: the queues and the 02:00 UTC schedule are registered, the nightly
+// sweep fans out with app_list_household_ids(), and plan.recompute is a debounced singleton that stores
+// the fixture's calc snapshot.
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import pg from "pg";
+import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
+import { createApiDb, createWorkerDb, type ApiDb, type WorkerDb } from "@mp/db";
+import { createHousehold, ensureUser, seedFixture, seedPlanning, type SeedResult } from "@mp/db/testing";
+import { createLogger } from "@mp/observability";
+import { startJobs, type StartedJobs } from "./boss";
+import { assertQueueRole, checkBossConnection, readConnectionRole } from "./startup-checks";
+import { OCCURRENCES_SWEEP_CRON, OCCURRENCES_SWEEP_QUEUE } from "./jobs/occurrences/sweep";
+import { PLAN_RECOMPUTE_QUEUE, enqueuePlanRecompute } from "./jobs/plan/recompute";
+
+let api: ApiDb;
+let worker: WorkerDb;
+let admin: pg.Client;
+let jobs: StartedJobs;
+let seeded: SeedResult;
+let secondHousehold: string;
+let expectedSafeToSpend: number;
+
+async function until<T>(read: () => Promise<T | null | undefined | false>, what: string): Promise<T> {
+  const deadline = Date.now() + 30_000;
+  for (;;) {
+    const value = await read();
+    if (value) return value;
+    if (Date.now() > deadline) throw new Error(`timed out waiting for ${what}`);
+    await new Promise((r) => setTimeout(r, 250));
+  }
+}
+
+const count = async (sql: string, params: unknown[]): Promise<number> =>
+  Number((await admin.query(sql, params)).rows[0]?.n ?? 0);
+
+beforeAll(async () => {
+  api = createApiDb({ connectionString: inject("apiDatabaseUrl"), max: 2 });
+  worker = createWorkerDb({ connectionString: inject("workerDatabaseUrl"), max: 4 });
+  admin = new pg.Client({ connectionString: inject("adminDatabaseUrl") });
+  await admin.connect();
+  const fixtureJson = await readFile(
+    fileURLToPath(new URL("../../../design/fixtures/rivera-household.json", import.meta.url)),
+    "utf8",
+  );
+  const fixture = JSON.parse(fixtureJson) as { expected: { safeToSpendCents: number } };
+  expectedSafeToSpend = fixture.expected.safeToSpendCents;
+  seeded = await seedFixture({ api, worker }, fixture);
+  await seedPlanning({ api, worker }, seeded, fixture);
+  const owner = await ensureUser(api, {
+    authSubject: "sweep|second",
+    email: "second@example.test",
+    firstName: "Second",
+    timezone: "America/Chicago",
+  });
+  secondHousehold = "00000000-0000-4000-8000-0000000000c3";
+  await createHousehold(api, owner, {
+    id: secondHousehold,
+    name: "Second household",
+    timezone: "America/Chicago",
+    forwardingToken: "second-sweep",
+  });
+  // pg-boss creates its own schema, which mp_worker cannot: it connects as the superuser here.
+  jobs = await startJobs({
+    bossUrl: inject("adminDatabaseUrl"),
+    db: worker,
+    now: () => "2026-10-27T16:00:00Z",
+    log: createLogger("worker", "silent"),
+    pollingIntervalSeconds: 0.5,
+  });
+}, 240_000);
+
+afterAll(async () => {
+  await jobs?.stop();
+  await admin?.end();
+  await api?.close();
+  await worker?.close();
+});
+
+describe("queue connection role (security M2)", () => {
+  it("accepts mp_worker and refuses a superuser connection", async () => {
+    const worker = await readConnectionRole(inject("workerDatabaseUrl"));
+    expect(worker.rolname).toBe("mp_worker");
+    expect(() => assertQueueRole(worker)).not.toThrow();
+    const superuser = await readConnectionRole(inject("adminDatabaseUrl"));
+    expect(() => assertQueueRole(superuser)).toThrow(/superuser/);
+  });
+
+  it("checkBossConnection in production rejects the superuser URL and accepts a plain role", async () => {
+    await expect(
+      checkBossConnection({ NODE_ENV: "production", PGBOSS_DATABASE_URL: inject("adminDatabaseUrl") }),
+    ).rejects.toThrow(/superuser/);
+    await expect(
+      checkBossConnection({ NODE_ENV: "production", PGBOSS_DATABASE_URL: inject("workerDatabaseUrl") }),
+    ).resolves.toBe(inject("workerDatabaseUrl"));
+    await expect(checkBossConnection({ NODE_ENV: "production" })).rejects.toThrow(/PGBOSS_DATABASE_URL/);
+  });
+});
+
+describe("job registration", () => {
+  it("creates the queues and schedules the nightly sweep at 02:00 UTC", async () => {
+    for (const name of ["occurrences.materialize", PLAN_RECOMPUTE_QUEUE, OCCURRENCES_SWEEP_QUEUE]) {
+      expect(await jobs.boss.getQueue(name), name).not.toBeNull();
+    }
+    const schedules = await jobs.boss.getSchedules(OCCURRENCES_SWEEP_QUEUE);
+    expect(schedules).toHaveLength(1);
+    expect(schedules[0]).toMatchObject({ name: OCCURRENCES_SWEEP_QUEUE, cron: OCCURRENCES_SWEEP_CRON });
+  });
+
+  it("registering twice (a restart) keeps one schedule", async () => {
+    const again = await startJobs({
+      bossUrl: inject("adminDatabaseUrl"),
+      db: worker,
+      now: () => "2026-10-27T16:00:00Z",
+      log: createLogger("worker", "silent"),
+    });
+    try {
+      expect(await again.boss.getSchedules(OCCURRENCES_SWEEP_QUEUE)).toHaveLength(1);
+    } finally {
+      await again.stop();
+    }
+  });
+});
+
+describe("occurrences.sweep", () => {
+  it("lists every household through app_list_household_ids()", async () => {
+    const ids = await worker.listHouseholdIds();
+    expect(ids).toEqual(expect.arrayContaining([seeded.householdId, secondHousehold]));
+  });
+
+  it("fans out one materialize job per household, and each one completes", async () => {
+    const before = await count(
+      "select count(*)::int as n from pgboss.job where name = 'occurrences.materialize'",
+      [],
+    );
+    await jobs.boss.send(OCCURRENCES_SWEEP_QUEUE, {});
+    await until(
+      async () =>
+        (await count(
+          "select count(*)::int as n from pgboss.job where name = 'occurrences.materialize'",
+          [],
+        )) >=
+        before + 2,
+      "the materialize jobs to be enqueued",
+    );
+    await until(
+      async () =>
+        (await count(
+          "select count(*)::int as n from pgboss.job where name = 'occurrences.materialize' and state = 'completed'",
+          [],
+        )) >= 2,
+      "the materialize jobs to complete",
+    );
+    for (const id of [seeded.householdId, secondHousehold]) {
+      expect(
+        await count(
+          "select count(*)::int as n from pgboss.job where name = 'occurrences.materialize' and data->>'householdId' = $1 and state = 'completed'",
+          [id],
+        ),
+      ).toBe(1);
+    }
+  });
+});
+
+describe("plan.recompute", () => {
+  it("is a debounced singleton: a burst of writes queues one job", async () => {
+    const ids = await Promise.all(
+      [1, 2, 3, 4, 5].map(() => enqueuePlanRecompute(jobs.boss, secondHousehold)),
+    );
+    expect(ids.filter((id) => id !== null)).toHaveLength(1);
+    expect(
+      await count("select count(*)::int as n from pgboss.job where name = $1 and data->>'householdId' = $2", [
+        PLAN_RECOMPUTE_QUEUE,
+        secondHousehold,
+      ]),
+    ).toBe(1);
+  });
+
+  it("stores the fixture's snapshot, once, however often it runs", async () => {
+    await enqueuePlanRecompute(jobs.boss, seeded.householdId);
+    const snapshot = await until(async () => {
+      const r = await admin.query(
+        "select id, result->>'safeToSpendCents' as safe, result->>'asOf' as as_of from calc_snapshots where household_id = $1",
+        [seeded.householdId],
+      );
+      return r.rows[0] as { id: string; safe: string; as_of: string } | undefined;
+    }, "the snapshot");
+    expect(snapshot.as_of).toBe("2026-10-27");
+    expect(Number(snapshot.safe)).toBe(expectedSafeToSpend);
+
+    // run it again after the debounce slot: same input, same row
+    await new Promise((r) => setTimeout(r, 2500));
+    await enqueuePlanRecompute(jobs.boss, seeded.householdId);
+    await until(
+      async () =>
+        (await count(
+          "select count(*)::int as n from pgboss.job where name = $1 and data->>'householdId' = $2 and state = 'completed'",
+          [PLAN_RECOMPUTE_QUEUE, seeded.householdId],
+        )) >= 2,
+      "the second recompute",
+    );
+    expect(
+      await count("select count(*)::int as n from calc_snapshots where household_id = $1", [
+        seeded.householdId,
+      ]),
+    ).toBe(1);
+  });
+
+  it("skips a household that cannot be planned yet instead of failing", async () => {
+    await enqueuePlanRecompute(jobs.boss, secondHousehold);
+    await until(
+      async () =>
+        (await count(
+          "select count(*)::int as n from pgboss.job where name = $1 and data->>'householdId' = $2 and state = 'completed'",
+          [PLAN_RECOMPUTE_QUEUE, secondHousehold],
+        )) >= 1,
+      "the job to complete",
+    );
+    expect(
+      await count("select count(*)::int as n from calc_snapshots where household_id = $1", [secondHousehold]),
+    ).toBe(0);
+  });
+});

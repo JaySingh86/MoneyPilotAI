@@ -154,8 +154,8 @@ export const CreateItem = itemFields
     message: "A member owner needs ownerUserId; both and split must not have one",
     path: ["ownerUserId"],
   })
-  .refine((v) => v.amountType !== "fixed" || v.amountCents != null, {
-    message: "A fixed amount needs amountCents",
+  .refine((v) => v.amountCents != null, {
+    message: "Every amount type needs amountCents (the estimate or the last statement for variable bills)",
     path: ["amountCents"],
   })
   .meta({ id: "CreateItem" });
@@ -182,6 +182,8 @@ export const ItemListQuery = z.object({
     .enum(["true", "false"])
     .transform((v) => v === "true")
     .optional(),
+  /** `averages` adds the monthly averages of Bills & recurring (rule 17, WP-12) to the page. */
+  include: z.enum(["averages"]).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   cursor: Uuid.optional(),
 });

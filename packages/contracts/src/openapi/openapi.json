@@ -43,6 +43,7 @@
               "entitlement_required",
               "mfa_required",
               "approval_required",
+              "plan_not_ready",
               "rate_limited",
               "idempotency_key_reused",
               "precondition_required",
@@ -58,7 +59,12 @@
             "type": "array",
             "items": { "$ref": "#/components/schemas/ProblemFieldInput" }
           },
-          "current": { "description": "The current resource, on a version conflict (If-Match)" }
+          "current": { "description": "The current resource, on a version conflict (If-Match)" },
+          "reason": {
+            "description": "plan_not_ready only: what the household still has to set up",
+            "type": "string",
+            "enum": ["no_balance", "no_primary_income"]
+          }
         },
         "required": ["type", "title", "status", "code"],
         "description": "RFC 9457 problem details"
@@ -1329,6 +1335,1366 @@
         },
         "required": ["amountCents", "asOf"]
       },
+      "PlanFlagInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "not_usual_month",
+              "price_up",
+              "possible_duplicate",
+              "decide_by",
+              "not_automatic",
+              "estimate",
+              "stale_balance",
+              "overdue",
+              "data_missing"
+            ]
+          },
+          "subjectId": { "type": ["string", "null"] },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "relatedIds": { "type": "array", "items": { "type": "string" } },
+          "deadlineKind": { "type": "string", "enum": ["decision", "cancel"] }
+        },
+        "required": ["code", "subjectId", "date"]
+      },
+      "RunwayEventInput": {
+        "type": "object",
+        "properties": {
+          "kind": { "type": "string", "enum": ["income", "bill", "planned_expense", "goal_transfer"] },
+          "sourceId": { "type": "string" },
+          "occurrenceId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "name": { "type": "string" },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "scheduledOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "status": {
+            "anyOf": [
+              { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+              { "type": "string", "const": "planned" }
+            ]
+          },
+          "isEstimate": { "type": "boolean" }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "occurrenceId",
+          "name",
+          "owner",
+          "amountCents",
+          "date",
+          "scheduledOn",
+          "dueOn",
+          "status",
+          "isEstimate"
+        ]
+      },
+      "RunwayDayInput": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "endBalanceCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "events": { "type": "array", "items": { "$ref": "#/components/schemas/RunwayEventInput" } }
+        },
+        "required": ["date", "endBalanceCents", "events"]
+      },
+      "PlanMathLineInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "starting_balance",
+              "carried_events",
+              "income_in_window",
+              "money_out_in_window",
+              "lowest_point",
+              "cushion",
+              "safe_to_spend",
+              "shortfall",
+              "days_to_payday",
+              "per_day"
+            ]
+          },
+          "label": { "type": "string" },
+          "role": { "type": "string", "enum": ["value", "subtract", "total", "gap"] },
+          "cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "days": {
+            "anyOf": [
+              { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["id", "label", "role", "cents", "days", "date"]
+      },
+      "PlanDecisionInput": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": ["shortfall", "not_usual_month", "estimate", "decide_by", "goal_behind"]
+          },
+          "rank": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "subjectId": { "type": ["string", "null"] },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "templateText": { "type": "string" },
+          "detailTemplateText": { "type": "string" },
+          "params": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": { "type": ["string", "number", "null"] }
+          },
+          "aiText": { "type": ["string", "null"] }
+        },
+        "required": [
+          "id",
+          "kind",
+          "rank",
+          "subjectId",
+          "owner",
+          "date",
+          "templateText",
+          "detailTemplateText",
+          "params",
+          "aiText"
+        ]
+      },
+      "OptionResultInput": {
+        "type": "object",
+        "properties": {
+          "state": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shortfallDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "perDayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "minBalanceCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "neverBelowZero": { "type": "boolean" },
+          "effect": { "type": "string", "enum": ["ok", "info"] }
+        },
+        "required": [
+          "state",
+          "safeToSpendCents",
+          "safeToSpendDisplayCents",
+          "shortfallDisplayCents",
+          "perDayCents",
+          "minBalanceCents",
+          "neverBelowZero",
+          "effect"
+        ]
+      },
+      "ShortfallOptionInput": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "move_from_emergency_fund" },
+              "goalId": { "type": "string" },
+              "amountCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "capped": { "type": "boolean" },
+              "fundBalanceAfterCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "reachMonthBefore": { "type": ["string", "null"] },
+              "reachMonthAfter": { "type": ["string", "null"] },
+              "onlyIfAllowed": { "type": "boolean", "const": false },
+              "result": { "$ref": "#/components/schemas/OptionResultInput" }
+            },
+            "required": [
+              "kind",
+              "goalId",
+              "amountCents",
+              "capped",
+              "fundBalanceAfterCents",
+              "reachMonthBefore",
+              "reachMonthAfter",
+              "onlyIfAllowed",
+              "result"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "split_expense" },
+              "plannedExpenseId": { "type": "string" },
+              "amountNowCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "amountAfterPaydayCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "nowOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "afterPaydayOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "onlyIfAllowed": { "type": "boolean", "const": true },
+              "result": { "$ref": "#/components/schemas/OptionResultInput" }
+            },
+            "required": [
+              "kind",
+              "plannedExpenseId",
+              "amountNowCents",
+              "amountAfterPaydayCents",
+              "nowOn",
+              "afterPaydayOn",
+              "onlyIfAllowed",
+              "result"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "move_bill_to_payday" },
+              "itemId": { "type": "string" },
+              "itemKind": {
+                "type": "string",
+                "enum": [
+                  "bill",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "registration",
+                  "loan",
+                  "income",
+                  "other"
+                ]
+              },
+              "scheduledOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "fromDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "toDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "onlyIfAllowed": { "type": "boolean", "const": true },
+              "result": { "$ref": "#/components/schemas/OptionResultInput" }
+            },
+            "required": [
+              "kind",
+              "itemId",
+              "itemKind",
+              "scheduledOn",
+              "fromDate",
+              "toDate",
+              "amountCents",
+              "onlyIfAllowed",
+              "result"
+            ]
+          }
+        ]
+      },
+      "PlanInput": {
+        "type": "object",
+        "properties": {
+          "calcSnapshotId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "engineVersion": { "type": "string" },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "cushionCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "window": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "to": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "daysToPayday": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+            },
+            "required": ["from", "to", "daysToPayday"]
+          },
+          "state": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shortfallDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "perDayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "lowest": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"]
+          },
+          "belowCushionFrom": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "belowZeroDates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "format": "date",
+              "description": "Calendar date YYYY-MM-DD (household timezone)"
+            }
+          },
+          "billsBeforePayday": {
+            "type": "object",
+            "properties": {
+              "count": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "totalCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "byOwner": {
+                "type": "object",
+                "propertyNames": { "type": "string" },
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "Integer cents"
+                }
+              }
+            },
+            "required": ["count", "totalCents", "byOwner"]
+          },
+          "runway": { "type": "array", "items": { "$ref": "#/components/schemas/RunwayDayInput" } },
+          "runwayDetail": {
+            "type": "object",
+            "properties": {
+              "startingBalanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "startingBalanceAsOf": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "carriedEvents": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/RunwayEventInput" }
+              },
+              "openingBalanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "excludedEvents": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/RunwayEventInput" }
+              }
+            },
+            "required": [
+              "startingBalanceCents",
+              "startingBalanceAsOf",
+              "carriedEvents",
+              "openingBalanceCents",
+              "excludedEvents"
+            ]
+          },
+          "flags": { "type": "array", "items": { "$ref": "#/components/schemas/PlanFlagInput" } },
+          "decisions": { "type": "array", "items": { "$ref": "#/components/schemas/PlanDecisionInput" } },
+          "shortfallOptions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ShortfallOptionInput" }
+          },
+          "math": { "type": "array", "items": { "$ref": "#/components/schemas/PlanMathLineInput" } }
+        },
+        "required": [
+          "calcSnapshotId",
+          "engineVersion",
+          "asOf",
+          "cushionCents",
+          "window",
+          "state",
+          "safeToSpendCents",
+          "safeToSpendDisplayCents",
+          "shortfallDisplayCents",
+          "perDayCents",
+          "lowest",
+          "belowCushionFrom",
+          "belowZeroDates",
+          "billsBeforePayday",
+          "runway",
+          "runwayDetail",
+          "flags",
+          "decisions",
+          "shortfallOptions",
+          "math"
+        ]
+      },
+      "PlanChangeInput": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "move_occurrence" },
+              "occurrenceId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "toDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              }
+            },
+            "required": ["type", "occurrenceId", "toDate"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "set_actual_amount" },
+              "occurrenceId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["type", "occurrenceId", "amountCents"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "split_planned_expense" },
+              "plannedExpenseId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "amountNowCents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "laterOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              }
+            },
+            "required": ["type", "plannedExpenseId", "amountNowCents", "laterOn"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "add_transfer" },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "on": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "fromGoalId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "amountCents", "on"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "set_item_amount" },
+              "itemId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["type", "itemId", "amountCents"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "set_goal_monthly" },
+              "goalId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "monthlyCents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["type", "goalId", "monthlyCents"]
+          }
+        ]
+      },
+      "WhatIfRequestInput": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PlanChangeInput" }
+          },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          }
+        },
+        "required": ["changes"],
+        "additionalProperties": false
+      },
+      "PlanSummaryInput": {
+        "type": "object",
+        "properties": {
+          "state": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shortfallDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "perDayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "lowest": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"]
+          },
+          "belowCushionFrom": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "belowZeroDates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "format": "date",
+              "description": "Calendar date YYYY-MM-DD (household timezone)"
+            }
+          },
+          "math": { "type": "array", "items": { "$ref": "#/components/schemas/PlanMathLineInput" } }
+        },
+        "required": [
+          "state",
+          "safeToSpendCents",
+          "safeToSpendDisplayCents",
+          "shortfallDisplayCents",
+          "perDayCents",
+          "lowest",
+          "belowCushionFrom",
+          "belowZeroDates",
+          "math"
+        ]
+      },
+      "PlanDiffInput": {
+        "type": "object",
+        "properties": {
+          "stateBefore": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "stateAfter": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendBeforeCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendAfterCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "deltaCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "changesSafeToSpend": { "type": "boolean" },
+          "lowestBefore": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"]
+          },
+          "lowestAfter": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"]
+          }
+        },
+        "required": [
+          "stateBefore",
+          "stateAfter",
+          "safeToSpendBeforeCents",
+          "safeToSpendAfterCents",
+          "deltaCents",
+          "changesSafeToSpend",
+          "lowestBefore",
+          "lowestAfter"
+        ]
+      },
+      "WhatIfResponseInput": {
+        "type": "object",
+        "properties": {
+          "before": { "$ref": "#/components/schemas/PlanSummaryInput" },
+          "after": { "$ref": "#/components/schemas/PlanSummaryInput" },
+          "diff": { "$ref": "#/components/schemas/PlanDiffInput" }
+        },
+        "required": ["before", "after", "diff"]
+      },
+      "CalendarEntryInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["income", "bill", "estimate", "decision", "planned", "goal_transfer"]
+          },
+          "sourceId": { "type": "string" },
+          "occurrenceId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "name": { "type": "string" },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "status": {
+            "anyOf": [
+              { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+              { "type": "string", "const": "planned" }
+            ]
+          },
+          "isEstimate": { "type": "boolean" },
+          "flagCodes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "not_usual_month",
+                "price_up",
+                "possible_duplicate",
+                "decide_by",
+                "not_automatic",
+                "estimate",
+                "stale_balance",
+                "overdue",
+                "data_missing"
+              ]
+            }
+          },
+          "goalIds": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "occurrenceId",
+          "name",
+          "owner",
+          "amountCents",
+          "date",
+          "status",
+          "isEstimate",
+          "flagCodes",
+          "goalIds"
+        ]
+      },
+      "CalendarDayInput": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "isPayday": { "type": "boolean" },
+          "entries": { "type": "array", "items": { "$ref": "#/components/schemas/CalendarEntryInput" } }
+        },
+        "required": ["date", "isPayday", "entries"]
+      },
+      "CalendarMonthInput": {
+        "type": "object",
+        "properties": {
+          "month": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+          "days": { "type": "array", "items": { "$ref": "#/components/schemas/CalendarDayInput" } },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "incomeCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "billsCount": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "billsCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "goalsAndPlannedCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "leftForEverydayCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "estimatesCount": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "incomeCents",
+              "billsCount",
+              "billsCents",
+              "goalsAndPlannedCents",
+              "leftForEverydayCents",
+              "estimatesCount"
+            ]
+          }
+        },
+        "required": ["month", "days", "summary"]
+      },
+      "RenewalRowInput": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "itemId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "name": { "type": "string" },
+          "category": {
+            "type": "string",
+            "enum": ["insurance", "subscription", "membership", "vehicle_home"]
+          },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "every": {
+            "type": "object",
+            "properties": {
+              "unit": { "type": "string", "enum": ["week", "month"] },
+              "n": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+            },
+            "required": ["unit", "n"]
+          },
+          "annualCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "renewsOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "shopAroundOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "decisionBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "actBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "actByKind": {
+            "anyOf": [{ "type": "string", "enum": ["decision", "cancel"] }, { "type": "null" }]
+          },
+          "nextActionOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "autoRenews": { "type": "string", "enum": ["yes", "no", "rolls_over"] },
+          "big": { "type": "boolean" },
+          "reminderOffsetsDays": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+          },
+          "priceUp": { "type": "boolean" },
+          "annualIncreaseCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "markedPossiblyUnused": { "type": "boolean" },
+          "sources": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["manual", "csv", "email", "bank"] }
+          },
+          "foundAutomatically": { "type": "boolean" }
+        },
+        "required": [
+          "id",
+          "itemId",
+          "name",
+          "category",
+          "owner",
+          "amountCents",
+          "every",
+          "annualCents",
+          "renewsOn",
+          "shopAroundOn",
+          "decisionBy",
+          "actBy",
+          "actByKind",
+          "nextActionOn",
+          "autoRenews",
+          "big",
+          "reminderOffsetsDays",
+          "priceUp",
+          "annualIncreaseCents",
+          "markedPossiblyUnused",
+          "sources",
+          "foundAutomatically"
+        ]
+      },
+      "RenewalListInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/RenewalRowInput" } }
+        },
+        "required": ["data"]
+      },
+      "RenewalsSummaryInput": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+          "yearlyCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "monthlyAverageCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "next90Days": {
+            "type": "object",
+            "properties": {
+              "count": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "cents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "planDecisions": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "ids": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["count", "cents", "planDecisions", "ids"]
+          },
+          "priceIncreaseYearlyCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "couldSaveYearlyCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "foundAutomatically": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "countsByCategory": {
+            "type": "object",
+            "properties": {
+              "insurance": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "subscription": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "membership": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "vehicle_home": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+            },
+            "required": ["insurance", "subscription", "membership", "vehicle_home"]
+          }
+        },
+        "required": [
+          "count",
+          "yearlyCents",
+          "monthlyAverageCents",
+          "next90Days",
+          "priceIncreaseYearlyCents",
+          "couldSaveYearlyCents",
+          "foundAutomatically",
+          "countsByCategory"
+        ]
+      },
+      "BillsAveragesInput": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+          "monthlyBillsAverageCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "monthlyIncomeAverageCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "leftAfterBillsCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "estimatesToConfirm": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "byItem": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "monthlyCents": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "Integer cents"
+                }
+              },
+              "required": ["itemId", "monthlyCents"]
+            }
+          }
+        },
+        "required": [
+          "rows",
+          "monthlyBillsAverageCents",
+          "monthlyIncomeAverageCents",
+          "leftAfterBillsCents",
+          "estimatesToConfirm",
+          "byItem"
+        ]
+      },
       "ProblemField": {
         "type": "object",
         "properties": {
@@ -1365,6 +2731,7 @@
               "entitlement_required",
               "mfa_required",
               "approval_required",
+              "plan_not_ready",
               "rate_limited",
               "idempotency_key_reused",
               "precondition_required",
@@ -1380,7 +2747,12 @@
             "type": "array",
             "items": { "$ref": "#/components/schemas/ProblemField" }
           },
-          "current": { "description": "The current resource, on a version conflict (If-Match)" }
+          "current": { "description": "The current resource, on a version conflict (If-Match)" },
+          "reason": {
+            "description": "plan_not_ready only: what the household still has to set up",
+            "type": "string",
+            "enum": ["no_balance", "no_primary_income"]
+          }
         },
         "required": ["type", "title", "status", "code"],
         "additionalProperties": false,
@@ -2690,6 +4062,1396 @@
         },
         "required": ["label", "amountCents", "asOf"],
         "additionalProperties": false
+      },
+      "PlanFlag": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "not_usual_month",
+              "price_up",
+              "possible_duplicate",
+              "decide_by",
+              "not_automatic",
+              "estimate",
+              "stale_balance",
+              "overdue",
+              "data_missing"
+            ]
+          },
+          "subjectId": { "type": ["string", "null"] },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "relatedIds": { "type": "array", "items": { "type": "string" } },
+          "deadlineKind": { "type": "string", "enum": ["decision", "cancel"] }
+        },
+        "required": ["code", "subjectId", "date"],
+        "additionalProperties": false
+      },
+      "RunwayEvent": {
+        "type": "object",
+        "properties": {
+          "kind": { "type": "string", "enum": ["income", "bill", "planned_expense", "goal_transfer"] },
+          "sourceId": { "type": "string" },
+          "occurrenceId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "name": { "type": "string" },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "scheduledOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "status": {
+            "anyOf": [
+              { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+              { "type": "string", "const": "planned" }
+            ]
+          },
+          "isEstimate": { "type": "boolean" }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "occurrenceId",
+          "name",
+          "owner",
+          "amountCents",
+          "date",
+          "scheduledOn",
+          "dueOn",
+          "status",
+          "isEstimate"
+        ],
+        "additionalProperties": false
+      },
+      "RunwayDay": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "endBalanceCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "events": { "type": "array", "items": { "$ref": "#/components/schemas/RunwayEvent" } }
+        },
+        "required": ["date", "endBalanceCents", "events"],
+        "additionalProperties": false
+      },
+      "PlanMathLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "starting_balance",
+              "carried_events",
+              "income_in_window",
+              "money_out_in_window",
+              "lowest_point",
+              "cushion",
+              "safe_to_spend",
+              "shortfall",
+              "days_to_payday",
+              "per_day"
+            ]
+          },
+          "label": { "type": "string" },
+          "role": { "type": "string", "enum": ["value", "subtract", "total", "gap"] },
+          "cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "days": {
+            "anyOf": [
+              { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              { "type": "null" }
+            ]
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["id", "label", "role", "cents", "days", "date"],
+        "additionalProperties": false
+      },
+      "PlanDecision": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": ["shortfall", "not_usual_month", "estimate", "decide_by", "goal_behind"]
+          },
+          "rank": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "subjectId": { "type": ["string", "null"] },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "templateText": { "type": "string" },
+          "detailTemplateText": { "type": "string" },
+          "params": {
+            "type": "object",
+            "propertyNames": { "type": "string" },
+            "additionalProperties": { "type": ["string", "number", "null"] }
+          },
+          "aiText": { "type": ["string", "null"] }
+        },
+        "required": [
+          "id",
+          "kind",
+          "rank",
+          "subjectId",
+          "owner",
+          "date",
+          "templateText",
+          "detailTemplateText",
+          "params",
+          "aiText"
+        ],
+        "additionalProperties": false
+      },
+      "OptionResult": {
+        "type": "object",
+        "properties": {
+          "state": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shortfallDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "perDayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "minBalanceCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "neverBelowZero": { "type": "boolean" },
+          "effect": { "type": "string", "enum": ["ok", "info"] }
+        },
+        "required": [
+          "state",
+          "safeToSpendCents",
+          "safeToSpendDisplayCents",
+          "shortfallDisplayCents",
+          "perDayCents",
+          "minBalanceCents",
+          "neverBelowZero",
+          "effect"
+        ],
+        "additionalProperties": false
+      },
+      "ShortfallOption": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "move_from_emergency_fund" },
+              "goalId": { "type": "string" },
+              "amountCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "capped": { "type": "boolean" },
+              "fundBalanceAfterCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "reachMonthBefore": { "type": ["string", "null"] },
+              "reachMonthAfter": { "type": ["string", "null"] },
+              "onlyIfAllowed": { "type": "boolean", "const": false },
+              "result": { "$ref": "#/components/schemas/OptionResult" }
+            },
+            "required": [
+              "kind",
+              "goalId",
+              "amountCents",
+              "capped",
+              "fundBalanceAfterCents",
+              "reachMonthBefore",
+              "reachMonthAfter",
+              "onlyIfAllowed",
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "split_expense" },
+              "plannedExpenseId": { "type": "string" },
+              "amountNowCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "amountAfterPaydayCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "nowOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "afterPaydayOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "onlyIfAllowed": { "type": "boolean", "const": true },
+              "result": { "$ref": "#/components/schemas/OptionResult" }
+            },
+            "required": [
+              "kind",
+              "plannedExpenseId",
+              "amountNowCents",
+              "amountAfterPaydayCents",
+              "nowOn",
+              "afterPaydayOn",
+              "onlyIfAllowed",
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": { "type": "string", "const": "move_bill_to_payday" },
+              "itemId": { "type": "string" },
+              "itemKind": {
+                "type": "string",
+                "enum": [
+                  "bill",
+                  "subscription",
+                  "insurance",
+                  "membership",
+                  "registration",
+                  "loan",
+                  "income",
+                  "other"
+                ]
+              },
+              "scheduledOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "fromDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "toDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "onlyIfAllowed": { "type": "boolean", "const": true },
+              "result": { "$ref": "#/components/schemas/OptionResult" }
+            },
+            "required": [
+              "kind",
+              "itemId",
+              "itemKind",
+              "scheduledOn",
+              "fromDate",
+              "toDate",
+              "amountCents",
+              "onlyIfAllowed",
+              "result"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "Plan": {
+        "type": "object",
+        "properties": {
+          "calcSnapshotId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "engineVersion": { "type": "string" },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "cushionCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "window": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "to": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "daysToPayday": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+            },
+            "required": ["from", "to", "daysToPayday"],
+            "additionalProperties": false
+          },
+          "state": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shortfallDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "perDayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "lowest": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"],
+            "additionalProperties": false
+          },
+          "belowCushionFrom": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "belowZeroDates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "format": "date",
+              "description": "Calendar date YYYY-MM-DD (household timezone)"
+            }
+          },
+          "billsBeforePayday": {
+            "type": "object",
+            "properties": {
+              "count": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "totalCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "byOwner": {
+                "type": "object",
+                "propertyNames": { "type": "string" },
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "Integer cents"
+                }
+              }
+            },
+            "required": ["count", "totalCents", "byOwner"],
+            "additionalProperties": false
+          },
+          "runway": { "type": "array", "items": { "$ref": "#/components/schemas/RunwayDay" } },
+          "runwayDetail": {
+            "type": "object",
+            "properties": {
+              "startingBalanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "startingBalanceAsOf": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "carriedEvents": { "type": "array", "items": { "$ref": "#/components/schemas/RunwayEvent" } },
+              "openingBalanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "excludedEvents": { "type": "array", "items": { "$ref": "#/components/schemas/RunwayEvent" } }
+            },
+            "required": [
+              "startingBalanceCents",
+              "startingBalanceAsOf",
+              "carriedEvents",
+              "openingBalanceCents",
+              "excludedEvents"
+            ],
+            "additionalProperties": false
+          },
+          "flags": { "type": "array", "items": { "$ref": "#/components/schemas/PlanFlag" } },
+          "decisions": { "type": "array", "items": { "$ref": "#/components/schemas/PlanDecision" } },
+          "shortfallOptions": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ShortfallOption" }
+          },
+          "math": { "type": "array", "items": { "$ref": "#/components/schemas/PlanMathLine" } }
+        },
+        "required": [
+          "calcSnapshotId",
+          "engineVersion",
+          "asOf",
+          "cushionCents",
+          "window",
+          "state",
+          "safeToSpendCents",
+          "safeToSpendDisplayCents",
+          "shortfallDisplayCents",
+          "perDayCents",
+          "lowest",
+          "belowCushionFrom",
+          "belowZeroDates",
+          "billsBeforePayday",
+          "runway",
+          "runwayDetail",
+          "flags",
+          "decisions",
+          "shortfallOptions",
+          "math"
+        ],
+        "additionalProperties": false
+      },
+      "PlanChange": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "move_occurrence" },
+              "occurrenceId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "toDate": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              }
+            },
+            "required": ["type", "occurrenceId", "toDate"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "set_actual_amount" },
+              "occurrenceId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["type", "occurrenceId", "amountCents"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "split_planned_expense" },
+              "plannedExpenseId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "amountNowCents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "laterOn": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              }
+            },
+            "required": ["type", "plannedExpenseId", "amountNowCents", "laterOn"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "add_transfer" },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "on": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "fromGoalId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "amountCents", "on"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "set_item_amount" },
+              "itemId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["type", "itemId", "amountCents"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "set_goal_monthly" },
+              "goalId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "monthlyCents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["type", "goalId", "monthlyCents"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "WhatIfRequest": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PlanChange" }
+          },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          }
+        },
+        "required": ["changes"],
+        "additionalProperties": false
+      },
+      "PlanSummary": {
+        "type": "object",
+        "properties": {
+          "state": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shortfallDisplayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "perDayCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "lowest": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"],
+            "additionalProperties": false
+          },
+          "belowCushionFrom": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "belowZeroDates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "format": "date",
+              "description": "Calendar date YYYY-MM-DD (household timezone)"
+            }
+          },
+          "math": { "type": "array", "items": { "$ref": "#/components/schemas/PlanMathLine" } }
+        },
+        "required": [
+          "state",
+          "safeToSpendCents",
+          "safeToSpendDisplayCents",
+          "shortfallDisplayCents",
+          "perDayCents",
+          "lowest",
+          "belowCushionFrom",
+          "belowZeroDates",
+          "math"
+        ],
+        "additionalProperties": false
+      },
+      "PlanDiff": {
+        "type": "object",
+        "properties": {
+          "stateBefore": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "stateAfter": { "type": "string", "enum": ["on_track", "shortfall"] },
+          "safeToSpendBeforeCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "safeToSpendAfterCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "deltaCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "changesSafeToSpend": { "type": "boolean" },
+          "lowestBefore": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"],
+            "additionalProperties": false
+          },
+          "lowestAfter": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "balanceCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              }
+            },
+            "required": ["date", "balanceCents"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "stateBefore",
+          "stateAfter",
+          "safeToSpendBeforeCents",
+          "safeToSpendAfterCents",
+          "deltaCents",
+          "changesSafeToSpend",
+          "lowestBefore",
+          "lowestAfter"
+        ],
+        "additionalProperties": false
+      },
+      "WhatIfResponse": {
+        "type": "object",
+        "properties": {
+          "before": { "$ref": "#/components/schemas/PlanSummary" },
+          "after": { "$ref": "#/components/schemas/PlanSummary" },
+          "diff": { "$ref": "#/components/schemas/PlanDiff" }
+        },
+        "required": ["before", "after", "diff"],
+        "additionalProperties": false
+      },
+      "CalendarEntry": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["income", "bill", "estimate", "decision", "planned", "goal_transfer"]
+          },
+          "sourceId": { "type": "string" },
+          "occurrenceId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "name": { "type": "string" },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "status": {
+            "anyOf": [
+              { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+              { "type": "string", "const": "planned" }
+            ]
+          },
+          "isEstimate": { "type": "boolean" },
+          "flagCodes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "not_usual_month",
+                "price_up",
+                "possible_duplicate",
+                "decide_by",
+                "not_automatic",
+                "estimate",
+                "stale_balance",
+                "overdue",
+                "data_missing"
+              ]
+            }
+          },
+          "goalIds": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "occurrenceId",
+          "name",
+          "owner",
+          "amountCents",
+          "date",
+          "status",
+          "isEstimate",
+          "flagCodes",
+          "goalIds"
+        ],
+        "additionalProperties": false
+      },
+      "CalendarDay": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "isPayday": { "type": "boolean" },
+          "entries": { "type": "array", "items": { "$ref": "#/components/schemas/CalendarEntry" } }
+        },
+        "required": ["date", "isPayday", "entries"],
+        "additionalProperties": false
+      },
+      "CalendarMonth": {
+        "type": "object",
+        "properties": {
+          "month": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+          "days": { "type": "array", "items": { "$ref": "#/components/schemas/CalendarDay" } },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "incomeCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "billsCount": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "billsCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "goalsAndPlannedCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "leftForEverydayCents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "estimatesCount": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "incomeCents",
+              "billsCount",
+              "billsCents",
+              "goalsAndPlannedCents",
+              "leftForEverydayCents",
+              "estimatesCount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["month", "days", "summary"],
+        "additionalProperties": false
+      },
+      "RenewalRow": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "itemId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "name": { "type": "string" },
+          "category": {
+            "type": "string",
+            "enum": ["insurance", "subscription", "membership", "vehicle_home"]
+          },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "every": {
+            "type": "object",
+            "properties": {
+              "unit": { "type": "string", "enum": ["week", "month"] },
+              "n": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+            },
+            "required": ["unit", "n"],
+            "additionalProperties": false
+          },
+          "annualCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "renewsOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "shopAroundOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "decisionBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "actBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "actByKind": {
+            "anyOf": [{ "type": "string", "enum": ["decision", "cancel"] }, { "type": "null" }]
+          },
+          "nextActionOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "autoRenews": { "type": "string", "enum": ["yes", "no", "rolls_over"] },
+          "big": { "type": "boolean" },
+          "reminderOffsetsDays": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+          },
+          "priceUp": { "type": "boolean" },
+          "annualIncreaseCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "markedPossiblyUnused": { "type": "boolean" },
+          "sources": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["manual", "csv", "email", "bank"] }
+          },
+          "foundAutomatically": { "type": "boolean" }
+        },
+        "required": [
+          "id",
+          "itemId",
+          "name",
+          "category",
+          "owner",
+          "amountCents",
+          "every",
+          "annualCents",
+          "renewsOn",
+          "shopAroundOn",
+          "decisionBy",
+          "actBy",
+          "actByKind",
+          "nextActionOn",
+          "autoRenews",
+          "big",
+          "reminderOffsetsDays",
+          "priceUp",
+          "annualIncreaseCents",
+          "markedPossiblyUnused",
+          "sources",
+          "foundAutomatically"
+        ],
+        "additionalProperties": false
+      },
+      "RenewalList": {
+        "type": "object",
+        "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/RenewalRow" } } },
+        "required": ["data"],
+        "additionalProperties": false
+      },
+      "RenewalsSummary": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+          "yearlyCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "monthlyAverageCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "next90Days": {
+            "type": "object",
+            "properties": {
+              "count": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "cents": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              "planDecisions": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "ids": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["count", "cents", "planDecisions", "ids"],
+            "additionalProperties": false
+          },
+          "priceIncreaseYearlyCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "couldSaveYearlyCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "foundAutomatically": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "countsByCategory": {
+            "type": "object",
+            "properties": {
+              "insurance": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "subscription": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "membership": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+              "vehicle_home": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 }
+            },
+            "required": ["insurance", "subscription", "membership", "vehicle_home"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "count",
+          "yearlyCents",
+          "monthlyAverageCents",
+          "next90Days",
+          "priceIncreaseYearlyCents",
+          "couldSaveYearlyCents",
+          "foundAutomatically",
+          "countsByCategory"
+        ],
+        "additionalProperties": false
+      },
+      "BillsAverages": {
+        "type": "object",
+        "properties": {
+          "rows": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+          "monthlyBillsAverageCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "monthlyIncomeAverageCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "leftAfterBillsCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "estimatesToConfirm": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "byItem": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "monthlyCents": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "Integer cents"
+                }
+              },
+              "required": ["itemId", "monthlyCents"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "rows",
+          "monthlyBillsAverageCents",
+          "monthlyIncomeAverageCents",
+          "leftAfterBillsCents",
+          "estimatesToConfirm",
+          "byItem"
+        ],
+        "additionalProperties": false
       }
     }
   },
@@ -3182,6 +5944,12 @@
             "required": false
           },
           {
+            "schema": { "type": "string", "enum": ["averages"] },
+            "in": "query",
+            "name": "include",
+            "required": false
+          },
+          {
             "schema": { "default": 50, "type": "integer", "minimum": 1, "maximum": 100 },
             "in": "query",
             "name": "limit",
@@ -3217,7 +5985,8 @@
                   "type": "object",
                   "properties": {
                     "data": { "type": "array", "items": { "$ref": "#/components/schemas/Item" } },
-                    "nextCursor": { "type": ["string", "null"] }
+                    "nextCursor": { "type": ["string", "null"] },
+                    "averages": { "$ref": "#/components/schemas/BillsAverages" }
                   },
                   "required": ["data", "nextCursor"],
                   "additionalProperties": false
@@ -3848,6 +6617,252 @@
           "200": {
             "description": "Default Response",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Balance" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/plan": {
+      "get": {
+        "summary": "The Overview plan: window, runway, safe to spend, flags, decisions, math",
+        "tags": ["planning"],
+        "parameters": [
+          {
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Plan" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/plan/what-if": {
+      "post": {
+        "summary": "Recalculate the plan with hypothetical changes (no writes)",
+        "tags": ["planning"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/WhatIfRequestInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WhatIfResponse" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/calendar": {
+      "get": {
+        "summary": "Month grid model",
+        "tags": ["planning"],
+        "parameters": [
+          {
+            "schema": { "type": "string", "pattern": "^\\d{4}-(0[1-9]|1[0-2])$" },
+            "in": "query",
+            "name": "month",
+            "required": true
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                { "type": "string", "enum": ["both", "split"] }
+              ]
+            },
+            "in": "query",
+            "name": "owner",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CalendarMonth" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/renewals": {
+      "get": {
+        "summary": "Renewals and subscriptions, sorted by next action",
+        "tags": ["planning"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["insurance", "subscription", "membership", "vehicle_home"]
+            },
+            "in": "query",
+            "name": "category",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RenewalList" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/renewals/summary": {
+      "get": {
+        "summary": "Renewals KPIs",
+        "tags": ["planning"],
+        "parameters": [
+          {
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+            "in": "query",
+            "name": "asOf",
+            "required": false,
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/RenewalsSummary" } }
+            }
           },
           "4XX": {
             "description": "Client error (RFC 9457 problem details)",

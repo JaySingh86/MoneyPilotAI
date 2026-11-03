@@ -89,4 +89,12 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
       values (${t.householdId}, 1, '2026-10-27', 'manual')`,
     update: (t) => sql`update balances set amount_cents = 1 where household_id = ${t.householdId}`,
   },
+  // ===== WP-12: engine result snapshots =====
+  {
+    table: "calc_snapshots",
+    insert: (t) => sql`insert into calc_snapshots (household_id, engine_version, as_of, inputs_hash, result)
+      values (${t.householdId}, '1.0.0', '2026-10-27', ${randomBytes(32)}, '{}'::jsonb)`,
+    update: (t) =>
+      sql`update calc_snapshots set result = '{"tampered":true}'::jsonb where household_id = ${t.householdId}`,
+  },
 ];

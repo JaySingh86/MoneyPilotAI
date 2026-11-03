@@ -1,10 +1,10 @@
 import { createLogger } from "@mp/observability";
-import { createApiDb } from "@mp/db";
 import { createAuthenticator } from "./auth/authenticator";
 import { AuthConfigError, loadCognitoConfig } from "./auth/config";
 import { createCognitoProvider } from "./auth/cognito";
 import { configureRuntime, createUnconfiguredInviteSender } from "./auth/runtime";
 import { unauthorized, type AuthProvider } from "./auth/provider";
+import { createSharedDb, installShutdown } from "./lib/db-pool";
 import { buildServer } from "./server";
 
 const log = createLogger("api");
@@ -16,7 +16,9 @@ if (!databaseUrl) {
   log.error("DATABASE_URL is not set");
   process.exit(1);
 }
-const db = createApiDb({ connectionString: databaseUrl });
+// The one pool of the process: every module reaches it through the runtime and it is closed on shutdown.
+const pool = createSharedDb({ connectionString: databaseUrl });
+const db = pool.db;
 
 // Cognito (ADR-017). In production a missing or inconsistent setting stops the API at startup. Elsewhere,
 // without a user pool (local dev before WP-09) every token is refused and only anonymous routes such as
@@ -69,3 +71,8 @@ app
     log.error({ err }, "api failed to start");
     process.exit(1);
   });
+
+installShutdown(app, pool, process, (error) => {
+  if (error) log.error({ err: error }, "api did not shut down cleanly");
+  process.exit(error ? 1 : 0);
+});

@@ -1,6 +1,6 @@
 // WP-06 rows for the RLS world: one of everything in a household, written as the creator through mp_api
 // (the way the API writes), so cross-household tests have victim rows in every items table.
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { inject } from "vitest";
 import { createWorkerDb, type ApiDb } from "../../src/tx";
@@ -48,6 +48,8 @@ export async function seedItemsWorld(db: ApiDb, hh: Seeded): Promise<ItemsWorldR
       values (${hh.id}, 'Thanksgiving', 25000, '2026-11-26', 'both', ${hh.creator.id})`);
     await tx.execute(sql`insert into balances (household_id, amount_cents, as_of, source, recorded_by)
       values (${hh.id}, 340000, '2026-10-27', 'manual', ${hh.creator.id})`);
+    await tx.execute(sql`insert into calc_snapshots (household_id, engine_version, as_of, inputs_hash, result)
+      values (${hh.id}, '1.0.0', '2026-10-27', ${randomBytes(32)}, '{}'::jsonb)`);
     const id = occ.rows[0]?.id;
     if (!id) throw new Error("occurrence insert returned no id");
     return id;

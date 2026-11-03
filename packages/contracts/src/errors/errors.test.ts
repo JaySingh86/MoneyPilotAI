@@ -36,6 +36,16 @@ describe("AppError", () => {
     expect(isAppError(new Error("x"))).toBe(false);
   });
 
+  it("plan_not_ready is a 409 with a static reason in the problem body", () => {
+    const err = new AppError("plan_not_ready", undefined, "Enter your current balance before planning.", {
+      reason: "no_balance",
+    });
+    expect(err.status).toBe(409);
+    const problem = ProblemSchema.parse(err.toProblem());
+    expect(problem).toMatchObject({ code: "plan_not_ready", reason: "no_balance" });
+    expect(ProblemSchema.safeParse({ ...problem, reason: "free text" }).success).toBe(false);
+  });
+
   it("keeps an explicit status", () => {
     expect(new AppError("conflict", 409).status).toBe(409);
     expect(new AppError("forbidden", 451).status).toBe(451);

@@ -21,6 +21,8 @@ const routes: FastifyPluginAsyncZod = async (scope) => {
     { config: { idempotency: "optional", rateLimitGroup: "authSensitive" } },
     async () => ({}),
   );
+  scope.get("/calc-a", { config: { rateLimitGroup: "compute" } }, async () => ({}));
+  scope.post("/calc-b", { config: { idempotency: "off", rateLimitGroup: "compute" } }, async () => ({}));
   scope.post(
     "/custom",
     { config: { idempotency: "optional", rateLimit: { max: 2, timeWindow: "1 minute" } } },
@@ -33,6 +35,7 @@ describe("rate limits (BACKEND_PLAN §8.1)", () => {
     expect(RATE_LIMITS).toEqual({
       overall: { max: 600, timeWindow: "1 minute" },
       authSensitive: { max: 20, timeWindow: "1 minute" },
+      compute: { max: 60, timeWindow: "1 minute" },
     });
   });
 
@@ -64,6 +67,19 @@ describe("rate limits (BACKEND_PLAN §8.1)", () => {
     expectProblem(await post("/v1/invites"), 429, "rate_limited");
     expectProblem(await post("/v1/invites/accept"), 429, "rate_limited");
     expect((await post("/v1/invites", USER_B)).statusCode).toBe(200);
+  });
+
+  it("compute routes (plan, what-if, calendar) share one budget of 60 per minute per user", async () => {
+    app = testServer(routes);
+    const a = (user = USER_A) => app.inject({ url: "/v1/calc-a", headers: bearer(user) });
+    const b = (user = USER_A) => app.inject({ method: "POST", url: "/v1/calc-b", headers: bearer(user) });
+    for (let i = 0; i < 30; i += 1) {
+      expect((await a()).statusCode).toBe(200);
+      expect((await b()).statusCode).toBe(200);
+    }
+    expectProblem(await a(), 429, "rate_limited");
+    expectProblem(await b(), 429, "rate_limited");
+    expect((await a(USER_B)).statusCode).toBe(200);
   });
 
   it("rejects an unknown rate-limit group at registration", async () => {

@@ -18,6 +18,7 @@ export const ERROR_CODES = [
   "entitlement_required",
   "mfa_required",
   "approval_required",
+  "plan_not_ready",
   "rate_limited",
   "idempotency_key_reused",
   "precondition_required",
@@ -41,6 +42,7 @@ export const DEFAULT_STATUS: Readonly<Record<ErrorCode, number>> = {
   entitlement_required: 403,
   mfa_required: 403,
   approval_required: 403,
+  plan_not_ready: 409,
   rate_limited: 429,
   idempotency_key_reused: 422,
   precondition_required: 428,
@@ -60,6 +62,7 @@ export const TITLES: Readonly<Record<ErrorCode, string>> = {
   entitlement_required: "Upgrade required",
   mfa_required: "Multi-factor authentication required",
   approval_required: "Approval required",
+  plan_not_ready: "Plan not ready",
   rate_limited: "Too many requests",
   idempotency_key_reused: "Idempotency key reused",
   precondition_required: "Precondition required",
@@ -95,6 +98,10 @@ export const ProblemSchema = z
     requestId: z.string().optional(),
     fields: z.array(ProblemFieldSchema).optional().describe("Per-field errors for validation_failed"),
     current: z.unknown().optional().describe("The current resource, on a version conflict (If-Match)"),
+    reason: z
+      .enum(["no_balance", "no_primary_income"])
+      .optional()
+      .describe("plan_not_ready only: what the household still has to set up"),
   })
   .meta({ id: "Problem", description: "RFC 9457 problem details" });
 
@@ -104,6 +111,8 @@ export interface AppErrorOptions {
   fields?: ProblemField[];
   /** Current resource for a 409 version conflict. */
   current?: unknown;
+  /** `plan_not_ready`: static reason code. */
+  reason?: "no_balance" | "no_primary_income";
   /** Extra response headers, e.g. `Retry-After`. */
   headers?: Record<string, string>;
   cause?: unknown;
@@ -120,6 +129,7 @@ export class AppError extends Error {
   readonly status: number;
   readonly fields: ProblemField[] | undefined;
   readonly current: unknown;
+  readonly reason: "no_balance" | "no_primary_income" | undefined;
   readonly headers: Record<string, string>;
 
   constructor(
@@ -135,6 +145,7 @@ export class AppError extends Error {
     this.status = status;
     this.fields = options.fields;
     this.current = options.current;
+    this.reason = options.reason;
     this.headers = options.headers ?? {};
   }
 
@@ -150,6 +161,7 @@ export class AppError extends Error {
       ...(context.requestId !== undefined ? { requestId: context.requestId } : {}),
       ...(this.fields !== undefined ? { fields: this.fields } : {}),
       ...(this.current !== undefined ? { current: this.current } : {}),
+      ...(this.reason !== undefined ? { reason: this.reason } : {}),
     };
   }
 }

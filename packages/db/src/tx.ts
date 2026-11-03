@@ -44,6 +44,11 @@ export interface ApiDb {
 export interface WorkerDb {
   /** Runs fn as mp_worker with RLS scoped to exactly one household. */
   withJobTx<T>(householdId: string, fn: (tx: Tx) => Promise<T>): Promise<T>;
+  /**
+   * Every household id, for schedulers that fan a nightly job out per household (Q-051). Calls the
+   * SECURITY DEFINER `app_list_household_ids()`; ids only, nothing else is readable this way.
+   */
+  listHouseholdIds(): Promise<string[]>;
   close(): Promise<void>;
 }
 
@@ -154,6 +159,13 @@ export function createWorkerDb(options: DbOptions): WorkerDb {
         "app.auth_subject": "",
       };
       return runner.run(session, fn);
+    },
+    async listHouseholdIds() {
+      const none: Session = { "app.user_id": "", "app.household_id": "", "app.auth_subject": "" };
+      const res = await runner.run(none, (tx) =>
+        tx.execute<{ id: string }>(sql`select app_list_household_ids() as id`),
+      );
+      return res.rows.map((r) => r.id);
     },
     close: runner.close,
   };

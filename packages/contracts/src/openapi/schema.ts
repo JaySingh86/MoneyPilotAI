@@ -687,6 +687,7 @@ export interface paths {
           owner?: string | ("both" | "split");
           amountType?: "fixed" | "estimated" | "statement";
           onBillsPage?: "true" | "false";
+          include?: "averages";
           limit?: number;
           cursor?: string;
         };
@@ -707,6 +708,7 @@ export interface paths {
             "application/json": {
               data: components["schemas"]["Item"][];
               nextCursor: string | null;
+              averages?: components["schemas"]["BillsAverages"];
             };
           };
         };
@@ -1468,6 +1470,305 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/households/{hid}/plan": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The Overview plan: window, runway, safe to spend, flags, decisions, math */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Calendar date YYYY-MM-DD (household timezone) */
+          asOf?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Plan"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/plan/what-if": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Recalculate the plan with hypothetical changes (no writes) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["WhatIfRequestInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["WhatIfResponse"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/calendar": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Month grid model */
+    get: {
+      parameters: {
+        query: {
+          month: string;
+          owner?: string | ("both" | "split");
+          /** @description Calendar date YYYY-MM-DD (household timezone) */
+          asOf?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["CalendarMonth"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/renewals": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Renewals and subscriptions, sorted by next action */
+    get: {
+      parameters: {
+        query?: {
+          category?: "insurance" | "subscription" | "membership" | "vehicle_home";
+          /** @description Calendar date YYYY-MM-DD (household timezone) */
+          asOf?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["RenewalList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/renewals/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Renewals KPIs */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Calendar date YYYY-MM-DD (household timezone) */
+          asOf?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["RenewalsSummary"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1501,6 +1802,7 @@ export interface components {
         | "entitlement_required"
         | "mfa_required"
         | "approval_required"
+        | "plan_not_ready"
         | "rate_limited"
         | "idempotency_key_reused"
         | "precondition_required"
@@ -1513,6 +1815,11 @@ export interface components {
       fields?: components["schemas"]["ProblemFieldInput"][];
       /** @description The current resource, on a version conflict (If-Match) */
       current?: unknown;
+      /**
+       * @description plan_not_ready only: what the household still has to set up
+       * @enum {string}
+       */
+      reason?: "no_balance" | "no_primary_income";
     };
     MembershipInput: {
       /** Format: uuid */
@@ -2017,6 +2324,520 @@ export interface components {
        */
       asOf: string;
     };
+    PlanFlagInput: {
+      /** @enum {string} */
+      code:
+        | "not_usual_month"
+        | "price_up"
+        | "possible_duplicate"
+        | "decide_by"
+        | "not_automatic"
+        | "estimate"
+        | "stale_balance"
+        | "overdue"
+        | "data_missing";
+      subjectId: string | null;
+      date: string | null;
+      relatedIds?: string[];
+      /** @enum {string} */
+      deadlineKind?: "decision" | "cancel";
+    };
+    RunwayEventInput: {
+      /** @enum {string} */
+      kind: "income" | "bill" | "planned_expense" | "goal_transfer";
+      sourceId: string;
+      occurrenceId: string | null;
+      name: string;
+      owner: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      scheduledOn: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      status: ("scheduled" | "paid" | "received" | "skipped") | "planned";
+      isEstimate: boolean;
+    };
+    RunwayDayInput: {
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      /** @description Integer cents */
+      endBalanceCents: number;
+      events: components["schemas"]["RunwayEventInput"][];
+    };
+    PlanMathLineInput: {
+      /** @enum {string} */
+      id:
+        | "starting_balance"
+        | "carried_events"
+        | "income_in_window"
+        | "money_out_in_window"
+        | "lowest_point"
+        | "cushion"
+        | "safe_to_spend"
+        | "shortfall"
+        | "days_to_payday"
+        | "per_day";
+      label: string;
+      /** @enum {string} */
+      role: "value" | "subtract" | "total" | "gap";
+      cents: number | null;
+      days: number | null;
+      date: string | null;
+    };
+    PlanDecisionInput: {
+      id: string;
+      /** @enum {string} */
+      kind: "shortfall" | "not_usual_month" | "estimate" | "decide_by" | "goal_behind";
+      rank: number;
+      subjectId: string | null;
+      owner: string;
+      date: string | null;
+      templateText: string;
+      detailTemplateText: string;
+      params: {
+        [key: string]: string | number | null;
+      };
+      aiText: string | null;
+    };
+    OptionResultInput: {
+      /** @enum {string} */
+      state: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendCents: number;
+      safeToSpendDisplayCents: number | null;
+      shortfallDisplayCents: number | null;
+      perDayCents: number | null;
+      /** @description Integer cents */
+      minBalanceCents: number;
+      neverBelowZero: boolean;
+      /** @enum {string} */
+      effect: "ok" | "info";
+    };
+    ShortfallOptionInput:
+      | {
+          /** @constant */
+          kind: "move_from_emergency_fund";
+          goalId: string;
+          /** @description Integer cents */
+          amountCents: number;
+          capped: boolean;
+          /** @description Integer cents */
+          fundBalanceAfterCents: number;
+          reachMonthBefore: string | null;
+          reachMonthAfter: string | null;
+          /** @constant */
+          onlyIfAllowed: false;
+          result: components["schemas"]["OptionResultInput"];
+        }
+      | {
+          /** @constant */
+          kind: "split_expense";
+          plannedExpenseId: string;
+          /** @description Integer cents */
+          amountNowCents: number;
+          /** @description Integer cents */
+          amountAfterPaydayCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          nowOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          afterPaydayOn: string;
+          /** @constant */
+          onlyIfAllowed: true;
+          result: components["schemas"]["OptionResultInput"];
+        }
+      | {
+          /** @constant */
+          kind: "move_bill_to_payday";
+          itemId: string;
+          /** @enum {string} */
+          itemKind:
+            | "bill"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "registration"
+            | "loan"
+            | "income"
+            | "other";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          scheduledOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          fromDate: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDate: string;
+          /** @description Integer cents */
+          amountCents: number;
+          /** @constant */
+          onlyIfAllowed: true;
+          result: components["schemas"]["OptionResultInput"];
+        };
+    PlanInput: {
+      calcSnapshotId: string | null;
+      engineVersion: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf: string;
+      /** @description Integer cents */
+      cushionCents: number;
+      window: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        from: string;
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        to: string;
+        daysToPayday: number;
+      };
+      /** @enum {string} */
+      state: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendCents: number;
+      safeToSpendDisplayCents: number | null;
+      shortfallDisplayCents: number | null;
+      perDayCents: number | null;
+      lowest: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+      belowCushionFrom: string | null;
+      belowZeroDates: string[];
+      billsBeforePayday: {
+        count: number;
+        /** @description Integer cents */
+        totalCents: number;
+        byOwner: {
+          [key: string]: number;
+        };
+      };
+      runway: components["schemas"]["RunwayDayInput"][];
+      runwayDetail: {
+        /** @description Integer cents */
+        startingBalanceCents: number;
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        startingBalanceAsOf: string;
+        carriedEvents: components["schemas"]["RunwayEventInput"][];
+        /** @description Integer cents */
+        openingBalanceCents: number;
+        excludedEvents: components["schemas"]["RunwayEventInput"][];
+      };
+      flags: components["schemas"]["PlanFlagInput"][];
+      decisions: components["schemas"]["PlanDecisionInput"][];
+      shortfallOptions: components["schemas"]["ShortfallOptionInput"][];
+      math: components["schemas"]["PlanMathLineInput"][];
+    };
+    PlanChangeInput:
+      | {
+          /** @constant */
+          type: "move_occurrence";
+          /** Format: uuid */
+          occurrenceId: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDate: string;
+        }
+      | {
+          /** @constant */
+          type: "set_actual_amount";
+          /** Format: uuid */
+          occurrenceId: string;
+          /** @description Integer cents */
+          amountCents: number;
+        }
+      | {
+          /** @constant */
+          type: "split_planned_expense";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          /** @description Integer cents */
+          amountNowCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          laterOn: string;
+        }
+      | {
+          /** @constant */
+          type: "add_transfer";
+          /** @description Integer cents */
+          amountCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          on: string;
+          fromGoalId?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "set_item_amount";
+          /** Format: uuid */
+          itemId: string;
+          /** @description Integer cents */
+          amountCents: number;
+        }
+      | {
+          /** @constant */
+          type: "set_goal_monthly";
+          /** Format: uuid */
+          goalId: string;
+          /** @description Integer cents */
+          monthlyCents: number;
+        };
+    WhatIfRequestInput: {
+      changes: components["schemas"]["PlanChangeInput"][];
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf?: string;
+    };
+    PlanSummaryInput: {
+      /** @enum {string} */
+      state: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendCents: number;
+      safeToSpendDisplayCents: number | null;
+      shortfallDisplayCents: number | null;
+      perDayCents: number | null;
+      lowest: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+      belowCushionFrom: string | null;
+      belowZeroDates: string[];
+      math: components["schemas"]["PlanMathLineInput"][];
+    };
+    PlanDiffInput: {
+      /** @enum {string} */
+      stateBefore: "on_track" | "shortfall";
+      /** @enum {string} */
+      stateAfter: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendBeforeCents: number;
+      /** @description Integer cents */
+      safeToSpendAfterCents: number;
+      /** @description Integer cents */
+      deltaCents: number;
+      changesSafeToSpend: boolean;
+      lowestBefore: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+      lowestAfter: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+    };
+    WhatIfResponseInput: {
+      before: components["schemas"]["PlanSummaryInput"];
+      after: components["schemas"]["PlanSummaryInput"];
+      diff: components["schemas"]["PlanDiffInput"];
+    };
+    CalendarEntryInput: {
+      /** @enum {string} */
+      kind: "income" | "bill" | "estimate" | "decision" | "planned" | "goal_transfer";
+      sourceId: string;
+      occurrenceId: string | null;
+      name: string;
+      owner: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      status: ("scheduled" | "paid" | "received" | "skipped") | "planned";
+      isEstimate: boolean;
+      flagCodes: (
+        | "not_usual_month"
+        | "price_up"
+        | "possible_duplicate"
+        | "decide_by"
+        | "not_automatic"
+        | "estimate"
+        | "stale_balance"
+        | "overdue"
+        | "data_missing"
+      )[];
+      goalIds: string[];
+    };
+    CalendarDayInput: {
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      isPayday: boolean;
+      entries: components["schemas"]["CalendarEntryInput"][];
+    };
+    CalendarMonthInput: {
+      month: string;
+      days: components["schemas"]["CalendarDayInput"][];
+      summary: {
+        /** @description Integer cents */
+        incomeCents: number;
+        billsCount: number;
+        /** @description Integer cents */
+        billsCents: number;
+        /** @description Integer cents */
+        goalsAndPlannedCents: number;
+        /** @description Integer cents */
+        leftForEverydayCents: number;
+        estimatesCount: number;
+      };
+    };
+    RenewalRowInput: {
+      id: string;
+      itemId: string | null;
+      name: string;
+      /** @enum {string} */
+      category: "insurance" | "subscription" | "membership" | "vehicle_home";
+      owner: string;
+      /** @description Integer cents */
+      amountCents: number;
+      every: {
+        /** @enum {string} */
+        unit: "week" | "month";
+        n: number;
+      };
+      /** @description Integer cents */
+      annualCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      renewsOn: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      shopAroundOn: string;
+      decisionBy: string | null;
+      actBy: string | null;
+      actByKind: ("decision" | "cancel") | null;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      nextActionOn: string;
+      /** @enum {string} */
+      autoRenews: "yes" | "no" | "rolls_over";
+      big: boolean;
+      reminderOffsetsDays: number[];
+      priceUp: boolean;
+      /** @description Integer cents */
+      annualIncreaseCents: number;
+      markedPossiblyUnused: boolean;
+      sources: ("manual" | "csv" | "email" | "bank")[];
+      foundAutomatically: boolean;
+    };
+    RenewalListInput: {
+      data: components["schemas"]["RenewalRowInput"][];
+    };
+    RenewalsSummaryInput: {
+      count: number;
+      /** @description Integer cents */
+      yearlyCents: number;
+      /** @description Integer cents */
+      monthlyAverageCents: number;
+      next90Days: {
+        count: number;
+        /** @description Integer cents */
+        cents: number;
+        planDecisions: number;
+        ids: string[];
+      };
+      /** @description Integer cents */
+      priceIncreaseYearlyCents: number;
+      /** @description Integer cents */
+      couldSaveYearlyCents: number;
+      foundAutomatically: number;
+      countsByCategory: {
+        insurance: number;
+        subscription: number;
+        membership: number;
+        vehicle_home: number;
+      };
+    };
+    BillsAveragesInput: {
+      rows: number;
+      /** @description Integer cents */
+      monthlyBillsAverageCents: number;
+      /** @description Integer cents */
+      monthlyIncomeAverageCents: number;
+      /** @description Integer cents */
+      leftAfterBillsCents: number;
+      estimatesToConfirm: number;
+      byItem: {
+        /** Format: uuid */
+        itemId: string;
+        /** @description Integer cents */
+        monthlyCents: number;
+      }[];
+    };
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -2046,6 +2867,7 @@ export interface components {
         | "entitlement_required"
         | "mfa_required"
         | "approval_required"
+        | "plan_not_ready"
         | "rate_limited"
         | "idempotency_key_reused"
         | "precondition_required"
@@ -2058,6 +2880,11 @@ export interface components {
       fields?: components["schemas"]["ProblemField"][];
       /** @description The current resource, on a version conflict (If-Match) */
       current?: unknown;
+      /**
+       * @description plan_not_ready only: what the household still has to set up
+       * @enum {string}
+       */
+      reason?: "no_balance" | "no_primary_income";
     };
     Membership: {
       /** Format: uuid */
@@ -2561,6 +3388,520 @@ export interface components {
        * @description Calendar date YYYY-MM-DD (household timezone)
        */
       asOf: string;
+    };
+    PlanFlag: {
+      /** @enum {string} */
+      code:
+        | "not_usual_month"
+        | "price_up"
+        | "possible_duplicate"
+        | "decide_by"
+        | "not_automatic"
+        | "estimate"
+        | "stale_balance"
+        | "overdue"
+        | "data_missing";
+      subjectId: string | null;
+      date: string | null;
+      relatedIds?: string[];
+      /** @enum {string} */
+      deadlineKind?: "decision" | "cancel";
+    };
+    RunwayEvent: {
+      /** @enum {string} */
+      kind: "income" | "bill" | "planned_expense" | "goal_transfer";
+      sourceId: string;
+      occurrenceId: string | null;
+      name: string;
+      owner: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      scheduledOn: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      status: ("scheduled" | "paid" | "received" | "skipped") | "planned";
+      isEstimate: boolean;
+    };
+    RunwayDay: {
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      /** @description Integer cents */
+      endBalanceCents: number;
+      events: components["schemas"]["RunwayEvent"][];
+    };
+    PlanMathLine: {
+      /** @enum {string} */
+      id:
+        | "starting_balance"
+        | "carried_events"
+        | "income_in_window"
+        | "money_out_in_window"
+        | "lowest_point"
+        | "cushion"
+        | "safe_to_spend"
+        | "shortfall"
+        | "days_to_payday"
+        | "per_day";
+      label: string;
+      /** @enum {string} */
+      role: "value" | "subtract" | "total" | "gap";
+      cents: number | null;
+      days: number | null;
+      date: string | null;
+    };
+    PlanDecision: {
+      id: string;
+      /** @enum {string} */
+      kind: "shortfall" | "not_usual_month" | "estimate" | "decide_by" | "goal_behind";
+      rank: number;
+      subjectId: string | null;
+      owner: string;
+      date: string | null;
+      templateText: string;
+      detailTemplateText: string;
+      params: {
+        [key: string]: string | number | null;
+      };
+      aiText: string | null;
+    };
+    OptionResult: {
+      /** @enum {string} */
+      state: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendCents: number;
+      safeToSpendDisplayCents: number | null;
+      shortfallDisplayCents: number | null;
+      perDayCents: number | null;
+      /** @description Integer cents */
+      minBalanceCents: number;
+      neverBelowZero: boolean;
+      /** @enum {string} */
+      effect: "ok" | "info";
+    };
+    ShortfallOption:
+      | {
+          /** @constant */
+          kind: "move_from_emergency_fund";
+          goalId: string;
+          /** @description Integer cents */
+          amountCents: number;
+          capped: boolean;
+          /** @description Integer cents */
+          fundBalanceAfterCents: number;
+          reachMonthBefore: string | null;
+          reachMonthAfter: string | null;
+          /** @constant */
+          onlyIfAllowed: false;
+          result: components["schemas"]["OptionResult"];
+        }
+      | {
+          /** @constant */
+          kind: "split_expense";
+          plannedExpenseId: string;
+          /** @description Integer cents */
+          amountNowCents: number;
+          /** @description Integer cents */
+          amountAfterPaydayCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          nowOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          afterPaydayOn: string;
+          /** @constant */
+          onlyIfAllowed: true;
+          result: components["schemas"]["OptionResult"];
+        }
+      | {
+          /** @constant */
+          kind: "move_bill_to_payday";
+          itemId: string;
+          /** @enum {string} */
+          itemKind:
+            | "bill"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "registration"
+            | "loan"
+            | "income"
+            | "other";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          scheduledOn: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          fromDate: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDate: string;
+          /** @description Integer cents */
+          amountCents: number;
+          /** @constant */
+          onlyIfAllowed: true;
+          result: components["schemas"]["OptionResult"];
+        };
+    Plan: {
+      calcSnapshotId: string | null;
+      engineVersion: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf: string;
+      /** @description Integer cents */
+      cushionCents: number;
+      window: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        from: string;
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        to: string;
+        daysToPayday: number;
+      };
+      /** @enum {string} */
+      state: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendCents: number;
+      safeToSpendDisplayCents: number | null;
+      shortfallDisplayCents: number | null;
+      perDayCents: number | null;
+      lowest: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+      belowCushionFrom: string | null;
+      belowZeroDates: string[];
+      billsBeforePayday: {
+        count: number;
+        /** @description Integer cents */
+        totalCents: number;
+        byOwner: {
+          [key: string]: number;
+        };
+      };
+      runway: components["schemas"]["RunwayDay"][];
+      runwayDetail: {
+        /** @description Integer cents */
+        startingBalanceCents: number;
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        startingBalanceAsOf: string;
+        carriedEvents: components["schemas"]["RunwayEvent"][];
+        /** @description Integer cents */
+        openingBalanceCents: number;
+        excludedEvents: components["schemas"]["RunwayEvent"][];
+      };
+      flags: components["schemas"]["PlanFlag"][];
+      decisions: components["schemas"]["PlanDecision"][];
+      shortfallOptions: components["schemas"]["ShortfallOption"][];
+      math: components["schemas"]["PlanMathLine"][];
+    };
+    PlanChange:
+      | {
+          /** @constant */
+          type: "move_occurrence";
+          /** Format: uuid */
+          occurrenceId: string;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          toDate: string;
+        }
+      | {
+          /** @constant */
+          type: "set_actual_amount";
+          /** Format: uuid */
+          occurrenceId: string;
+          /** @description Integer cents */
+          amountCents: number;
+        }
+      | {
+          /** @constant */
+          type: "split_planned_expense";
+          /** Format: uuid */
+          plannedExpenseId: string;
+          /** @description Integer cents */
+          amountNowCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          laterOn: string;
+        }
+      | {
+          /** @constant */
+          type: "add_transfer";
+          /** @description Integer cents */
+          amountCents: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          on: string;
+          fromGoalId?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "set_item_amount";
+          /** Format: uuid */
+          itemId: string;
+          /** @description Integer cents */
+          amountCents: number;
+        }
+      | {
+          /** @constant */
+          type: "set_goal_monthly";
+          /** Format: uuid */
+          goalId: string;
+          /** @description Integer cents */
+          monthlyCents: number;
+        };
+    WhatIfRequest: {
+      changes: components["schemas"]["PlanChange"][];
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf?: string;
+    };
+    PlanSummary: {
+      /** @enum {string} */
+      state: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendCents: number;
+      safeToSpendDisplayCents: number | null;
+      shortfallDisplayCents: number | null;
+      perDayCents: number | null;
+      lowest: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+      belowCushionFrom: string | null;
+      belowZeroDates: string[];
+      math: components["schemas"]["PlanMathLine"][];
+    };
+    PlanDiff: {
+      /** @enum {string} */
+      stateBefore: "on_track" | "shortfall";
+      /** @enum {string} */
+      stateAfter: "on_track" | "shortfall";
+      /** @description Integer cents */
+      safeToSpendBeforeCents: number;
+      /** @description Integer cents */
+      safeToSpendAfterCents: number;
+      /** @description Integer cents */
+      deltaCents: number;
+      changesSafeToSpend: boolean;
+      lowestBefore: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+      lowestAfter: {
+        /**
+         * Format: date
+         * @description Calendar date YYYY-MM-DD (household timezone)
+         */
+        date: string;
+        /** @description Integer cents */
+        balanceCents: number;
+      };
+    };
+    WhatIfResponse: {
+      before: components["schemas"]["PlanSummary"];
+      after: components["schemas"]["PlanSummary"];
+      diff: components["schemas"]["PlanDiff"];
+    };
+    CalendarEntry: {
+      /** @enum {string} */
+      kind: "income" | "bill" | "estimate" | "decision" | "planned" | "goal_transfer";
+      sourceId: string;
+      occurrenceId: string | null;
+      name: string;
+      owner: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      status: ("scheduled" | "paid" | "received" | "skipped") | "planned";
+      isEstimate: boolean;
+      flagCodes: (
+        | "not_usual_month"
+        | "price_up"
+        | "possible_duplicate"
+        | "decide_by"
+        | "not_automatic"
+        | "estimate"
+        | "stale_balance"
+        | "overdue"
+        | "data_missing"
+      )[];
+      goalIds: string[];
+    };
+    CalendarDay: {
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      date: string;
+      isPayday: boolean;
+      entries: components["schemas"]["CalendarEntry"][];
+    };
+    CalendarMonth: {
+      month: string;
+      days: components["schemas"]["CalendarDay"][];
+      summary: {
+        /** @description Integer cents */
+        incomeCents: number;
+        billsCount: number;
+        /** @description Integer cents */
+        billsCents: number;
+        /** @description Integer cents */
+        goalsAndPlannedCents: number;
+        /** @description Integer cents */
+        leftForEverydayCents: number;
+        estimatesCount: number;
+      };
+    };
+    RenewalRow: {
+      id: string;
+      itemId: string | null;
+      name: string;
+      /** @enum {string} */
+      category: "insurance" | "subscription" | "membership" | "vehicle_home";
+      owner: string;
+      /** @description Integer cents */
+      amountCents: number;
+      every: {
+        /** @enum {string} */
+        unit: "week" | "month";
+        n: number;
+      };
+      /** @description Integer cents */
+      annualCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      renewsOn: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      shopAroundOn: string;
+      decisionBy: string | null;
+      actBy: string | null;
+      actByKind: ("decision" | "cancel") | null;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      nextActionOn: string;
+      /** @enum {string} */
+      autoRenews: "yes" | "no" | "rolls_over";
+      big: boolean;
+      reminderOffsetsDays: number[];
+      priceUp: boolean;
+      /** @description Integer cents */
+      annualIncreaseCents: number;
+      markedPossiblyUnused: boolean;
+      sources: ("manual" | "csv" | "email" | "bank")[];
+      foundAutomatically: boolean;
+    };
+    RenewalList: {
+      data: components["schemas"]["RenewalRow"][];
+    };
+    RenewalsSummary: {
+      count: number;
+      /** @description Integer cents */
+      yearlyCents: number;
+      /** @description Integer cents */
+      monthlyAverageCents: number;
+      next90Days: {
+        count: number;
+        /** @description Integer cents */
+        cents: number;
+        planDecisions: number;
+        ids: string[];
+      };
+      /** @description Integer cents */
+      priceIncreaseYearlyCents: number;
+      /** @description Integer cents */
+      couldSaveYearlyCents: number;
+      foundAutomatically: number;
+      countsByCategory: {
+        insurance: number;
+        subscription: number;
+        membership: number;
+        vehicle_home: number;
+      };
+    };
+    BillsAverages: {
+      rows: number;
+      /** @description Integer cents */
+      monthlyBillsAverageCents: number;
+      /** @description Integer cents */
+      monthlyIncomeAverageCents: number;
+      /** @description Integer cents */
+      leftAfterBillsCents: number;
+      estimatesToConfirm: number;
+      byItem: {
+        /** Format: uuid */
+        itemId: string;
+        /** @description Integer cents */
+        monthlyCents: number;
+      }[];
     };
   };
   responses: never;

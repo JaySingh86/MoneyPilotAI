@@ -15,6 +15,7 @@ import {
 import {
   extendOccurrences,
   householdToday,
+  loadBillsAverages,
   rebuildFutureOccurrences,
   type ApiContext,
   type ApiDb,
@@ -108,11 +109,21 @@ async function checkOwner(tx: Tx, a: Actor, ownerType: string, ownerUserId: stri
 }
 
 // ===== Items =====
-export async function listItems(deps: ItemsDeps, a: Actor, filter: repo.ItemFilter, limit: number) {
+export async function listItems(
+  deps: ItemsDeps,
+  a: Actor,
+  filter: repo.ItemFilter,
+  limit: number,
+  include?: "averages",
+) {
   return inTx(deps, a, async (tx) => {
     const rows = await repo.listItems(tx, a.householdId, filter, limit + 1);
     const data = rows.slice(0, limit);
-    return { data, nextCursor: rows.length > limit ? (data[data.length - 1]?.id ?? null) : null };
+    const page = { data, nextCursor: rows.length > limit ? (data[data.length - 1]?.id ?? null) : null };
+    if (include !== "averages") return page;
+    // Same transaction, so the averages describe exactly the rows the page was read from (WP-12).
+    const averages = await loadBillsAverages(tx, a.householdId, deps.now());
+    return averages ? { ...page, averages } : page;
   });
 }
 
@@ -228,8 +239,14 @@ export async function patchItem(
     }
     const amountType = body.amountType ?? current.amountType;
     const amountCents = body.amountCents !== undefined ? body.amountCents : current.amountCents;
-    if (amountType === "fixed" && amountCents == null)
-      throw invalid("amountCents", "A fixed amount needs amountCents.");
+    // Q-107: no amount type may end up without an amount. Existing estimated items imported with only
+    // history stay editable until their amount fields are touched.
+    const amountTouched = body.amountType !== undefined || body.amountCents !== undefined;
+    if ((amountType === "fixed" || amountTouched) && amountCents == null)
+      throw invalid(
+        "amountCents",
+        "An item needs amountCents (the estimate or last statement for variable bills).",
+      );
 
     if (scheduleParts) Object.assign(columns, scheduleParts);
     const scheduleChanged = scheduleEdited || weekendEdited || statusEdited;

@@ -15,13 +15,18 @@ export const RATE_LIMITS = {
   overall: { max: 600, timeWindow: "1 minute" },
   /** Auth-sensitive endpoints (invites, email connect, step-up flows): 20 per minute, shared by all of them. */
   authSensitive: { max: 20, timeWindow: "1 minute" },
+  /** Engine calculations (plan, what-if, calendar): 60 per minute per user, shared (WP-12). */
+  compute: { max: 60, timeWindow: "1 minute" },
 } as const;
 
 /**
  * Named budgets shared across routes: `config: { rateLimitGroup: "authSensitive" }`. Every route in a
  * group draws from ONE per-user counter, so spreading calls over several endpoints does not multiply it.
  */
-export const RATE_LIMIT_GROUPS = { authSensitive: RATE_LIMITS.authSensitive } as const;
+export const RATE_LIMIT_GROUPS = {
+  authSensitive: RATE_LIMITS.authSensitive,
+  compute: RATE_LIMITS.compute,
+} as const;
 export type RateLimitGroup = keyof typeof RATE_LIMIT_GROUPS;
 
 declare module "fastify" {
