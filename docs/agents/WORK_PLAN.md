@@ -29,12 +29,12 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | todo |
 | WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | done |
 | WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | done (G3 open: live eval pending) |
-| WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | todo |
-| WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | todo |
-| WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | todo |
+| WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | in-progress (wp-builder, wp/12-planning-api) |
+| WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | in-progress (wp-builder, wp/13-goals-tasks) |
+| WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | in-progress (wp-builder, wp/14-review-queue) |
 | WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | todo |
 | WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | todo |
-| WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | todo |
+| WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | in-progress (wp-builder, wp/17-web-overview) |
 | WP-18 | Web: Bills, Renewals, Goals, Tasks | 3 | WP-10, WP-08 (WP-12, WP-13 for live data) | L | — | todo |
 | WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | done |
 | WP-20 | Forwarding channel (SES inbound) | 4 | WP-19, WP-09 | M | G2 | todo |
