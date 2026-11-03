@@ -21,7 +21,7 @@ This is the implementation contract for the web app (Next.js) and the mobile app
 1. **No raw values.** Every color, font size, space, radius and shadow comes from a token. Lint for hex literals outside `design/`.
 2. **Never move money.** There are no “Pay”, “Transfer” or “Send money” actions. Use “Mark as paid” and “Ask [partner] to approve”.
 3. **Rules calculate, AI explains.** Every number on screen comes from deterministic code (§6). AI text only describes those results, and it always appears with its sources and a “See the math” or “How was this calculated?” link.
-4. **Amber means “needs a decision” or “something went wrong”**, and nothing else. Errors (the error banner, invalid inputs) use the `attention.*` tokens, as the canvas draws them. Never use them for branding or decoration.
+4. **Amber means “needs a decision” or “something went wrong”**, plus the sidebar count badges for Tasks and Email & imports (drawn amber on the canvas), and nothing else. Errors (the error banner, invalid inputs) use the `attention.*` tokens, as the canvas draws them. Never use them for branding or decoration.
 5. **Each partner keeps one color everywhere.** The household creator is `partnerA` (teal) and the invited partner is `partnerB` (plum). Items owned by both use `both.mark` (brand navy). Colors come from the member’s role, never from their name.
 6. **Status is never shown by color alone.** Chips always carry text, owners show an initial, and the lowest bar has a label.
 7. **Light theme only in MVP.** Use semantic token names so a dark theme can be added later without touching components.
@@ -323,7 +323,7 @@ All of these run in tested, deterministic code. AI never produces these numbers.
 
 ## 8. Accessibility (WCAG 2.2 AA)
 - Verified contrast (Harbor): text.primary/surface 17.2 · text.muted/surface 6.3, /canvas 5.7 · white/brand.default 8.7 · brand.onStrongMuted/brand.strong 9.4 · brand.onSoft/brand.soft 9.1 · attention.text/attention.soft 6.2 · info.text/info.soft 7.4 · income.text/surface 5.4 · income.onSoft/income.soft 5.7 · partner avatar text 6.9 (A) and 7.9 (B) · chart.balance and chart.lowest against surface 3.8 and 3.9, partner dots 5.2 and 5.5 (graphics only). Don’t introduce a new pair without checking it.
-- Touch targets are at least 44, and every control shows the focus ring. Keyboard order follows the visual order. The calendar grid supports arrow-key movement.
+- Touch targets are at least 44 on touch devices (`pointer: coarse`), including inline links through padding. With a fine pointer, web controls keep the §4 sizes (40 and 36). Every control shows the focus ring. Keyboard order follows the visual order. The calendar grid supports arrow-key movement.
 - Icon-only buttons get an `aria-label`. Decorative SVGs get `aria-hidden`. Groups get `role="group"` with a label. Live updates use `role="status"`, and errors use `role="alert"`.
 - Support 200% text zoom (web) and Dynamic Type or font scaling (mobile) without clipping amounts. Amounts may wrap below their labels.
 

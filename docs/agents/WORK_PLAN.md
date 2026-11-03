@@ -92,6 +92,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 
 ## H-01 · Human setup (not an agent task)
 - Make the decisions in BACKEND_PLAN §17: hosting, auth, billing, product name/domain, AI model policy.
+- CI: the `visual` and `web-e2e` jobs run on `ubuntu-24.04-arm`, which is free only for public repos. On a private repo, enable a larger arm64 runner or move those jobs to x86 and regenerate the baselines there.
 - Create: GitHub repo (branch protection on `main`, required checks, CODEOWNERS for `design/`, `docs/`, `packages/db/migrations/`, `infra/`); AWS Organization with dev, staging and prod accounts; Cognito user pools per environment (WP-09); Google Cloud project + OAuth consent (**start Gmail verification**); Microsoft app registration; SES domain + production access request; Anthropic API keys per environment; billing sandbox.
 - CI secrets: **dev and staging only**. Agents never receive production credentials.
 

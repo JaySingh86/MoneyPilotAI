@@ -26,6 +26,7 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 | 016 | Mobile app on the React Native CLI (no Expo) | Accepted |
 | 017 | Auth on AWS Cognito behind the adapter | Accepted (step-up amended by 018) |
 | 018 | Step-up requires proof that MFA was used | Accepted |
+| 019 | Web tokens in Amplify's default browser storage, protected by CSP | Accepted |
 
 ---
 
@@ -149,4 +150,9 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 - WP-09 implements the trigger. If Cognito can't provide this signal reliably, WP-09 files a question; the fallback is pool-level MFA REQUIRED.
 
 **Consequences:** sensitive actions (connect email, export, delete, leave) can't be reached with a password alone. WP-05 tests must cover a missing, stale and string-typed `mfa_verified_at`.
+
+## ADR-019 Web sign-in tokens stay in Amplify's default storage, protected by a strict CSP
+**Context:** the WP-17 security review noted that Amplify keeps Cognito tokens in localStorage, where any successful XSS could read them. Moving them to cookies the page can read gives no real protection, and httpOnly cookies would need a backend-for-frontend that this project doesn't have yet.
+**Decision:** keep Amplify's default storage. Mitigate with a strict nonce-based CSP and the standard security headers, no `dangerouslySetInnerHTML`, React text rendering for all user and engine strings, self-hosted fonts, an API client that sends the token only to the API origin, and short token lifetimes (access and ID tokens ≤ 60 min) set in WP-09.
+**Consequences:** XSS prevention is the primary defence, so any new HTML sink or third-party script needs a security review. Revisit (a BFF with httpOnly cookies) if the app ever embeds third-party scripts.
 
