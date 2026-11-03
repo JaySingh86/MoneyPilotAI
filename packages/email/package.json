@@ -3,12 +3,23 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Gmail/Graph/forwarding adapters, MIME to text, prefilter, redaction. Built in WP-19 and WP-21.",
+  "description": "Gmail/Graph/forwarding adapters, MIME to text, prefilter, redaction, matcher. Core built in WP-19; providers in WP-21.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./testing/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "html-to-text": "9.0.5",
+    "htmlparser2": "8.0.2",
+    "pdfjs-dist": "6.4.299",
+    "postal-mime": "2.7.6"
+  },
+  "devDependencies": {
+    "@types/html-to-text": "^9.0.4",
+    "fast-check": "3.23.2"
   }
 }

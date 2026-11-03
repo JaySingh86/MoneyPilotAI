@@ -45,7 +45,7 @@ docs            specs, architecture, agent docs
 ## Commands
 
 **Prerequisites:**
-- Node 22 or newer.
+- Node 22.13 or newer (pdfjs-dist 6 needs it).
 - pnpm through corepack: `corepack enable pnpm`. The repo pins pnpm 9.15.4.
 - Docker Desktop running, for the local Postgres, MinIO and Mailpit stack (`docker compose up -d`).
 

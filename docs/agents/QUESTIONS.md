@@ -14,6 +14,72 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-068 · WP-19 · How the sandbox worker entry is loaded (tsx) and one Worker per message
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (parsing sandbox), apps/worker `start` script (`tsx src/index.ts`)
+- Question: The repo runs TypeScript directly with tsx, so the sandbox Worker loads `src/mime/worker-entry.ts`. When the parent was not started under tsx (for example Vitest), `sandbox.ts` adds `--import tsx/esm`; a production build that ships `.js` needs no flag but must keep `worker-entry` next to `sandbox`. Each message also pays a Worker start (about 0.3 s, plus about 1 s the first time pdfjs loads). Is one Worker per message acceptable for backfill volumes, or should WP-22 add a small pool that recycles workers (the isolation and `terminate()` behavior stay the same)?
+- Blocking: no.
+- Answer: …
+
+## Q-067 · WP-19 · Sandboxing PDF parsing
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (`email.fetch`, pdfjs)
+- Question: `pdfToText` runs pdfjs in the worker process with size (5 MB), page (10), output (200k chars) and elapsed-time budgets checked between pages. A malicious PDF can still spin the CPU inside one pdfjs call, because a timer cannot interrupt synchronous work. Should parsing move to a `worker_threads` thread or child process with a hard kill and memory cap?
+- Options considered: (a) accept for the pilot (staff and pilot accounts only); (b) run pdfjs in a `worker_threads` Worker with `resourceLimits` and `terminate()` on timeout (small change inside `packages/email/src/pdf`).
+- Blocking: no. Recommend (b) before G2 (any real inbox).
+- Answer: Answered (owner, 2026-11-03), per b2595c1. Build the sandbox now. Done: `prepareEmail` runs in a `worker_threads` Worker (heap cap, hard timeout, terminate(); `parse_limit` on timeout, out-of-memory or an inflate bomb); more than 200 MIME parts are refused before parsing. See Q-068 for how the worker entry loads.
+
+## Q-066 · WP-19 · Matcher: unknown kind, and fuzzy matching against items with a known domain
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (`email.match`: provider_domain + account_last4 → provider_domain + kind → fuzzy name)
+- Question: The spec does not say (1) what happens when the extraction has no kind and the sender domain matches exactly one item, or (2) whether the fuzzy-name step may match an item whose known provider domain differs from the sender.
+- Chosen behavior (conservative): (1) no domain-only step: a null kind falls through to fuzzy; two policies at one provider are never guessed (`ambiguous`, no itemId). (2) Fuzzy never matches an item whose known domain differs from the sender (spoof guard); a stored last 4 that differs from the message's last 4 excludes the item; consumer webmail senders never match by domain. Fuzzy needs Dice similarity ≥ 0.85 and a 0.10 margin over the runner-up.
+- Blocking: no. Easy to relax in `packages/email/src/match/match.ts`.
+- Answer: Answered (owner, 2026-11-03), per b2595c1. Accept as built.
+
+## Q-065 · WP-19 · Prefilter: use of List-Id, and watched domain vs the promotions label
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (`email.prefilter`: fetch From, Subject, Date, List-Id)
+- Question: §7.8.2 fetches `List-Id` but never says how it is used, and the stop order (ignored / promotions / social first, then watched) means a bill that Gmail files under Promotions from a watched sender is dropped.
+- Chosen behavior: follow the order literally; `List-Id` is only a -1 in the keyword score. Keyword weights and threshold 3 are my tuning.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), per b2595c1. Accept as built.
+
+## Q-064 · WP-19 · Prefilter accuracy gate uses a synthetic corpus
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: WORK_PLAN WP-19 acceptance ("labeled metadata corpus")
+- Question: No labeled corpus exists in the repo. I generated 662 synthetic samples (312 positive) in `packages/email/testing/metadata-corpus.ts` (precision 100%, recall 99.4%, including 2 deliberate misses). These numbers are a regression gate, not a measurement of real inboxes. Who supplies a real, consented, labeled metadata sample (staff test accounts, G2) to validate the threshold?
+- Blocking: no for WP-19; yes for trusting the numbers before a pilot.
+- Answer: Answered (owner, 2026-11-03), per b2595c1. The synthetic corpus is a regression gate only. A real labeled sample is required before the pilot.
+
+## Q-063 · WP-19 · Fixture has no provider domains or insurance subtypes
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: `design/fixtures/rivera-household.json` (`renewals`), BACKEND_PLAN §5 (`provider_domain`), §7.8.2 extraction schema (`insurance_type`)
+- Question: The matcher keys on provider domain, last 4 and kind, but the fixture renewals have only a provider name, one `policyLast4` (renters, 4821) and no domain or subtype. The matcher tests use fictional domains and subtypes defined in `packages/email/testing/items.ts` (fixture not edited, hard rule 10). Should the fixture gain `providerDomain` and `insuranceType`?
+- Blocking: no. WP-22's fixture-inbox acceptance (4 review items, 3 auto-applied) will need them.
+- Answer: Answered (owner, 2026-11-03), per b2595c1. Done: `providerDomain` and `insuranceType` are now in the fixture; `packages/email/testing/items.ts` reads them from it.
+
+## Q-062 · WP-19 · Sender authenticity (SPF/DKIM/DMARC) for provider-domain matching
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (`email.match`, auto-apply policy), ADR-009
+- Question: Auto-apply trusts "the match is by provider_domain", but the From header can be forged and forwarded mail carries the forwarder's authentication, not the original sender's. Should a failed or missing `Authentication-Results` block auto-apply (review only)? Not implemented; the matcher only compares the domain it is given, and `prepareEmail` returns `senderDomain` taken from the actual address, not the display name.
+- Blocking: no for WP-19; WP-22 needs the answer before `auto_apply` can be enabled.
+- Answer: Answered (owner, 2026-11-03), per b2595c1. Auto-apply only with DMARC pass aligned to From, from our own receiver; otherwise review (WP-22 implements). WP-19 carries parsed verdicts only: `prepareEmail(...).authentication` = `{ authservId, dkim, spf, dmarc, dmarcAligned }`, read from the first Authentication-Results header whose authserv-id is in `trustedAuthservIds`. The receiver must strip inbound copies of that header.
+
+## Q-061 · WP-19 · Redaction output format and what "masks card-like numbers" keeps
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: WORK_PLAN WP-19; BACKEND_PLAN §7.8.2 (`email.redact`), §7.8.2 evidence rule 1
+- Question: Long digit runs keep the last 4; the WP says card-like numbers are "masked" without saying whether the last 4 stay. Chosen: Luhn-valid 13-19 digit numbers become `[card ••••1111]`, other 8+ digit runs and keyworded policy/account/member ids become `[acct ••••9012]`, SSNs become `[ssn]` and phones `[phone]` (no digits kept), other-domain emails become `[email]`. Evidence quotes are validated against this redacted text, so WP-22 must quote the masked form. Consumer webmail senders (forwarded mail from a member) keep no addresses. Please confirm the formats.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), per b2595c1. Masked formats confirmed. Evidence quotes must use the masked form; documented at the top of `packages/email/src/redact/redact.ts` for WP-22.
+
+## Q-060 · WP-19 · Hidden-text coverage and prompt-injection stance
+- Asked by: wp-builder/wp/19-email-core · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (prompt-injection posture)
+- Question: HTML hidden text is removed for inline styles (display:none, font-size:0, opacity:0, off-screen, same-colour on the same element, etc.), `hidden`, `aria-hidden`, and common preheader/sr-only class names. White text on a parent's background and CSS from `<style>` blocks are not evaluated. Visible injection text is kept as data and flagged `injection_suspected` (heuristic), and `<email` / `</email` in the body is neutralized so it cannot close the prompt's `<email>` block. Is a heuristic flag acceptable, and should flagged messages always go to review?
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), per b2595c1. Keep the heuristic flag. Flagged messages always go to review and never auto-apply (enforced in WP-22). The hidden-text gaps (white-on-parent, PDF invisible text) are accepted for now. Built since: a `<style>` class-hiding pass for simple `.class` selectors (rules inside `@media` ignored), and `neutralizeDelimiters` now also covers `<email attr>` and full-width forms.
+
 ## Q-049 · WP-10 · CalendarCell: the spec's aria-label vs WCAG 2.5.3 Label in Name
 - Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
 - Where: DESIGN_SPEC §4.2 ("The aria-label reads “November 4, 1 item”"); WCAG 2.2 SC 2.5.3

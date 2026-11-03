@@ -36,7 +36,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | todo |
 | WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | todo |
 | WP-18 | Web: Bills, Renewals, Goals, Tasks | 3 | WP-10, WP-08 (WP-12, WP-13 for live data) | L | — | todo |
-| WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | in-progress (wp-builder, wp/19-email-core) |
+| WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | done |
 | WP-20 | Forwarding channel (SES inbound) | 4 | WP-19, WP-09 | M | G2 | todo |
 | WP-21 | Gmail + Outlook connectors, token crypto | 4 | WP-05, WP-19, WP-09 | L | G2 | todo |
 | WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | todo |
