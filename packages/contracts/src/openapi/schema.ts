@@ -652,6 +652,822 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/households/{hid}/items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          direction?: "outflow" | "inflow";
+          kind?:
+            | "bill"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "registration"
+            | "loan"
+            | "income"
+            | "other";
+          category?:
+            | "housing"
+            | "utilities"
+            | "childcare"
+            | "transport"
+            | "debt"
+            | "subscription"
+            | "insurance"
+            | "membership"
+            | "vehicle_home"
+            | "income"
+            | "other";
+          owner?: string | ("both" | "split");
+          amountType?: "fixed" | "estimated" | "statement";
+          onBillsPage?: "true" | "false";
+          limit?: number;
+          cursor?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: components["schemas"]["Item"][];
+              nextCursor: string | null;
+            };
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateItemInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Item"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/items/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Item"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchItemInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Item"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/v1/households/{hid}/items/{id}/renewal": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PutRenewalDetailsInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Item"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/items/{id}/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AmountHistory"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/occurrences": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          /** @description Calendar date YYYY-MM-DD (household timezone) */
+          from: string;
+          /** @description Calendar date YYYY-MM-DD (household timezone) */
+          to: string;
+          itemId?: string;
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["OccurrenceList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/occurrences/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchOccurrenceInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Occurrence"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/v1/households/{hid}/planned-expenses": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          status?: "planned" | "done" | "cancelled";
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["PlannedExpenseList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreatePlannedExpenseInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["PlannedExpense"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/planned-expenses/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchPlannedExpenseInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["PlannedExpense"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/v1/households/{hid}/balances": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateBalanceInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Balance"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/balances/latest": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Balance"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -684,6 +1500,7 @@ export interface components {
         | "conflict"
         | "entitlement_required"
         | "mfa_required"
+        | "approval_required"
         | "rate_limited"
         | "idempotency_key_reused"
         | "precondition_required"
@@ -766,6 +1583,8 @@ export interface components {
       timezone?: string;
       /** @description Integer cents */
       cushionCents?: number;
+      /** Format: uuid */
+      primaryIncomeItemId?: string;
     };
     HouseholdMemberInput: {
       /** Format: uuid */
@@ -816,6 +1635,388 @@ export interface components {
         emailConnections: number;
       };
     };
+    ScheduleInput:
+      | {
+          /** @constant */
+          type: "monthly_day";
+          day: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "monthly_last_day";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "monthly_last_weekday";
+          /** @enum {string} */
+          weekday: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "every_n_weeks";
+          n: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "every_n_months";
+          n: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "yearly";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        };
+    RenewalDetailsInput: {
+      /** @enum {string} */
+      autoRenews: "yes" | "no" | "rolls_over";
+      coverageStart: string | null;
+      coverageEnd: string | null;
+      cancelBy: string | null;
+      decisionBy: string | null;
+      shopAroundOn: string | null;
+      previousAmountCents: number | null;
+      priceChangedOn: string | null;
+    };
+    PutRenewalDetailsInput: {
+      /** @enum {string} */
+      autoRenews?: "yes" | "no" | "rolls_over";
+      coverageStart?: string | null;
+      coverageEnd?: string | null;
+      cancelBy?: string | null;
+      decisionBy?: string | null;
+      shopAroundOn?: string | null;
+      previousAmountCents?: number | null;
+      priceChangedOn?: string | null;
+    };
+    ItemInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      /** @enum {string} */
+      direction: "outflow" | "inflow";
+      /** @enum {string} */
+      kind:
+        "bill" | "subscription" | "insurance" | "membership" | "registration" | "loan" | "income" | "other";
+      /** @enum {string} */
+      category:
+        | "housing"
+        | "utilities"
+        | "childcare"
+        | "transport"
+        | "debt"
+        | "subscription"
+        | "insurance"
+        | "membership"
+        | "vehicle_home"
+        | "income"
+        | "other";
+      name: string;
+      providerName: string | null;
+      providerDomain: string | null;
+      /** @enum {string} */
+      amountType: "fixed" | "estimated" | "statement";
+      amountCents: number | null;
+      schedule: components["schemas"]["ScheduleInput"];
+      /** @enum {string} */
+      weekendRule: "none" | "prev_business_day" | "next_business_day";
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId: string | null;
+      /** @enum {string} */
+      status: "active" | "paused" | "ended" | "pending_review";
+      /** @enum {string} */
+      source: "manual" | "csv" | "email" | "bank";
+      accountLast4: string | null;
+      /** @enum {string} */
+      paidFrom: "account" | "payroll";
+      markedPossiblyUnused: boolean;
+      subcategory: string | null;
+      movable: boolean | null;
+      onBillsPage: boolean;
+      notes: string | null;
+      renewal: components["schemas"]["RenewalDetailsInput"] | null;
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    CreateItemInput: {
+      /** @enum {string} */
+      direction: "outflow" | "inflow";
+      /** @enum {string} */
+      kind:
+        "bill" | "subscription" | "insurance" | "membership" | "registration" | "loan" | "income" | "other";
+      /** @enum {string} */
+      category:
+        | "housing"
+        | "utilities"
+        | "childcare"
+        | "transport"
+        | "debt"
+        | "subscription"
+        | "insurance"
+        | "membership"
+        | "vehicle_home"
+        | "income"
+        | "other";
+      name: string;
+      providerName?: string | null;
+      providerDomain?: string | null;
+      /** @enum {string} */
+      amountType: "fixed" | "estimated" | "statement";
+      amountCents?: number | null;
+      schedule: components["schemas"]["ScheduleInput"];
+      /**
+       * @default none
+       * @enum {string}
+       */
+      weekendRule: "none" | "prev_business_day" | "next_business_day";
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      /**
+       * @default active
+       * @enum {string}
+       */
+      status: "active" | "paused" | "ended" | "pending_review";
+      accountLast4?: string | null;
+      /**
+       * @default account
+       * @enum {string}
+       */
+      paidFrom: "account" | "payroll";
+      /** @default false */
+      markedPossiblyUnused: boolean;
+      subcategory?: string | null;
+      movable?: boolean | null;
+      /** @default true */
+      onBillsPage: boolean;
+      notes?: string | null;
+    };
+    PatchItemInput: {
+      /** @enum {string} */
+      kind?:
+        "bill" | "subscription" | "insurance" | "membership" | "registration" | "loan" | "income" | "other";
+      /** @enum {string} */
+      category?:
+        | "housing"
+        | "utilities"
+        | "childcare"
+        | "transport"
+        | "debt"
+        | "subscription"
+        | "insurance"
+        | "membership"
+        | "vehicle_home"
+        | "income"
+        | "other";
+      name?: string;
+      providerName?: string | null;
+      providerDomain?: string | null;
+      /** @enum {string} */
+      amountType?: "fixed" | "estimated" | "statement";
+      amountCents?: number | null;
+      schedule?: components["schemas"]["ScheduleInput"];
+      /** @enum {string} */
+      weekendRule?: "none" | "prev_business_day" | "next_business_day";
+      /** @enum {string} */
+      ownerType?: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      /** @enum {string} */
+      status?: "active" | "paused" | "ended" | "pending_review";
+      accountLast4?: string | null;
+      /** @enum {string} */
+      paidFrom?: "account" | "payroll";
+      markedPossiblyUnused?: boolean;
+      subcategory?: string | null;
+      movable?: boolean | null;
+      onBillsPage?: boolean;
+      notes?: string | null;
+    };
+    AmountHistoryEntryInput: {
+      /** Format: uuid */
+      id: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      occurredOn: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /** @enum {string} */
+      source: "manual" | "csv" | "email" | "bank";
+    };
+    AmountHistoryInput: {
+      data: components["schemas"]["AmountHistoryEntryInput"][];
+    };
+    OccurrenceInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      /** Format: uuid */
+      itemId: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      scheduledOn: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      actualAmountCents: number | null;
+      /** @enum {string} */
+      status: "scheduled" | "paid" | "received" | "skipped";
+      paidOn: string | null;
+      markedBy: string | null;
+      movedBy: string | null;
+      version: number;
+    };
+    OccurrenceListInput: {
+      data: components["schemas"]["OccurrenceInput"][];
+    };
+    PatchOccurrenceInput: {
+      /** @enum {string} */
+      status?: "scheduled" | "paid" | "received" | "skipped";
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      paidOn?: string;
+      actualAmountCents?: number | null;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn?: string;
+    };
+    PlannedExpenseInput: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      name: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId: string | null;
+      goalId: string | null;
+      /** @enum {string} */
+      status: "planned" | "done" | "cancelled";
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreatePlannedExpenseInput: {
+      name: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      goalId?: string | null;
+      /**
+       * @default planned
+       * @enum {string}
+       */
+      status: "planned" | "done" | "cancelled";
+    };
+    PatchPlannedExpenseInput: {
+      name?: string;
+      /** @description Integer cents */
+      amountCents?: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn?: string;
+      /** @enum {string} */
+      ownerType?: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      goalId?: string | null;
+      /** @enum {string} */
+      status?: "planned" | "done" | "cancelled";
+    };
+    PlannedExpenseListInput: {
+      data: components["schemas"]["PlannedExpenseInput"][];
+    };
+    BalanceInput: {
+      /** Format: uuid */
+      id: string;
+      label: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf: string;
+      /** @enum {string} */
+      source: "manual" | "csv" | "bank";
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateBalanceInput: {
+      /** @default Checking */
+      label: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf: string;
+    };
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -844,6 +2045,7 @@ export interface components {
         | "conflict"
         | "entitlement_required"
         | "mfa_required"
+        | "approval_required"
         | "rate_limited"
         | "idempotency_key_reused"
         | "precondition_required"
@@ -926,6 +2128,8 @@ export interface components {
       timezone?: string;
       /** @description Integer cents */
       cushionCents?: number;
+      /** Format: uuid */
+      primaryIncomeItemId?: string;
     };
     HouseholdMember: {
       /** Format: uuid */
@@ -975,6 +2179,388 @@ export interface components {
       connections: {
         emailConnections: number;
       };
+    };
+    Schedule:
+      | {
+          /** @constant */
+          type: "monthly_day";
+          day: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "monthly_last_day";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "monthly_last_weekday";
+          /** @enum {string} */
+          weekday: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "every_n_weeks";
+          n: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "every_n_months";
+          n: number;
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        }
+      | {
+          /** @constant */
+          type: "yearly";
+          /**
+           * Format: date
+           * @description Calendar date YYYY-MM-DD (household timezone)
+           */
+          dtstart: string;
+          until?: string | null;
+        };
+    RenewalDetails: {
+      /** @enum {string} */
+      autoRenews: "yes" | "no" | "rolls_over";
+      coverageStart: string | null;
+      coverageEnd: string | null;
+      cancelBy: string | null;
+      decisionBy: string | null;
+      shopAroundOn: string | null;
+      previousAmountCents: number | null;
+      priceChangedOn: string | null;
+    };
+    PutRenewalDetails: {
+      /** @enum {string} */
+      autoRenews?: "yes" | "no" | "rolls_over";
+      coverageStart?: string | null;
+      coverageEnd?: string | null;
+      cancelBy?: string | null;
+      decisionBy?: string | null;
+      shopAroundOn?: string | null;
+      previousAmountCents?: number | null;
+      priceChangedOn?: string | null;
+    };
+    Item: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      /** @enum {string} */
+      direction: "outflow" | "inflow";
+      /** @enum {string} */
+      kind:
+        "bill" | "subscription" | "insurance" | "membership" | "registration" | "loan" | "income" | "other";
+      /** @enum {string} */
+      category:
+        | "housing"
+        | "utilities"
+        | "childcare"
+        | "transport"
+        | "debt"
+        | "subscription"
+        | "insurance"
+        | "membership"
+        | "vehicle_home"
+        | "income"
+        | "other";
+      name: string;
+      providerName: string | null;
+      providerDomain: string | null;
+      /** @enum {string} */
+      amountType: "fixed" | "estimated" | "statement";
+      amountCents: number | null;
+      schedule: components["schemas"]["Schedule"];
+      /** @enum {string} */
+      weekendRule: "none" | "prev_business_day" | "next_business_day";
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId: string | null;
+      /** @enum {string} */
+      status: "active" | "paused" | "ended" | "pending_review";
+      /** @enum {string} */
+      source: "manual" | "csv" | "email" | "bank";
+      accountLast4: string | null;
+      /** @enum {string} */
+      paidFrom: "account" | "payroll";
+      markedPossiblyUnused: boolean;
+      subcategory: string | null;
+      movable: boolean | null;
+      onBillsPage: boolean;
+      notes: string | null;
+      renewal: components["schemas"]["RenewalDetails"] | null;
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    CreateItem: {
+      /** @enum {string} */
+      direction: "outflow" | "inflow";
+      /** @enum {string} */
+      kind:
+        "bill" | "subscription" | "insurance" | "membership" | "registration" | "loan" | "income" | "other";
+      /** @enum {string} */
+      category:
+        | "housing"
+        | "utilities"
+        | "childcare"
+        | "transport"
+        | "debt"
+        | "subscription"
+        | "insurance"
+        | "membership"
+        | "vehicle_home"
+        | "income"
+        | "other";
+      name: string;
+      providerName?: string | null;
+      providerDomain?: string | null;
+      /** @enum {string} */
+      amountType: "fixed" | "estimated" | "statement";
+      amountCents?: number | null;
+      schedule: components["schemas"]["Schedule"];
+      /**
+       * @default none
+       * @enum {string}
+       */
+      weekendRule: "none" | "prev_business_day" | "next_business_day";
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      /**
+       * @default active
+       * @enum {string}
+       */
+      status: "active" | "paused" | "ended" | "pending_review";
+      accountLast4?: string | null;
+      /**
+       * @default account
+       * @enum {string}
+       */
+      paidFrom: "account" | "payroll";
+      /** @default false */
+      markedPossiblyUnused: boolean;
+      subcategory?: string | null;
+      movable?: boolean | null;
+      /** @default true */
+      onBillsPage: boolean;
+      notes?: string | null;
+    };
+    PatchItem: {
+      /** @enum {string} */
+      kind?:
+        "bill" | "subscription" | "insurance" | "membership" | "registration" | "loan" | "income" | "other";
+      /** @enum {string} */
+      category?:
+        | "housing"
+        | "utilities"
+        | "childcare"
+        | "transport"
+        | "debt"
+        | "subscription"
+        | "insurance"
+        | "membership"
+        | "vehicle_home"
+        | "income"
+        | "other";
+      name?: string;
+      providerName?: string | null;
+      providerDomain?: string | null;
+      /** @enum {string} */
+      amountType?: "fixed" | "estimated" | "statement";
+      amountCents?: number | null;
+      schedule?: components["schemas"]["Schedule"];
+      /** @enum {string} */
+      weekendRule?: "none" | "prev_business_day" | "next_business_day";
+      /** @enum {string} */
+      ownerType?: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      /** @enum {string} */
+      status?: "active" | "paused" | "ended" | "pending_review";
+      accountLast4?: string | null;
+      /** @enum {string} */
+      paidFrom?: "account" | "payroll";
+      markedPossiblyUnused?: boolean;
+      subcategory?: string | null;
+      movable?: boolean | null;
+      onBillsPage?: boolean;
+      notes?: string | null;
+    };
+    AmountHistoryEntry: {
+      /** Format: uuid */
+      id: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      occurredOn: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /** @enum {string} */
+      source: "manual" | "csv" | "email" | "bank";
+    };
+    AmountHistory: {
+      data: components["schemas"]["AmountHistoryEntry"][];
+    };
+    Occurrence: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      /** Format: uuid */
+      itemId: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      scheduledOn: string;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      actualAmountCents: number | null;
+      /** @enum {string} */
+      status: "scheduled" | "paid" | "received" | "skipped";
+      paidOn: string | null;
+      markedBy: string | null;
+      movedBy: string | null;
+      version: number;
+    };
+    OccurrenceList: {
+      data: components["schemas"]["Occurrence"][];
+    };
+    PatchOccurrence: {
+      /** @enum {string} */
+      status?: "scheduled" | "paid" | "received" | "skipped";
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      paidOn?: string;
+      actualAmountCents?: number | null;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn?: string;
+    };
+    PlannedExpense: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      householdId: string;
+      name: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId: string | null;
+      goalId: string | null;
+      /** @enum {string} */
+      status: "planned" | "done" | "cancelled";
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreatePlannedExpense: {
+      name: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn: string;
+      /** @enum {string} */
+      ownerType: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      goalId?: string | null;
+      /**
+       * @default planned
+       * @enum {string}
+       */
+      status: "planned" | "done" | "cancelled";
+    };
+    PatchPlannedExpense: {
+      name?: string;
+      /** @description Integer cents */
+      amountCents?: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      dueOn?: string;
+      /** @enum {string} */
+      ownerType?: "member" | "both" | "split";
+      ownerUserId?: string | null;
+      goalId?: string | null;
+      /** @enum {string} */
+      status?: "planned" | "done" | "cancelled";
+    };
+    PlannedExpenseList: {
+      data: components["schemas"]["PlannedExpense"][];
+    };
+    Balance: {
+      /** Format: uuid */
+      id: string;
+      label: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf: string;
+      /** @enum {string} */
+      source: "manual" | "csv" | "bank";
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateBalance: {
+      /** @default Checking */
+      label: string;
+      /** @description Integer cents */
+      amountCents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      asOf: string;
     };
   };
   responses: never;

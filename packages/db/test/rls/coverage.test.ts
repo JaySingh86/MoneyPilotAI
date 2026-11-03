@@ -93,6 +93,7 @@ describe("RLS posture of every table", () => {
       app_sync_auth_user: ["mp_api", "mp_worker"],
       app_transfer_creator: ["mp_api"],
       app_purge_audit_events: ["mp_worker"],
+      app_list_household_ids: ["mp_worker"],
     };
     const res = await apiClient.query<{ proname: string; roles: string[] }>(`
       select p.proname,

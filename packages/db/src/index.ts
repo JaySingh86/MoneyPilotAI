@@ -21,3 +21,16 @@ export {
   parseMigrationName,
   runMigrations,
 } from "./migrate";
+export {
+  extendOccurrences,
+  householdToday,
+  materializeForJob,
+  materializeHousehold,
+  MATERIALIZE_FUTURE_DAYS,
+  MATERIALIZE_PAST_DAYS,
+  planOccurrences,
+  rebuildFutureOccurrences,
+  type MaterializeResult,
+  type PlannedOccurrence,
+  type ScheduledItem,
+} from "./items/materialize";

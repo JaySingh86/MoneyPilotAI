@@ -54,6 +54,11 @@ export interface ItemInput {
    * income items, which usually carry hard due dates. See QUESTIONS.md Q-016.
    */
   movable?: boolean;
+  /**
+   * False for items that exist only as renewals: they are left out of the Bills & recurring row count and
+   * averages (rule 17, Q-020) but still count in the runway. Defaults to true.
+   */
+  onBillsPage?: boolean;
 }
 
 export type ItemSource = "manual" | "csv" | "email" | "bank";

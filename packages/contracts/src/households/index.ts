@@ -33,12 +33,13 @@ export const CreateHouseholdBody = z
   .meta({ id: "CreateHouseholdBody" });
 export type CreateHouseholdBody = z.infer<typeof CreateHouseholdBody>;
 
-/** Primary income changes arrive with the items module (WP-06); see Q-086. */
+/** `primaryIncomeItemId` must be a live income item of this household (checked by the API, Q-086). */
 export const PatchHouseholdBody = z
   .object({
     name: HouseholdName.optional(),
     timezone: TimeZone.optional(),
     cushionCents: Cents.min(0).optional(),
+    primaryIncomeItemId: Uuid.optional(),
   })
   .strict()
   .refine((body) => Object.keys(body).length > 0, "Send at least one field")

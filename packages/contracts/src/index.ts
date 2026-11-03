@@ -4,3 +4,4 @@ export * from "./common";
 export * from "./errors";
 export * from "./identity";
 export * from "./households";
+export * from "./items";

@@ -33,4 +33,31 @@ describe("billsAverages", () => {
     expect(b.estimatesToConfirm).toBe(2);
     expect(b.byItem.find((x) => x.itemId === "inc-sam")).toEqual({ itemId: "inc-sam", monthlyCents: 682500 });
   });
+
+  it("skips items that exist only as renewals (onBillsPage false): rows and averages are unchanged (rule 17, Q-020)", () => {
+    const input = riveraInput();
+    const base = billsAverages(input);
+    expect(base.rows).toBe(18);
+    expect(base.monthlyBillsAverageCents).toBe(495694);
+    const renewalOnly: ItemInput = {
+      id: "b-renters",
+      name: "Renters insurance",
+      direction: "outflow",
+      kind: "insurance",
+      owner: "m-sam",
+      amount: { type: "fixed", cents: 16800 },
+      schedule: { type: "yearly", dtstart: "2027-01-09" },
+      onBillsPage: false,
+    };
+    input.items.push(renewalOnly);
+    const withRenewalOnly = billsAverages(input);
+    expect(withRenewalOnly.rows).toBe(18);
+    expect(withRenewalOnly.monthlyBillsAverageCents).toBe(495694);
+    expect(withRenewalOnly.byItem.some((x) => x.itemId === "b-renters")).toBe(false);
+    // True and absent both count, so the flag only ever removes items.
+    renewalOnly.onBillsPage = true;
+    const listed = billsAverages(input);
+    expect(listed.rows).toBe(19);
+    expect(listed.monthlyBillsAverageCents).toBe(495694 + 1400);
+  });
 });

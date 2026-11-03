@@ -1,7 +1,7 @@
 // Cross-household test cases, one per table that has a `household_id` column.
 // test/rls/coverage.test.ts fails if a table with household_id exists without an entry here, so a WP
 // that adds a household table must add its case in the same PR (ADR-003, ARCHITECTURE §8).
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { sql, type SQL } from "drizzle-orm";
 
 export interface AttackTarget {
@@ -40,5 +40,53 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
     insert: (t) => sql`insert into audit_events (household_id, actor_user_id, actor_type, action)
       values (${t.householdId}, ${t.actorUserId}, ${t.actorUserId ? "user" : "system"}, 'rls.probe')`,
     update: (t) => sql`update audit_events set action = 'tampered' where household_id = ${t.householdId}`,
+  },
+  // ===== WP-06: items, schedules, renewals, occurrences, planned expenses, balances, goals =====
+  {
+    table: "goals",
+    insert: (t) => sql`insert into goals (household_id, name, type, target_cents)
+      values (${t.householdId}, 'Attacker goal', 'savings', 100000)`,
+    update: (t) => sql`update goals set name = 'tampered' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "recurring_items",
+    insert: (t) => sql`insert into recurring_items
+        (household_id, direction, kind, category, name, amount_type, amount_cents, rrule, dtstart, owner_type, source)
+      values (${t.householdId}, 'outflow', 'bill', 'other', 'Attacker bill', 'fixed', 100,
+        'FREQ=MONTHLY;BYMONTHDAY=1', '2026-01-01', 'both', 'manual')`,
+    update: (t) => sql`update recurring_items set notes = 'tampered' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "renewal_details",
+    insert: (t) =>
+      sql`insert into renewal_details (item_id, household_id) values (${randomUUID()}, ${t.householdId})`,
+    update: (t) =>
+      sql`update renewal_details set cancel_by = '2026-01-01' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "item_amount_history",
+    insert: (
+      t,
+    ) => sql`insert into item_amount_history (household_id, item_id, occurred_on, amount_cents, source)
+      values (${t.householdId}, ${randomUUID()}, '2026-01-01', 100, 'manual')`,
+    update: (t) => sql`update item_amount_history set amount_cents = 1 where household_id = ${t.householdId}`,
+  },
+  {
+    table: "occurrences",
+    insert: (t) => sql`insert into occurrences (household_id, item_id, scheduled_on, due_on)
+      values (${t.householdId}, ${randomUUID()}, '2026-12-01', '2026-12-01')`,
+    update: (t) => sql`update occurrences set due_on = '2026-12-31' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "planned_expenses",
+    insert: (t) => sql`insert into planned_expenses (household_id, name, amount_cents, due_on, owner_type)
+      values (${t.householdId}, 'Attacker expense', 100, '2026-12-01', 'both')`,
+    update: (t) => sql`update planned_expenses set name = 'tampered' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "balances",
+    insert: (t) => sql`insert into balances (household_id, amount_cents, as_of, source)
+      values (${t.householdId}, 1, '2026-10-27', 'manual')`,
+    update: (t) => sql`update balances set amount_cents = 1 where household_id = ${t.householdId}`,
   },
 ];

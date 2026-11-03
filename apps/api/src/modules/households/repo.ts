@@ -91,6 +91,14 @@ export interface HouseholdPatch {
   name?: string;
   timezone?: string;
   cushionCents?: number;
+  primaryIncomeItemId?: string;
+}
+
+/** A live (not deleted) income item of this household: the only valid primary income (Q-086). */
+export async function isLiveIncomeItem(tx: Tx, householdId: string, itemId: string): Promise<boolean> {
+  const res = await tx.execute(sql`select 1 from recurring_items
+    where id = ${itemId} and household_id = ${householdId} and direction = 'inflow' and deleted_at is null`);
+  return res.rows.length > 0;
 }
 
 /** Updates only when the stored version is still `expected` (the trigger then bumps it). */
@@ -104,6 +112,9 @@ export async function updateHousehold(
     patch.name !== undefined ? sql`name = ${patch.name}` : undefined,
     patch.timezone !== undefined ? sql`timezone = ${patch.timezone}` : undefined,
     patch.cushionCents !== undefined ? sql`cushion_cents = ${patch.cushionCents}` : undefined,
+    patch.primaryIncomeItemId !== undefined
+      ? sql`primary_income_item_id = ${patch.primaryIncomeItemId}`
+      : undefined,
   ].filter((a) => a !== undefined);
   const res = await tx.execute<HouseholdSql>(sql`update households set ${sql.join(assignments, sql`, `)}
     where id = ${householdId} and version = ${expected}

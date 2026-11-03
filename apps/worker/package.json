@@ -11,6 +11,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@mp/observability": "workspace:*"
+    "@mp/db": "workspace:*",
+    "@mp/observability": "workspace:*",
+    "zod": "^4.2.0"
   }
 }

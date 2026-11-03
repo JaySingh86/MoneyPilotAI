@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Drizzle schema, SQL migrations, RLS, withHouseholdTx, seed loader (WP-03).",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -15,6 +16,7 @@
     "seed": "tsx src/cli/seed.ts"
   },
   "dependencies": {
+    "@mp/engine": "workspace:*",
     "drizzle-orm": "^0.45.4",
     "pg": "^8.23.1"
   },

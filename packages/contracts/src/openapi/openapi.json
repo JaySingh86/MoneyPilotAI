@@ -42,6 +42,7 @@
               "conflict",
               "entitlement_required",
               "mfa_required",
+              "approval_required",
               "rate_limited",
               "idempotency_key_reused",
               "precondition_required",
@@ -252,6 +253,11 @@
             "minimum": 0,
             "maximum": 9007199254740991,
             "description": "Integer cents"
+          },
+          "primaryIncomeItemId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
         "additionalProperties": false
@@ -361,6 +367,968 @@
         },
         "required": ["household", "members", "openInvite", "badges", "entitlements", "connections"]
       },
+      "ScheduleInput": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "monthly_day" },
+              "day": { "type": "integer", "minimum": 1, "maximum": 31 },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "day", "dtstart"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "monthly_last_day" },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "dtstart"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "monthly_last_weekday" },
+              "weekday": {
+                "type": "string",
+                "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+              },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "weekday", "dtstart"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "every_n_weeks" },
+              "n": { "type": "integer", "minimum": 1, "maximum": 520 },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "n", "dtstart"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "every_n_months" },
+              "n": { "type": "integer", "minimum": 2, "maximum": 520 },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "n", "dtstart"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "yearly" },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "dtstart"]
+          }
+        ]
+      },
+      "RenewalDetailsInput": {
+        "type": "object",
+        "properties": {
+          "autoRenews": { "type": "string", "enum": ["yes", "no", "rolls_over"] },
+          "coverageStart": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "coverageEnd": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "cancelBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decisionBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shopAroundOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "previousAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "priceChangedOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "autoRenews",
+          "coverageStart",
+          "coverageEnd",
+          "cancelBy",
+          "decisionBy",
+          "shopAroundOn",
+          "previousAmountCents",
+          "priceChangedOn"
+        ]
+      },
+      "PutRenewalDetailsInput": {
+        "type": "object",
+        "properties": {
+          "autoRenews": { "type": "string", "enum": ["yes", "no", "rolls_over"] },
+          "coverageStart": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "coverageEnd": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "cancelBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decisionBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shopAroundOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "previousAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "priceChangedOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "ItemInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "householdId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "direction": { "type": "string", "enum": ["outflow", "inflow"] },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "subscription",
+              "insurance",
+              "membership",
+              "registration",
+              "loan",
+              "income",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "housing",
+              "utilities",
+              "childcare",
+              "transport",
+              "debt",
+              "subscription",
+              "insurance",
+              "membership",
+              "vehicle_home",
+              "income",
+              "other"
+            ]
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "providerName": { "anyOf": [{ "type": "string", "maxLength": 120 }, { "type": "null" }] },
+          "providerDomain": { "type": ["string", "null"] },
+          "amountType": { "type": "string", "enum": ["fixed", "estimated", "statement"] },
+          "amountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "schedule": { "$ref": "#/components/schemas/ScheduleInput" },
+          "weekendRule": { "type": "string", "enum": ["none", "prev_business_day", "next_business_day"] },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["active", "paused", "ended", "pending_review"] },
+          "source": { "type": "string", "enum": ["manual", "csv", "email", "bank"] },
+          "accountLast4": { "type": ["string", "null"] },
+          "paidFrom": { "type": "string", "enum": ["account", "payroll"] },
+          "markedPossiblyUnused": { "type": "boolean" },
+          "subcategory": { "anyOf": [{ "type": "string", "maxLength": 40 }, { "type": "null" }] },
+          "movable": { "type": ["boolean", "null"] },
+          "onBillsPage": { "type": "boolean" },
+          "notes": { "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }] },
+          "renewal": {
+            "anyOf": [{ "$ref": "#/components/schemas/RenewalDetailsInput" }, { "type": "null" }]
+          },
+          "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "householdId",
+          "direction",
+          "kind",
+          "category",
+          "name",
+          "providerName",
+          "providerDomain",
+          "amountType",
+          "amountCents",
+          "schedule",
+          "weekendRule",
+          "ownerType",
+          "ownerUserId",
+          "status",
+          "source",
+          "accountLast4",
+          "paidFrom",
+          "markedPossiblyUnused",
+          "subcategory",
+          "movable",
+          "onBillsPage",
+          "notes",
+          "renewal",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateItemInput": {
+        "type": "object",
+        "properties": {
+          "direction": { "type": "string", "enum": ["outflow", "inflow"] },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "subscription",
+              "insurance",
+              "membership",
+              "registration",
+              "loan",
+              "income",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "housing",
+              "utilities",
+              "childcare",
+              "transport",
+              "debt",
+              "subscription",
+              "insurance",
+              "membership",
+              "vehicle_home",
+              "income",
+              "other"
+            ]
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "providerName": { "anyOf": [{ "type": "string", "maxLength": 120 }, { "type": "null" }] },
+          "providerDomain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "amountType": { "type": "string", "enum": ["fixed", "estimated", "statement"] },
+          "amountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "schedule": { "$ref": "#/components/schemas/ScheduleInput" },
+          "weekendRule": {
+            "default": "none",
+            "type": "string",
+            "enum": ["none", "prev_business_day", "next_business_day"]
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": {
+            "default": "active",
+            "type": "string",
+            "enum": ["active", "paused", "ended", "pending_review"]
+          },
+          "accountLast4": {
+            "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{2,4}$" }, { "type": "null" }]
+          },
+          "paidFrom": { "default": "account", "type": "string", "enum": ["account", "payroll"] },
+          "markedPossiblyUnused": { "default": false, "type": "boolean" },
+          "subcategory": { "anyOf": [{ "type": "string", "maxLength": 40 }, { "type": "null" }] },
+          "movable": { "type": ["boolean", "null"] },
+          "onBillsPage": { "default": true, "type": "boolean" },
+          "notes": { "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }] }
+        },
+        "required": ["direction", "kind", "category", "name", "amountType", "schedule", "ownerType"],
+        "additionalProperties": false
+      },
+      "PatchItemInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "subscription",
+              "insurance",
+              "membership",
+              "registration",
+              "loan",
+              "income",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "housing",
+              "utilities",
+              "childcare",
+              "transport",
+              "debt",
+              "subscription",
+              "insurance",
+              "membership",
+              "vehicle_home",
+              "income",
+              "other"
+            ]
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "providerName": { "anyOf": [{ "type": "string", "maxLength": 120 }, { "type": "null" }] },
+          "providerDomain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "amountType": { "type": "string", "enum": ["fixed", "estimated", "statement"] },
+          "amountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "schedule": { "$ref": "#/components/schemas/ScheduleInput" },
+          "weekendRule": { "type": "string", "enum": ["none", "prev_business_day", "next_business_day"] },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["active", "paused", "ended", "pending_review"] },
+          "accountLast4": {
+            "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{2,4}$" }, { "type": "null" }]
+          },
+          "paidFrom": { "type": "string", "enum": ["account", "payroll"] },
+          "markedPossiblyUnused": { "type": "boolean" },
+          "subcategory": { "anyOf": [{ "type": "string", "maxLength": 40 }, { "type": "null" }] },
+          "movable": { "type": ["boolean", "null"] },
+          "onBillsPage": { "type": "boolean" },
+          "notes": { "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }] }
+        },
+        "additionalProperties": false
+      },
+      "AmountHistoryEntryInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "occurredOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "source": { "type": "string", "enum": ["manual", "csv", "email", "bank"] }
+        },
+        "required": ["id", "occurredOn", "amountCents", "source"]
+      },
+      "AmountHistoryInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/AmountHistoryEntryInput" } }
+        },
+        "required": ["data"]
+      },
+      "OccurrenceInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "householdId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "scheduledOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "actualAmountCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+          "paidOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "markedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "movedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+        },
+        "required": [
+          "id",
+          "householdId",
+          "itemId",
+          "scheduledOn",
+          "dueOn",
+          "actualAmountCents",
+          "status",
+          "paidOn",
+          "markedBy",
+          "movedBy",
+          "version"
+        ]
+      },
+      "OccurrenceListInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/OccurrenceInput" } }
+        },
+        "required": ["data"]
+      },
+      "PatchOccurrenceInput": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+          "paidOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "actualAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          }
+        }
+      },
+      "PlannedExpenseInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "householdId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "goalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["planned", "done", "cancelled"] },
+          "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "householdId",
+          "name",
+          "amountCents",
+          "dueOn",
+          "ownerType",
+          "ownerUserId",
+          "goalId",
+          "status",
+          "version",
+          "createdAt"
+        ]
+      },
+      "CreatePlannedExpenseInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000000,
+            "description": "Integer cents"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "goalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "default": "planned", "type": "string", "enum": ["planned", "done", "cancelled"] }
+        },
+        "required": ["name", "amountCents", "dueOn", "ownerType"]
+      },
+      "PatchPlannedExpenseInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000000,
+            "description": "Integer cents"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "goalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["planned", "done", "cancelled"] }
+        }
+      },
+      "PlannedExpenseListInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/PlannedExpenseInput" } }
+        },
+        "required": ["data"]
+      },
+      "BalanceInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "label": { "type": "string" },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "source": { "type": "string", "enum": ["manual", "csv", "bank"] },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": ["id", "label", "amountCents", "asOf", "source", "createdAt"]
+      },
+      "CreateBalanceInput": {
+        "type": "object",
+        "properties": {
+          "label": { "default": "Checking", "type": "string", "minLength": 1, "maxLength": 40 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -100000000000,
+            "maximum": 100000000000,
+            "description": "Integer cents"
+          },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          }
+        },
+        "required": ["amountCents", "asOf"]
+      },
       "ProblemField": {
         "type": "object",
         "properties": {
@@ -396,6 +1364,7 @@
               "conflict",
               "entitlement_required",
               "mfa_required",
+              "approval_required",
               "rate_limited",
               "idempotency_key_reused",
               "precondition_required",
@@ -610,6 +1579,11 @@
             "minimum": 0,
             "maximum": 9007199254740991,
             "description": "Integer cents"
+          },
+          "primaryIncomeItemId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
         "additionalProperties": false
@@ -724,6 +1698,997 @@
           }
         },
         "required": ["household", "members", "openInvite", "badges", "entitlements", "connections"],
+        "additionalProperties": false
+      },
+      "Schedule": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "monthly_day" },
+              "day": { "type": "integer", "minimum": 1, "maximum": 31 },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "day", "dtstart"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "monthly_last_day" },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "dtstart"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "monthly_last_weekday" },
+              "weekday": {
+                "type": "string",
+                "enum": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+              },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "weekday", "dtstart"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "every_n_weeks" },
+              "n": { "type": "integer", "minimum": 1, "maximum": 520 },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "n", "dtstart"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "every_n_months" },
+              "n": { "type": "integer", "minimum": 2, "maximum": 520 },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "n", "dtstart"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "const": "yearly" },
+              "dtstart": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "format": "date",
+                    "description": "Calendar date YYYY-MM-DD (household timezone)"
+                  },
+                  { "type": "null" }
+                ]
+              }
+            },
+            "required": ["type", "dtstart"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "RenewalDetails": {
+        "type": "object",
+        "properties": {
+          "autoRenews": { "type": "string", "enum": ["yes", "no", "rolls_over"] },
+          "coverageStart": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "coverageEnd": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "cancelBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decisionBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shopAroundOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "previousAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "priceChangedOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": [
+          "autoRenews",
+          "coverageStart",
+          "coverageEnd",
+          "cancelBy",
+          "decisionBy",
+          "shopAroundOn",
+          "previousAmountCents",
+          "priceChangedOn"
+        ],
+        "additionalProperties": false
+      },
+      "PutRenewalDetails": {
+        "type": "object",
+        "properties": {
+          "autoRenews": { "type": "string", "enum": ["yes", "no", "rolls_over"] },
+          "coverageStart": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "coverageEnd": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "cancelBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "decisionBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "shopAroundOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "previousAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "priceChangedOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "householdId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "direction": { "type": "string", "enum": ["outflow", "inflow"] },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "subscription",
+              "insurance",
+              "membership",
+              "registration",
+              "loan",
+              "income",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "housing",
+              "utilities",
+              "childcare",
+              "transport",
+              "debt",
+              "subscription",
+              "insurance",
+              "membership",
+              "vehicle_home",
+              "income",
+              "other"
+            ]
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "providerName": { "anyOf": [{ "type": "string", "maxLength": 120 }, { "type": "null" }] },
+          "providerDomain": { "type": ["string", "null"] },
+          "amountType": { "type": "string", "enum": ["fixed", "estimated", "statement"] },
+          "amountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "schedule": { "$ref": "#/components/schemas/Schedule" },
+          "weekendRule": { "type": "string", "enum": ["none", "prev_business_day", "next_business_day"] },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["active", "paused", "ended", "pending_review"] },
+          "source": { "type": "string", "enum": ["manual", "csv", "email", "bank"] },
+          "accountLast4": { "type": ["string", "null"] },
+          "paidFrom": { "type": "string", "enum": ["account", "payroll"] },
+          "markedPossiblyUnused": { "type": "boolean" },
+          "subcategory": { "anyOf": [{ "type": "string", "maxLength": 40 }, { "type": "null" }] },
+          "movable": { "type": ["boolean", "null"] },
+          "onBillsPage": { "type": "boolean" },
+          "notes": { "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }] },
+          "renewal": { "anyOf": [{ "$ref": "#/components/schemas/RenewalDetails" }, { "type": "null" }] },
+          "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "householdId",
+          "direction",
+          "kind",
+          "category",
+          "name",
+          "providerName",
+          "providerDomain",
+          "amountType",
+          "amountCents",
+          "schedule",
+          "weekendRule",
+          "ownerType",
+          "ownerUserId",
+          "status",
+          "source",
+          "accountLast4",
+          "paidFrom",
+          "markedPossiblyUnused",
+          "subcategory",
+          "movable",
+          "onBillsPage",
+          "notes",
+          "renewal",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreateItem": {
+        "type": "object",
+        "properties": {
+          "direction": { "type": "string", "enum": ["outflow", "inflow"] },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "subscription",
+              "insurance",
+              "membership",
+              "registration",
+              "loan",
+              "income",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "housing",
+              "utilities",
+              "childcare",
+              "transport",
+              "debt",
+              "subscription",
+              "insurance",
+              "membership",
+              "vehicle_home",
+              "income",
+              "other"
+            ]
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "providerName": { "anyOf": [{ "type": "string", "maxLength": 120 }, { "type": "null" }] },
+          "providerDomain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "amountType": { "type": "string", "enum": ["fixed", "estimated", "statement"] },
+          "amountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "schedule": { "$ref": "#/components/schemas/Schedule" },
+          "weekendRule": {
+            "default": "none",
+            "type": "string",
+            "enum": ["none", "prev_business_day", "next_business_day"]
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": {
+            "default": "active",
+            "type": "string",
+            "enum": ["active", "paused", "ended", "pending_review"]
+          },
+          "accountLast4": {
+            "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{2,4}$" }, { "type": "null" }]
+          },
+          "paidFrom": { "default": "account", "type": "string", "enum": ["account", "payroll"] },
+          "markedPossiblyUnused": { "default": false, "type": "boolean" },
+          "subcategory": { "anyOf": [{ "type": "string", "maxLength": 40 }, { "type": "null" }] },
+          "movable": { "type": ["boolean", "null"] },
+          "onBillsPage": { "default": true, "type": "boolean" },
+          "notes": { "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }] }
+        },
+        "required": [
+          "direction",
+          "kind",
+          "category",
+          "name",
+          "amountType",
+          "schedule",
+          "weekendRule",
+          "ownerType",
+          "status",
+          "paidFrom",
+          "markedPossiblyUnused",
+          "onBillsPage"
+        ],
+        "additionalProperties": false
+      },
+      "PatchItem": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "bill",
+              "subscription",
+              "insurance",
+              "membership",
+              "registration",
+              "loan",
+              "income",
+              "other"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "housing",
+              "utilities",
+              "childcare",
+              "transport",
+              "debt",
+              "subscription",
+              "insurance",
+              "membership",
+              "vehicle_home",
+              "income",
+              "other"
+            ]
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "providerName": { "anyOf": [{ "type": "string", "maxLength": 120 }, { "type": "null" }] },
+          "providerDomain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120,
+                "pattern": "^(?=.{1,120}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "amountType": { "type": "string", "enum": ["fixed", "estimated", "statement"] },
+          "amountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "schedule": { "$ref": "#/components/schemas/Schedule" },
+          "weekendRule": { "type": "string", "enum": ["none", "prev_business_day", "next_business_day"] },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["active", "paused", "ended", "pending_review"] },
+          "accountLast4": {
+            "anyOf": [{ "type": "string", "pattern": "^[0-9A-Za-z]{2,4}$" }, { "type": "null" }]
+          },
+          "paidFrom": { "type": "string", "enum": ["account", "payroll"] },
+          "markedPossiblyUnused": { "type": "boolean" },
+          "subcategory": { "anyOf": [{ "type": "string", "maxLength": 40 }, { "type": "null" }] },
+          "movable": { "type": ["boolean", "null"] },
+          "onBillsPage": { "type": "boolean" },
+          "notes": { "anyOf": [{ "type": "string", "maxLength": 2000 }, { "type": "null" }] }
+        },
+        "additionalProperties": false
+      },
+      "AmountHistoryEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "occurredOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "source": { "type": "string", "enum": ["manual", "csv", "email", "bank"] }
+        },
+        "required": ["id", "occurredOn", "amountCents", "source"],
+        "additionalProperties": false
+      },
+      "AmountHistory": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/AmountHistoryEntry" } }
+        },
+        "required": ["data"],
+        "additionalProperties": false
+      },
+      "Occurrence": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "householdId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "scheduledOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "actualAmountCents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Integer cents"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+          "paidOn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "format": "date",
+                "description": "Calendar date YYYY-MM-DD (household timezone)"
+              },
+              { "type": "null" }
+            ]
+          },
+          "markedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "movedBy": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+        },
+        "required": [
+          "id",
+          "householdId",
+          "itemId",
+          "scheduledOn",
+          "dueOn",
+          "actualAmountCents",
+          "status",
+          "paidOn",
+          "markedBy",
+          "movedBy",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "OccurrenceList": {
+        "type": "object",
+        "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Occurrence" } } },
+        "required": ["data"],
+        "additionalProperties": false
+      },
+      "PatchOccurrence": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["scheduled", "paid", "received", "skipped"] },
+          "paidOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "actualAmountCents": {
+            "anyOf": [
+              { "type": "integer", "minimum": 0, "maximum": 100000000000, "description": "Integer cents" },
+              { "type": "null" }
+            ]
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlannedExpense": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "householdId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "goalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["planned", "done", "cancelled"] },
+          "version": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "householdId",
+          "name",
+          "amountCents",
+          "dueOn",
+          "ownerType",
+          "ownerUserId",
+          "goalId",
+          "status",
+          "version",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreatePlannedExpense": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000000,
+            "description": "Integer cents"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "goalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "default": "planned", "type": "string", "enum": ["planned", "done", "cancelled"] }
+        },
+        "required": ["name", "amountCents", "dueOn", "ownerType", "status"],
+        "additionalProperties": false
+      },
+      "PatchPlannedExpense": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000000000,
+            "description": "Integer cents"
+          },
+          "dueOn": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "ownerType": { "type": "string", "enum": ["member", "both", "split"] },
+          "ownerUserId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "goalId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "status": { "type": "string", "enum": ["planned", "done", "cancelled"] }
+        },
+        "additionalProperties": false
+      },
+      "PlannedExpenseList": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/PlannedExpense" } }
+        },
+        "required": ["data"],
+        "additionalProperties": false
+      },
+      "Balance": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "label": { "type": "string" },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Integer cents"
+          },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          "source": { "type": "string", "enum": ["manual", "csv", "bank"] },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          }
+        },
+        "required": ["id", "label", "amountCents", "asOf", "source", "createdAt"],
+        "additionalProperties": false
+      },
+      "CreateBalance": {
+        "type": "object",
+        "properties": {
+          "label": { "default": "Checking", "type": "string", "minLength": 1, "maxLength": 40 },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -100000000000,
+            "maximum": 100000000000,
+            "description": "Integer cents"
+          },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "format": "date",
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          }
+        },
+        "required": ["label", "amountCents", "asOf"],
         "additionalProperties": false
       }
     }
@@ -1125,6 +3090,765 @@
         ],
         "responses": {
           "204": { "description": "Left" },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/items": {
+      "get": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": { "type": "string", "enum": ["outflow", "inflow"] },
+            "in": "query",
+            "name": "direction",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "bill",
+                "subscription",
+                "insurance",
+                "membership",
+                "registration",
+                "loan",
+                "income",
+                "other"
+              ]
+            },
+            "in": "query",
+            "name": "kind",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "housing",
+                "utilities",
+                "childcare",
+                "transport",
+                "debt",
+                "subscription",
+                "insurance",
+                "membership",
+                "vehicle_home",
+                "income",
+                "other"
+              ]
+            },
+            "in": "query",
+            "name": "category",
+            "required": false
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                { "type": "string", "enum": ["both", "split"] }
+              ]
+            },
+            "in": "query",
+            "name": "owner",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "enum": ["fixed", "estimated", "statement"] },
+            "in": "query",
+            "name": "amountType",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "enum": ["true", "false"] },
+            "in": "query",
+            "name": "onBillsPage",
+            "required": false
+          },
+          {
+            "schema": { "default": 50, "type": "integer", "minimum": 1, "maximum": 100 },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Item" } },
+                    "nextCursor": { "type": ["string", "null"] }
+                  },
+                  "required": ["data", "nextCursor"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateItemInput" } } }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Item" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/items/{id}": {
+      "get": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Item" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PatchItemInput" } } }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Item" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": { "description": "Default Response" },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/items/{id}/renewal": {
+      "put": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PutRenewalDetailsInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Item" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/items/{id}/history": {
+      "get": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AmountHistory" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/occurrences": {
+      "get": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          {
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "description": "Calendar date YYYY-MM-DD (household timezone)"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "query",
+            "name": "itemId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/OccurrenceList" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/occurrences/{id}": {
+      "patch": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PatchOccurrenceInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Occurrence" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/planned-expenses": {
+      "get": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": { "type": "string", "enum": ["planned", "done", "cancelled"] },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/PlannedExpenseList" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreatePlannedExpenseInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlannedExpense" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/planned-expenses/{id}": {
+      "patch": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PatchPlannedExpenseInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PlannedExpense" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": { "description": "Default Response" },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/balances": {
+      "post": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateBalanceInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Balance" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/balances/latest": {
+      "get": {
+        "tags": ["items"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Balance" } } }
+          },
           "4XX": {
             "description": "Client error (RFC 9457 problem details)",
             "content": {

@@ -7,6 +7,7 @@ import { createApiDb, type ApiDb } from "@mp/db";
 import { buildServer, type ApiServer } from "../../server";
 import { createHouseholdsModule } from "../../modules/households";
 import { createIdentityModule } from "../../modules/identity";
+import { createItemsModule } from "../../modules/items";
 import { createAuthenticator } from "../authenticator";
 import { createCognitoProvider } from "../cognito";
 import type { ApiRuntime, InviteSender } from "../runtime";
@@ -68,7 +69,11 @@ export async function createTestApi(): Promise<TestApi> {
   const rt: ApiRuntime = { db, provider, inviteSender };
   const app = buildServer({
     authenticate: createAuthenticator({ provider, db }),
-    modules: [createIdentityModule(() => rt), createHouseholdsModule(() => rt)],
+    modules: [
+      createIdentityModule(() => rt),
+      createHouseholdsModule(() => rt),
+      createItemsModule(() => rt, { now: () => "2026-10-27T16:00:00Z" }),
+    ],
   });
   await app.ready();
 

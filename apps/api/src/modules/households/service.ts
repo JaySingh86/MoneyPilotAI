@@ -212,6 +212,20 @@ export class HouseholdService {
       const current = await repo.getHousehold(tx, householdId);
       if (!current) throw notFound();
       assertVersion(expected, toHousehold(current));
+      if (
+        patch.primaryIncomeItemId !== undefined &&
+        !(await repo.isLiveIncomeItem(tx, householdId, patch.primaryIncomeItemId))
+      ) {
+        throw new AppError("validation_failed", 400, "The request has invalid fields.", {
+          fields: [
+            {
+              in: "body",
+              path: "primaryIncomeItemId",
+              message: "Choose an income item that belongs to this household",
+            },
+          ],
+        });
+      }
       const updated = await repo.updateHousehold(tx, householdId, expected, patch);
       if (!updated) {
         // Lost a race between the read and the update: report the latest row.

@@ -33,8 +33,10 @@ export interface BillsAverages {
 }
 
 export function billsAverages(input: EngineInput): BillsAverages {
-  const listed = input.items.filter((i) => ["active", "paused"].includes(i.status ?? "active"));
-  const counted = input.items.filter((i) => (i.status ?? "active") === "active" && affectsAccount(i));
+  // Renewal-only items (onBillsPage false) live on Subscriptions & renewals and stay out of these figures.
+  const onPage = input.items.filter((i) => i.onBillsPage !== false);
+  const listed = onPage.filter((i) => ["active", "paused"].includes(i.status ?? "active"));
+  const counted = onPage.filter((i) => (i.status ?? "active") === "active" && affectsAccount(i));
   const monthly = (i: ItemInput) => monthlyAverageCents(itemAmount(i).cents, i.schedule);
   const byItem = counted.map((i) => ({ itemId: i.id, monthlyCents: monthly(i) }));
   const bills = sumCents(counted.filter((i) => i.direction === "outflow").map(monthly));

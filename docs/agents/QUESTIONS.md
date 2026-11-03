@@ -133,6 +133,61 @@ Format (newest first):
 - Blocking: no.
 - Answer: Answered (owner, 2026-11-03), per b2595c1. Keep the heuristic flag. Flagged messages always go to review and never auto-apply (enforced in WP-22). The hidden-text gaps (white-on-parent, PDF invisible text) are accepted for now. Built since: a `<style>` class-hiding pass for simple `.class` selectors (rules inside `@media` ignored), and `neutralizeDelimiters` now also covers `<email attr>` and full-width forms.
 
+## Q-056 · WP-06 · Skipped or interim items after the G1 fix round (informational)
+- Asked by: wp-builder/wp/06-items · 2026-11-03
+- Where: BACKEND_PLAN §8.2 (move may require a proposal), §7.3 interim guard, WORK_PLAN WP-06 (cushion change recomputes the plan), WP-13 (tasks)
+- Question: None to decide; recorded so nothing is lost. (1) "Move may require a proposal" is the interim 403 `approval_required` guard until WP-13. (2) The fixture `tasks` are not seeded (WP-13 owns the table). (3) A cushion change has nothing to recompute yet: there is no plan endpoint or stored snapshot, and the plan is computed on read, so WP-12 must recompute on its first read after a cushion change (`calcSnapshotId` changes with `inputs_hash`). (3b) Interim guard, as built (403 `approval_required` on the other member's item): delete; change of owner or status; a `schedule` or `weekendRule` change that differs from the stored values (a PATCH that repeats them is a no-op and works); moving an occurrence's due date; skipping an occurrence (marking paid stays allowed); and, for planned expenses, delete, owner change and date move. A member's own items and Both/Split items stay directly editable. (4) The items module takes its database from the shared API runtime, so it has no pool of its own to close; the shared provider and `onClose` of the runtime pool are on WP-12's checklist.
+- Options considered: n/a
+- Blocking: no.
+- Answer:
+
+## Q-055 · WP-06 · Retention purge of soft-deleted rows (G1 L-4)
+- Asked by: wp-builder/wp/06-items · 2026-11-03
+- Where: BACKEND_PLAN §5.1 (soft delete), §7.11 (retention)
+- Question: Soft-deleted `recurring_items` (and their occurrences and history) are kept for undo, but nothing deletes them for good. The security review asks for a purge after the retention window.
+- Options considered: a `retention.purge` job in WP-24 that hard-deletes items soft-deleted more than N days ago (app roles have no DELETE on `recurring_items` by design, so it needs its own definer function).
+- Blocking: no. Not built in WP-06.
+- Answer: Answered (owner, 2026-11-03), spec in 6c8bb8e. Goes to WP-24; not built in WP-06.
+
+## Q-054 · WP-06 · Which engine fields do `item_amount_history` rows feed, and how do multiple sources map?
+- Asked by: wp-builder/wp/06-items · 2026-10-28
+- Where: BACKEND_PLAN §5.2 (`recurring_items.source` is one value; `item_amount_history.source`); engine `ItemInput.sources` (`email+csv`); fixture `source` and `expected.renewals.foundAutomatically`
+- Question: The fixture says `email+csv` for car insurance, but `recurring_items.source` holds one value. The seed stores the first source (`email`) on the item and an extra `item_amount_history` row with the other source (`csv`) at the last occurrence date, so WP-12 can rebuild `sources` as the item source plus the history sources. Is that the intended mapping?
+- Options considered: (a) as seeded; (b) `sources text[]` on `recurring_items`; (c) drop multi-source and count only the primary.
+- Blocking: no. WP-12 builds the engine input; `foundAutomatically` (16) needs the mapping.
+- Answer: Answered (owner, 2026-11-03), spec in 6c8bb8e. Accepted as built: the item holds the first source, and extra `item_amount_history` rows carry the others.
+
+## Q-053 · WP-06 · Does a schedule change keep a user's move or actual amount on a future occurrence?
+- Asked by: wp-builder/wp/06-items · 2026-10-28
+- Where: BACKEND_PLAN §7.1 ("future `scheduled` occurrences are deleted and rebuilt"); WORK_PLAN WP-06 acceptance
+- Question: Implemented literally: a rebuild deletes every future `scheduled` row, including one the household moved ("pay on Nov 6 instead") or gave an actual amount. A paid, received or skipped row is never touched. Should a rebuild keep the move or actual amount when the scheduled date still exists in the new schedule? Rebuilds run only when the rule, start, end, weekend rule or status changes, not on an amount or name edit.
+- Options considered: (a) literal, as built; (b) keep rows whose `scheduled_on` is still in the new set and that carry `moved_by` or an actual amount.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), spec in 6c8bb8e. Option (b): a rebuild keeps future `scheduled` rows whose `scheduled_on` is still in the new set and that carry `moved_by` or an actual amount; a kept row that was not moved takes the new weekend-rule date. Built and tested in WP-06 (G1 fix round).
+
+## Q-052 · WP-06 · Where is a renewal's renewal date stored?
+- Asked by: wp-builder/wp/06-items · 2026-10-28
+- Where: BACKEND_PLAN §5.2 `renewal_details` (has `coverage_start`, `coverage_end`, `cancel_by`, `decision_by`, no `renews_on`); engine `RenewalInput.renewsOn`
+- Question: The engine needs `renewsOn`, the schema has no such column. The seed stores it in `coverage_end` (the term end is the renewal date), and the item's schedule starts on it (`dtstart`). For health insurance paid monthly from payroll the item recurs monthly but the plan-year renewal (2027-01-01) is `coverage_end`. Is `coverage_end` right, or should WP-12 derive it from the next occurrence?
+- Options considered: (a) `coverage_end` (as seeded); (b) next item occurrence (wrong for the payroll health plan); (c) add a `renews_on` column.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), spec in 6c8bb8e. Keep `coverage_end` as the renewal date; the column now has a comment saying so.
+
+## Q-051 · WP-06 · The nightly `occurrences.materialize` fan-out cannot list households
+- Asked by: wp-builder/wp/06-items · 2026-10-28
+- Where: BACKEND_PLAN §9 (nightly 02:00 UTC), §5.3 (`mp_worker` is scoped to one household); `households_worker_access` policy; pg-boss is not yet in `apps/worker`
+- Question: The job body (`apps/worker/src/jobs/occurrences/materialize.ts`) handles one household. The nightly trigger must enqueue one job per household, but no app role can read all households. Which role or function enumerates them (a `SECURITY DEFINER` `app_list_household_ids()` for `mp_worker`, which also needs a G1-style sign-off; or a scheduler role)? Queue registration is also left out until the worker has pg-boss.
+- Options considered: (a) a definer function returning household ids for `mp_worker`; (b) a separate scheduler role; (c) enqueue lazily on first request per household.
+- Blocking: no. Item-change rebuilds already run synchronously in the API transaction.
+- Answer: Answered (owner, 2026-11-03), spec in 6c8bb8e. `app_list_household_ids()` (SECURITY DEFINER, ids only, pinned search_path, EXECUTE for mp_worker only) is in the WP-06 migration with RLS and coverage tests. pg-boss registration and the nightly fan-out stay with WP-12.
+
+## Q-050 · WP-06 · Who owns the `goals` table?
+- Asked by: wp-builder/wp/06-items · 2026-10-28
+- Where: WORK_PLAN WP-06 acceptance (`goals.is_emergency_fund` exists) vs WP-13 (goals module and migrations); BACKEND_PLAN §5.2
+- Question: WP-06 must have `goals.is_emergency_fund` and seed the fixture goals, and `planned_expenses.goal_id` references `goals`, so the `goals` table is created in the WP-06 migration (with RLS and tests), without `goal_events`, proposals or any goals API. WP-13 then owns only routes, goal_events and proposals. Confirm, or move the table to a WP-13 migration that WP-06 depends on?
+- Options considered: (a) WP-06 creates `goals` (as built); (b) WP-13 first.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), spec in 6c8bb8e. WP-06 owns the `goals` table; mp_api has SELECT only. The seed and the RLS tests insert goals as mp_worker (a minimal INSERT grant, needed because the RLS suite and the seed have no other role that may write; mp_api gets no write access until WP-13 adds the proposal gate).
 ## Q-049 · WP-10 · CalendarCell: the spec's aria-label vs WCAG 2.5.3 Label in Name
 - Asked by: wp-builder/wp/10-ui-kit · 2026-10-28
 - Where: DESIGN_SPEC §4.2 ("The aria-label reads “November 4, 1 item”"); WCAG 2.2 SC 2.5.3

@@ -11,6 +11,7 @@ describe("error codes (BACKEND_PLAN §8.1)", () => {
       "entitlement_required",
       "mfa_required",
       "rate_limited",
+      "approval_required",
     ]) {
       expect(ERROR_CODES).toContain(code);
     }
