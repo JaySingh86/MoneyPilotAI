@@ -24,3 +24,6 @@ playwright-report/
 *.p12
 *.pfx
 *service-account*.json
+
+# Live eval reports and recordings of external corpora (WP-11); only the offline report is committed
+packages/ai/evals/reports/latest-live.*

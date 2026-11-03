@@ -1,0 +1,1690 @@
+{
+  "version": 1,
+  "kind": "synthetic-oracle",
+  "promptId": "extract.v1",
+  "promptSha256": "0675feac9536b2b5be9dcacc532e1156ef7cd8e29be66e6c4cf463b7aa2cc7ac",
+  "model": "claude-opus-5-5",
+  "note": "SYNTHETIC ORACLE. Every answer is built from the corpus labels, so a pass proves the harness and gates work and says nothing about model quality. Token counts are placeholders. Replace with real output via `pnpm ai:eval -- --live --record` (needs ANTHROPIC_API_KEY).",
+  "responses": {
+    "1a9a038803b479e31c99dbd44e6ac128": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Lakeside Water\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":15450,\"previous_amount_cents\":null,\"due_date\":\"2027-01-15\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"6693\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $154.50\"},{\"field\":\"due_date\",\"quote\":\"Please pay by January 15, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "5302b49b5eb7c8e08b6e0d19c9643c55": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Northwind Power\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":8899,\"previous_amount_cents\":null,\"due_date\":\"2027-01-21\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"9670\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $88.99\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 01/21/2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "42d3a7ee1f1b2708c037c279c89fcc53": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Northwind Power\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":14449,\"previous_amount_cents\":null,\"due_date\":\"2027-01-28\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"4643\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $144.49\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 28 January 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "245ead85e1192f147675596490d41881": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Metro Gas\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":25135,\"previous_amount_cents\":null,\"due_date\":\"2027-02-05\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"6137\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $251.35\"},{\"field\":\"due_date\",\"quote\":\"Please pay by Feb 5, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "883dcf736d2163c905f4d479da0a6cc0": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Pacific Electric\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":13849,\"previous_amount_cents\":null,\"due_date\":\"2027-01-27\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"3100\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $138.49\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 1/27/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "5fa04b5657bf8a63775d83c4f3a3d59f": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Pacific Electric\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":8610,\"previous_amount_cents\":null,\"due_date\":\"2027-01-29\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"3057\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $86.10\"},{\"field\":\"due_date\",\"quote\":\"Please pay by January 29.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a7799cc82bd9c83f2adcc6b99269c897": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Cascade Waste\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":12465,\"previous_amount_cents\":null,\"due_date\":\"2027-02-14\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"4237\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $124.65\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 2/14.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "5082ad792d89e67aa02a86ebcf5fb63a": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Northwind Power\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":18335,\"previous_amount_cents\":null,\"due_date\":\"2027-02-11\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"5401\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $183.35\"},{\"field\":\"due_date\",\"quote\":\"Please pay by February 11, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "01a72ce427308663701ff06cdd4444c6": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Fiberlink Internet\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":8588,\"previous_amount_cents\":null,\"due_date\":\"2027-02-17\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"9355\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $85.88\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 02/17/2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c2399ef20cc0eb530078504b00aa8987": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Clearview Cable\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":9164,\"previous_amount_cents\":null,\"due_date\":\"2027-02-21\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"4193\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $91.64\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 21 February 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "88a3b5515b73337153cf6f266116b058": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Pacific Electric\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":19658,\"previous_amount_cents\":null,\"due_date\":\"2027-02-24\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"6263\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $196.58\"},{\"field\":\"due_date\",\"quote\":\"Please pay by Feb 24, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "f124bae46668eaefbdd36635ddd63d7b": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Lakeside Water\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":13981,\"previous_amount_cents\":null,\"due_date\":\"2027-02-16\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"9471\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $139.81\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 2/16/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c13c2b18c8690da84353e30dd12a3345": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Cascade Waste\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":7891,\"previous_amount_cents\":null,\"due_date\":\"2027-02-24\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"9324\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $78.91\"},{\"field\":\"due_date\",\"quote\":\"Please pay by February 24.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "de11234fe2607b66f9330f4ba0ca2ffd": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Pacific Electric\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":12510,\"previous_amount_cents\":null,\"due_date\":\"2027-02-23\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"3156\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $125.10\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 2/23.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c995e8629f6ced6de77d8e713c367bd3": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Clearview Cable\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":17273,\"previous_amount_cents\":null,\"due_date\":\"2027-03-09\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"6323\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $172.73\"},{\"field\":\"due_date\",\"quote\":\"Please pay by March 9, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "5d6bee3aebbd24e535ddfd8d59945772": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Clearview Cable\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":10419,\"previous_amount_cents\":null,\"due_date\":\"2027-03-04\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"3836\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $104.19\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 03/04/2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "ca99e2fcbe8bd22c9e3e2cd719a83386": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Clearview Cable\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":27665,\"previous_amount_cents\":null,\"due_date\":\"2027-03-09\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"5343\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $276.65\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 9 March 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "cc5213705f5ab37e0ae9b775b992fe0f": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Pacific Electric\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":13519,\"previous_amount_cents\":null,\"due_date\":\"2027-03-20\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"1871\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $135.19\"},{\"field\":\"due_date\",\"quote\":\"Please pay by Mar 20, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "f1b0c66a736ded8c7daa7641664085aa": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Clearview Cable\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":6957,\"previous_amount_cents\":null,\"due_date\":\"2027-03-15\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"2956\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $69.57\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 3/15/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a9185a630bb5f4f7a4c00c8f992f1e1a": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Fiberlink Internet\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":19075,\"previous_amount_cents\":null,\"due_date\":\"2027-03-23\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"9286\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $190.75\"},{\"field\":\"due_date\",\"quote\":\"Please pay by March 23.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "b5d6ad78e33826bffb8865901d97b8d1": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Pinecrest Credit Union\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":32940,\"previous_amount_cents\":null,\"due_date\":\"2027-03-29\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $329.40\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: March 29, 2027\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "05a794a388e0e1a784b92202e2ffeec3": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Orchard Bank Visa\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":15342,\"previous_amount_cents\":null,\"due_date\":\"2027-03-29\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $153.42\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: 03/29/2027\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a8eccecb1e3640474a590e69777620b4": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Summit Card\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":30995,\"previous_amount_cents\":null,\"due_date\":\"2027-03-30\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $309.95\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: 30 March 2027\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "4e8b32877e909ddc6fb31b2b5d5f2d55": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Orchard Bank Visa\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":69987,\"previous_amount_cents\":null,\"due_date\":\"2027-03-30\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $699.87\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: Mar 30, 2027\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "51f1f846e53c87e106ea97202be26559": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Pinecrest Credit Union\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":32612,\"previous_amount_cents\":null,\"due_date\":\"2027-04-04\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $326.12\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: 4/4/27\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a3d730cd71d43a0d5f336c62629b68c5": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Summit Card\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":67993,\"previous_amount_cents\":null,\"due_date\":\"2027-04-13\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $679.93\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: April 13\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "740c8c10ed36fc9215d28e75b76695ad": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Orchard Bank Visa\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":24520,\"previous_amount_cents\":null,\"due_date\":\"2027-04-16\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $245.20\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: 4/16\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "273fde0c36df9ec54a255ea9819563ab": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Orchard Bank Visa\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":45398,\"previous_amount_cents\":null,\"due_date\":\"2027-04-08\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $453.98\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: April 8, 2027\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "94bfdacebc265b2c2704cef741159468": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Granite Auto Loan\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":31680,\"previous_amount_cents\":null,\"due_date\":\"2027-04-14\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $316.80\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: 04/14/2027\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a6863d043257380b82401d7f4eaab0ad": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"statement\",\"provider_name\":\"Orchard Bank Visa\",\"category\":\"debt\",\"insurance_type\":null,\"amount_due_cents\":29605,\"previous_amount_cents\":null,\"due_date\":\"2027-04-15\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Minimum payment due: $296.05\"},{\"field\":\"due_date\",\"quote\":\"Payment due date: 15 April 2027\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "52c2e233906edcbb1f9e6380ac136507": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Beacon Auto\",\"category\":\"insurance\",\"insurance_type\":\"auto\",\"amount_due_cents\":51022,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-05-25\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"every_6_months\",\"auto_renews\":true,\"account_last4\":\"9773\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $510.22 per six months.\"},{\"field\":\"renewal_date\",\"quote\":\"Your auto policy renews on 25 May 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "afb55d89d76a76de0f5fba41aa16b135": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Keystone Home\",\"category\":\"insurance\",\"insurance_type\":\"home\",\"amount_due_cents\":109858,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-05-15\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"2853\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,098.58 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your home policy renews on May 15, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "edacefc53356f546f46cf56341a8ab7d": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Harbor Renters\",\"category\":\"insurance\",\"insurance_type\":\"renters\",\"amount_due_cents\":99373,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-07\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"7455\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $993.73 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your renters policy renews on 6/7/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "3448c38bb317ffeac37078a4c11d1aef": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Evergreen Life\",\"category\":\"insurance\",\"insurance_type\":\"life\",\"amount_due_cents\":66933,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-05-26\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"4914\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $669.33 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your life policy renews on May 26.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "4a371e9816cd137f195db5b643391548": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Pawsitive Pet\",\"category\":\"insurance\",\"insurance_type\":\"pet\",\"amount_due_cents\":199829,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-09\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"1293\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,998.29 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your pet policy renews on 6/9.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "adadd99f3dc99f4df07f1195680e9126": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Summit Health\",\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":133774,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-05-30\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"3528\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,337.74 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your health policy renews on May 30, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "12eec3790ceb5629f61d8b5c8e5cdc4e": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Beacon Auto\",\"category\":\"insurance\",\"insurance_type\":\"auto\",\"amount_due_cents\":134302,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-05-27\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"every_6_months\",\"auto_renews\":true,\"account_last4\":\"9633\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,343.02 per six months.\"},{\"field\":\"renewal_date\",\"quote\":\"Your auto policy renews on 05/27/2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "42dd2d744c4c6a5894c6d6303197cee9": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Keystone Home\",\"category\":\"insurance\",\"insurance_type\":\"home\",\"amount_due_cents\":185453,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-04\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"2255\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,854.53 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your home policy renews on 4 June 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "4309c5adc95734cdfeb4a62aecdd930f": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Harbor Renters\",\"category\":\"insurance\",\"insurance_type\":\"renters\",\"amount_due_cents\":145509,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-18\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"5470\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,455.09 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your renters policy renews on Jun 18, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "0a483eebcdb31734948cb599179bd66d": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Evergreen Life\",\"category\":\"insurance\",\"insurance_type\":\"life\",\"amount_due_cents\":123522,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-05-22\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"6554\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,235.22 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your life policy renews on 5/22/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "bf5c3642982eb944fa9a873f8842abbf": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Pawsitive Pet\",\"category\":\"insurance\",\"insurance_type\":\"pet\",\"amount_due_cents\":49258,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-17\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"2535\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $492.58 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your pet policy renews on June 17.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "1889e50ddda63a58ffef2aa1517434fd": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Summit Health\",\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":110693,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-27\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"5774\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,106.93 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your health policy renews on 6/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "64fe9e6c0b1883523fee1a5d7197da34": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Beacon Auto\",\"category\":\"insurance\",\"insurance_type\":\"auto\",\"amount_due_cents\":105176,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-25\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"every_6_months\",\"auto_renews\":true,\"account_last4\":\"1563\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,051.76 per six months.\"},{\"field\":\"renewal_date\",\"quote\":\"Your auto policy renews on June 25, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c32464714b94924a1fc4b6ce5633d76b": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Keystone Home\",\"category\":\"insurance\",\"insurance_type\":\"home\",\"amount_due_cents\":232723,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-21\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"2843\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $2,327.23 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your home policy renews on 06/21/2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "0c044dd228ab0e6581a2aff95cad5650": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Harbor Renters\",\"category\":\"insurance\",\"insurance_type\":\"renters\",\"amount_due_cents\":111934,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-07-11\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"2674\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,119.34 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your renters policy renews on 11 July 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "2cf2c5d6af62fc21840897cdd8c18c5b": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"renewal_notice\",\"provider_name\":\"Evergreen Life\",\"category\":\"insurance\",\"insurance_type\":\"life\",\"amount_due_cents\":164703,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":\"2027-06-11\",\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"yearly\",\"auto_renews\":true,\"account_last4\":\"4743\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your renewal premium is $1,647.03 per year.\"},{\"field\":\"renewal_date\",\"quote\":\"Your life policy renews on Jun 11, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "fabe8c42b467143c639bfdb7498aaa71": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"FitPass\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":989,\"previous_amount_cents\":557,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $5.57 to $9.89 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $5.57 to $9.89 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "e6a8433e38a76d542f65cabeeb95b891": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"FitPass\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":1357,\"previous_amount_cents\":1082,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $10.82 to $13.57 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $10.82 to $13.57 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "9d2c4d8d907183eff0d4dfb6e61c10d0": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"FitPass\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":922,\"previous_amount_cents\":668,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $6.68 to $9.22 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $6.68 to $9.22 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "44ae304e376b0b2ff1d95b280d415a27": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"StreamBox\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":3082,\"previous_amount_cents\":2660,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $26.60 to $30.82 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $26.60 to $30.82 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "efb8f1e80afbdec4ab78edac90ddf87d": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"Daily Reader\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":1324,\"previous_amount_cents\":828,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $8.28 to $13.24 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $8.28 to $13.24 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "31a959fb2e671863c925288d99555fd7": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"MusicLoop\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":3055,\"previous_amount_cents\":2768,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $27.68 to $30.55 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $27.68 to $30.55 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "10e0f71c1aebe87cdf32b5690d64c39e": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"Daily Reader\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":2614,\"previous_amount_cents\":2054,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $20.54 to $26.14 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $20.54 to $26.14 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c996eb7586d202efd49cf03ca68a3f39": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"StreamBox\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":3258,\"previous_amount_cents\":2500,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $25.00 to $32.58 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $25.00 to $32.58 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "623d9363f54d6932b660ed7832b3154c": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"MusicLoop\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":1626,\"previous_amount_cents\":1450,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $14.50 to $16.26 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $14.50 to $16.26 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "d71f907d88831f5771ffe0f5765c113a": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"FitPass\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":3260,\"previous_amount_cents\":2583,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $25.83 to $32.60 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $25.83 to $32.60 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "84d5e63672db3d68d3fd2173c9e6664e": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"Daily Reader\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":2727,\"previous_amount_cents\":2373,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $23.73 to $27.27 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $23.73 to $27.27 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a876747cdaf14f471d28d79686bfdcb8": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"price_change\",\"provider_name\":\"Daily Reader\",\"category\":\"subscription\",\"insurance_type\":null,\"amount_due_cents\":1146,\"previous_amount_cents\":548,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":\"monthly\",\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Your monthly price will change from $5.48 to $11.46 starting with your next billing cycle.\"},{\"field\":\"previous_amount_cents\",\"quote\":\"Your monthly price will change from $5.48 to $11.46 starting with your next billing cycle.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "5f5d4822b14ac27e71d921124b7e3ae4": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-07-29\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on 29 July 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c5f620eeff3b6d506cd3af5c79b3c995": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-08-09\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on Aug 9, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "fcd325f1019285e6a438e79995b6b2c1": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-07-23\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on 7/23/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "1cd9d352e40e7e95ffb7f9efa1e724bb": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-07-28\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on July 28.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "3efc0f9f03f468d657f37f1091e38003": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-08-11\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on 8/11.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "6d6edf9f8bb445d712df8f0c26d2091b": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-08-03\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on August 3, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "2e73b51f641db44d1cab7174ea03b982": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-08-11\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on 08/11/2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a46e2f26301c1cb187c6d88397ccbce6": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-09-01\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on 1 September 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "7c55fee5db77351f61b69596d089655c": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-08-14\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on Aug 14, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "3d796c36b939b2e65310f21339e890b1": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"enrollment_deadline\",\"provider_name\":null,\"category\":\"insurance\",\"insurance_type\":\"health\",\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":\"2027-08-09\",\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[{\"field\":\"decision_by_date\",\"quote\":\"Open enrollment ends on 8/9/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "9edf0d83ebb4fe8871eb9c674f681256": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Urban Threads\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "45c19626c3abf97fdab57473c6494757": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Nova Electronics\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "46603e31584f83a6574e1b7f718e4327": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Urban Threads\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "2df178155c8924ec568b2272f179a506": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Fieldstone Outfitters\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "db341df71f428ba31c086241e7c0f264": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Fieldstone Outfitters\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "1b24bea40165c16888e763642618c0aa": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Fieldstone Outfitters\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "46bbbb54a13719c75f2ec1b57945df6c": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Fieldstone Outfitters\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "de726e148db2262aa2325d86c178d1ce": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Brightside Market\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a392ba07145d45212aa581fcb022a8e5": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Brightside Market\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "dc78d8a4fd4a644ec28254cd4d02f290": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"receipt\",\"provider_name\":\"Brightside Market\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "bfad9ebf2bbba1eb5f2addad2f3be02e": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Pacific Electric\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "33a14fc3aa13f6bd600770968c06c32d": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Harbor Mobile\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "bb2992b8264bfee398a9b78205f752b4": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Lakeside Water\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "6fe0ac2f6de6c62a37a1ac42d1723bdf": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Fiberlink Internet\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "44f10304d65f03cccd8f3e1c11b65345": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Pacific Electric\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "54059c75a14b16df62886b6c8f824745": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Metro Gas\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "1ff38bc6ccd0c503afde85c25166145e": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Pacific Electric\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "05b6b69a59a9e1871670f5cabb2d8364": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"payment_confirmation\",\"provider_name\":\"Fiberlink Internet\",\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c8cbf49c4b717e24fdf5309f78e14b38": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "83f9e257fa72a5cb8d416c132a186904": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "2f1cc9d6c14c24759e730e261e265bab": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "0cca46b8758d03de70e662885363b9dd": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "e29c379169760682811f4bd93ddf893f": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "98f40e6139be1ef95e7b5b55990cd087": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "80161f29617f9b03d4f1b8d9875c24e0": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "588c94c56bae5f2573be8921c5d59fc6": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "fa4ba0178ee00cc55bd21b4c717dee3a": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "bc0c5f1d73a051d0e11acec6caf17ac9": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "e80c47e174ffc85d58f8f10d0d3ed231": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a02d8fac6938f5499a7090897017bab0": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "02aff4779d7630b3fcb510e863c36c2b": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "762e5ab33e9fff46a24b88e6f985818d": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "cf5541df26419bf5810e5b61c8de0c3d": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "9105904d3f3582ff6b10d80c9f449777": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "e7ed88c569e7f6c59cb003b57c110d9e": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "1abeb5e1010c88d73e871495436acd35": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "8928cda78194ae2326a9e8ed9e0c0cd2": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "ee28755578f392d0fad898247c5a318f": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "8042e48c54ad0206d7c5ca0852b6b79e": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "71454356308eff03b4f5dbd5ee25de21": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "9bf84dfb2881c2600359e55a2fb916a0": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "dd11f5a149ebc47daa843304108a30e9": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "823f3a726e95ba045e5616b5c3590bcd": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "ec200bc2e1523b22f52ad31ef0e8b0de": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "21a70eeb3a6f7ab2c97280c085f6acf8": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "888afd9a5fee5ba994a8e4e4fd95d978": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "83654273a2e49070db9a4fa60e799f50": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "f621c29f07bd4c925bb42b09ef3255f8": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "478d7e3f523e3088dfbb2ce047e57ec0": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "7ecd05acfed1401b4e306c7bc5c18203": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "984b699815c9e3a61a91a86c91eb191a": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "98645e6fecc0d2de5c7f4156f41f7006": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "0d62ca74bfc05718d0e82c2122f5e8f9": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "f19bf264ab580a59d9de13a0bf0ed5e8": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "659400872dcfc57e7bd139988438afb0": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Fiberlink Internet\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":6551,\"previous_amount_cents\":null,\"due_date\":\"2027-03-27\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"8821\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $65.51\"},{\"field\":\"due_date\",\"quote\":\"Please pay by Mar 27, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "da9e97d5cc2e39d892caf3ac93c402b4": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "f4179bceaffea4f3cd0606e291a5722f": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Pacific Electric\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":11622,\"previous_amount_cents\":null,\"due_date\":\"2027-04-04\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"5250\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $116.22\"},{\"field\":\"due_date\",\"quote\":\"Please pay by April 4.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "910006df76b8019228a9f4385d482266": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "da4577accaba27602711ec516aa6d622": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Northwind Power\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":10978,\"previous_amount_cents\":null,\"due_date\":\"2027-04-07\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"1865\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $109.78\"},{\"field\":\"due_date\",\"quote\":\"Please pay by April 7, 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "c1f90d8c042ab4c67680ca550254dab8": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "d96f1ad95d051ad503455ed880578560": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Pacific Electric\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":4233,\"previous_amount_cents\":null,\"due_date\":\"2027-04-13\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"6669\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $42.33\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 13 April 2027.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "a81b4ad254fe8ca40c205db45d5fb9b8": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "d4e7079be43ce9b64096b63d064568dd": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"bill\",\"provider_name\":\"Metro Gas\",\"category\":\"utilities\",\"insurance_type\":null,\"amount_due_cents\":21445,\"previous_amount_cents\":null,\"due_date\":\"2027-04-23\",\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":\"7874\",\"evidence\":[{\"field\":\"amount_due_cents\",\"quote\":\"Amount due: $214.45\"},{\"field\":\"due_date\",\"quote\":\"Please pay by 4/23/27.\"}]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "d39862c735b062da2defe8719065ee63": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "8877b4721d8f655a42385bd83206cd6c": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "86c6517a2d1cdfe77539d897e07270fe": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "d2ed902e183aacd9f9e99b40ed9ae849": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "500401a40de9442c026c3b43f9c72d26": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "deff692f5536684b40588489b824c345": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "862aa21626d4775afd0cf59102d208e8": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "83cf1f668b83d5f38009852e84c3c69a": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    },
+    "43484d07afd6003026108423c6b06537": {
+      "stopReason": "end_turn",
+      "stopCategory": null,
+      "text": "{\"doc_type\":\"irrelevant\",\"provider_name\":null,\"category\":null,\"insurance_type\":null,\"amount_due_cents\":null,\"previous_amount_cents\":null,\"due_date\":null,\"renewal_date\":null,\"cancel_by_date\":null,\"decision_by_date\":null,\"frequency\":null,\"auto_renews\":null,\"account_last4\":null,\"evidence\":[]}",
+      "usage": {
+        "inputTokens": 1500,
+        "outputTokens": 220,
+        "cacheReadTokens": 1200,
+        "cacheWriteTokens": 0
+      },
+      "model": "claude-opus-5-5"
+    }
+  }
+}

@@ -14,6 +14,59 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-076 · WP-11 · Refusals in backfill batches get no fallback
+- Asked by: wp-builder/wp/11-ai · 2026-11-03
+- Where: BACKEND_PLAN §7.9 (fallbacks, Batch API); `packages/ai/src/sdk-transport.ts`
+- Question: The Batches API rejects the `fallbacks` parameter, so a refused request in a 13-month backfill is not rescued by the fallback model. What should the pipeline do with a `refusal` result from a batch?
+- Options considered: (a) treat it as "needs review" and move on; (b) re-run only the refused items through the single-call path (which has fallbacks).
+- Current behavior (WP-11): batch refusals come back as `status: "refusal"`; the caller (WP-22) decides. No re-run is built.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03): (b). Refused batch items are retried through the single-call path, which has fallbacks. WP-22 does this; `collectExtractionBatch` documents it and leaves the `refusal` outcome as is.
+
+## Q-075 · WP-11 · Is a phishing "pay now" email `irrelevant`, and what is the label policy?
+- Asked by: wp-builder/wp/11-ai · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 (doc types), §7.9 (eval corpus: "phishing-style injections")
+- Question: The doc types have no "suspicious" value. A fake "account suspended, pay $499" email contains a verbatim amount and date, so evidence validation passes it. I labelled the 6 seed phishing cases `irrelevant`, and the prompt tells the model to extract only a sender's own charge. Is that the intended policy? Evidence validation cannot catch this class: only the prompt and the sender matching in WP-22 (new items always go to review) can.
+- Options considered: (a) `irrelevant` (current); (b) add a `suspicious` doc type (schema change, v2).
+- Blocking: no. The G3 reviewer should look at the phishing rows in the report.
+- Answer: Answered (owner, 2026-11-03): keep `irrelevant` for v1. The G3 report has a Phishing rows section so a reviewer sees them first. Revisit a `suspicious` doc type in schema v2.
+
+## Q-074 · WP-11 · Eval corpus is synthetic and small; who supplies the real-format set?
+- Asked by: wp-builder/wp/11-ai · 2026-11-03
+- Where: BACKEND_PLAN §7.9 Evals ("300+ real-format emails ... plus pilot emails with consent")
+- Question: I have no real emails and no API key, so the committed corpus is 137 template-generated cases and the committed recording is a synthetic oracle built from the labels. The offline report passes trivially and says so in its banner. Who provides the 300+ real-format and consented pilot emails, and who runs the first live eval (`pnpm ai:eval -- --live --record`)? Gate G3 cannot close without both.
+- Options considered: grow the synthetic set to 300+ (cheap, still no evidence of model quality); wait for pilot mail.
+- Blocking: G3 only.
+- Answer: Answered (owner, 2026-11-03): the synthetic set is the regression floor. The owner supplies consented real emails and an API key for G3; they stay outside the repo (`--corpus`). More synthetic variants toward 300 only if cheap (added: yearless-date styles and fence-breakout variants).
+
+## Q-073 · WP-11 · Evidence matching rules the spec leaves open
+- Asked by: wp-builder/wp/11-ai · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 validation rules 1–3
+- Question: Please confirm the following choices made in `extract/validate.ts`. (1) "Verbatim" ignores differences in whitespace and line wraps only (case and punctuation must match). (2) A date quoted without a year matches when its month and day equal the field and the field's year is within 1 of the received year; the prompt tells the model to pick the nearest upcoming date. (3) The −30/+400 day window applies to all four date fields, not just due and renewal. (4) An amount must equal one of the `$`-prefixed or `n.nn` amounts in the quote; bare integers are not amounts. (5) An `irrelevant` result carrying any amount, date or evidence is sent to review (an addition to the six rules).
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03): choices 1-5 approved, tightened by the security review. Yearless dates must equal the single nearest upcoming date (M1). Amounts are `$`-prefixed or a bare `n.nn` right after an amount keyword (M2). `provider_name` and `account_last4` must appear in the source and are length and character checked; `frequency` and `auto_renews` need a quote or are returned as advisory (M3).
+
+## Q-072 · WP-11 · `max_tokens` ~4k with always-on thinking, and the prompt-cache minimum
+- Asked by: wp-builder/wp/11-ai · 2026-11-03
+- Where: BACKEND_PLAN §7.9 (extract `max_tokens` ~4k, effort `low`, cached system prefix)
+- Question: Opus 5.5 cannot disable thinking, and thinking tokens count against `max_tokens`. At effort `low` 4096 is probably enough, but a `max_tokens` stop is handled as `invalid_output` (sent to review). Also, a cached prefix below the model's minimum cacheable length silently does not cache; `extract.v1.md` is about 1,100 tokens. Please confirm both from the first live run: the share of `max_tokens` stops, and `cache_read_input_tokens > 0`. If the prefix is too short, the options are to pad with worked examples (a new prompt version and eval) or accept no caching.
+- Blocking: no. Needs the live run.
+- Answer: Answered (owner, 2026-11-03): keep `max_tokens` 4096 and omit `thinking`. Decide from the first live run: raise to 8192 if the `max_tokens` stop rate is above 1%. Do not pad the prompt for caching.
+
+## Q-071 · WP-11 · Price table for `ai_runs.cost_micros` and the eval budget cap
+- Asked by: wp-builder/wp/11-ai · 2026-11-03
+- Where: `packages/ai/src/config.ts` (PRICING); BACKEND_PLAN §5 `ai_runs.cost_micros`
+- Question: I used $4 / $20 per million input / output tokens, $0.20 cache read, $5 cache write (1.25x input), and 50% for batch, taken from the model price list available to me. Please confirm they match the contract, and say whether `cost_micros` should be recomputed from the invoice or only estimated.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03): the price table stays a placeholder until the owner checks it against Anthropic's published pricing before G3. `cost_micros` is an estimate; an unknown response model is priced by the requested model and flagged `costEstimated`.
+
+## Q-070 · WP-11 · Plausible amount ceilings per category (validation rule 4)
+- Asked by: wp-builder/wp/11-ai · 2026-11-03
+- Where: BACKEND_PLAN §7.8.2 rule 4 ("configured ranges, e.g. a subscription < $500/month")
+- Question: Only the subscription example is given. I set ceilings in `MAX_AMOUNT_CENTS` (housing $20,000; utilities $1,000; childcare $6,000; transport $5,000; debt $20,000; subscription $500; insurance $10,000; membership $2,000; vehicle/home $20,000; income $50,000; other and unknown $20,000). Please supply the real ranges (and whether there is a floor above $0).
+- Blocking: no. Failing items go to review, never auto-apply.
+- Answer: Answered (owner, 2026-11-03): the current ceilings stay as placeholders (marked in `validate.ts`); the owner confirms the real ranges before G3.
+
 ## Q-068 · WP-19 · How the sandbox worker entry is loaded (tsx) and one Worker per message
 - Asked by: wp-builder/wp/19-email-core · 2026-11-03
 - Where: BACKEND_PLAN §7.8.2 (parsing sandbox), apps/worker `start` script (`tsx src/index.ts`)
