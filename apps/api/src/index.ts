@@ -1,13 +1,62 @@
 import { createLogger } from "@mp/observability";
+import { createApiDb } from "@mp/db";
+import { createAuthenticator } from "./auth/authenticator";
+import { AuthConfigError, loadCognitoConfig } from "./auth/config";
+import { createCognitoProvider } from "./auth/cognito";
+import { configureRuntime, createUnconfiguredInviteSender } from "./auth/runtime";
+import { unauthorized, type AuthProvider } from "./auth/provider";
 import { buildServer } from "./server";
 
 const log = createLogger("api");
 const port = Number(process.env.API_PORT ?? 4000);
 const webOrigin = process.env.WEB_ORIGIN;
 
-// TODO(WP-05): pass `authenticate` (Clerk) and a DB-backed idempotency store (lib/idempotency-store.ts).
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  log.error("DATABASE_URL is not set");
+  process.exit(1);
+}
+const db = createApiDb({ connectionString: databaseUrl });
+
+// Cognito (ADR-017). In production a missing or inconsistent setting stops the API at startup. Elsewhere,
+// without a user pool (local dev before WP-09) every token is refused and only anonymous routes such as
+// /health answer; there is no development bypass.
+let provider: AuthProvider;
+try {
+  const cognito = loadCognitoConfig(process.env);
+  if (cognito) {
+    provider = createCognitoProvider(cognito);
+  } else {
+    log.warn("COGNITO_* is not configured: every access token will be refused");
+    const notConfigured = () => unauthorized("Sign-in is not configured on this server.");
+    provider = {
+      verifyToken: async () => {
+        throw notConfigured();
+      },
+      getUser: () => {
+        throw notConfigured();
+      },
+      requireStepUp: () => {
+        throw notConfigured();
+      },
+    };
+  }
+} catch (err) {
+  if (err instanceof AuthConfigError) {
+    log.error({ reason: err.message }, "auth is misconfigured; refusing to start");
+    process.exit(1);
+  }
+  throw err;
+}
+
+// The invite sender is packages/notify's job (WP-15, Q-081). Until it is wired, this one fails in
+// production so an invite is never reported as sent when it was not.
+configureRuntime({ db, provider, inviteSender: createUnconfiguredInviteSender(process.env, log) });
+
+// TODO(WP-26): database-backed idempotency store (lib/idempotency-store.ts); the in-memory default is per process.
 const app = buildServer({
   logger: log,
+  authenticate: createAuthenticator({ provider, db }),
   corsOrigins: webOrigin ? [webOrigin] : [],
   // Behind the ALB in AWS (one hop). Locally nothing is in front, so X-Forwarded-For is not trusted.
   trustProxy: process.env.NODE_ENV === "production" ? 1 : false,

@@ -57,6 +57,601 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/me/bootstrap": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create or sync the signed-in user from the verified token */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["BootstrapBodyInput"] | null;
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Me"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The signed-in user and their households */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Me"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Update name or time zone */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchMeBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Me"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/v1/households": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Create a household */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateHouseholdBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Household"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Read household settings */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Household"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Update name, time zone or cushion */
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchHouseholdBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Household"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/v1/households/{hid}/summary": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Members, nav badges, entitlements and connection status */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["HouseholdSummary"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/invites": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Invite a partner by email */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateInviteBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Invite"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/invites/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Cancel a pending invite */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Cancelled */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/invites/accept": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Accept a partner invite (signed in, email must match) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AcceptInviteBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AcceptInviteResponse"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/leave": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Leave the household (step-up MFA) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Left */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -102,6 +697,125 @@ export interface components {
       /** @description The current resource, on a version conflict (If-Match) */
       current?: unknown;
     };
+    MembershipInput: {
+      /** Format: uuid */
+      householdId: string;
+      householdName: string;
+      /** @enum {string} */
+      colorRole: "partnerA" | "partnerB";
+      isCreator: boolean;
+      /** Format: date-time */
+      joinedAt: string;
+    };
+    MeInput: {
+      /** Format: uuid */
+      id: string;
+      /** @description Verified email from the sign-in provider */
+      email: string;
+      firstName: string;
+      lastName: string | null;
+      timezone: string;
+      mfaEnabled: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      /** @description Active household memberships */
+      memberships: components["schemas"]["MembershipInput"][];
+    };
+    BootstrapBodyInput: {
+      firstName?: string;
+      lastName?: string | null;
+      /** @description IANA time zone name */
+      timezone?: string;
+    };
+    PatchMeBodyInput: {
+      firstName?: string;
+      lastName?: string | null;
+      /** @description IANA time zone name */
+      timezone?: string;
+    };
+    HouseholdInput: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      timezone: string;
+      currency: string;
+      /** @description Integer cents */
+      cushionCents: number;
+      primaryIncomeItemId: string | null;
+      /** @enum {string} */
+      plan: "free" | "family_plus";
+      /** @description Local part of the household's forwarding address */
+      forwardingToken: string;
+      deletionScheduledFor: string | null;
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    CreateHouseholdBodyInput: {
+      name: string;
+      /** @description Defaults to the signed-in user's time zone */
+      timezone?: string;
+      /** @description Integer cents */
+      cushionCents?: number;
+    };
+    PatchHouseholdBodyInput: {
+      name?: string;
+      /** @description IANA time zone name */
+      timezone?: string;
+      /** @description Integer cents */
+      cushionCents?: number;
+    };
+    HouseholdMemberInput: {
+      /** Format: uuid */
+      userId: string;
+      firstName: string;
+      lastName: string | null;
+      /** @enum {string} */
+      colorRole: "partnerA" | "partnerB";
+      isCreator: boolean;
+      /** Format: date-time */
+      joinedAt: string;
+    };
+    InviteInput: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateInviteBodyInput: {
+      /** Format: email */
+      email: string;
+    };
+    AcceptInviteBodyInput: {
+      token: string;
+    };
+    AcceptInviteResponseInput: {
+      /** Format: uuid */
+      householdId: string;
+    };
+    HouseholdSummaryInput: {
+      household: components["schemas"]["HouseholdInput"];
+      members: components["schemas"]["HouseholdMemberInput"][];
+      openInvite: components["schemas"]["InviteInput"] | null;
+      badges: {
+        reviewQueue: number;
+        tasksDue: number;
+        proposalsPending: number;
+      };
+      entitlements: {
+        /** @enum {string} */
+        plan: "free" | "family_plus";
+        maxAdults: number;
+      };
+      connections: {
+        emailConnections: number;
+      };
+    };
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -142,6 +856,125 @@ export interface components {
       fields?: components["schemas"]["ProblemField"][];
       /** @description The current resource, on a version conflict (If-Match) */
       current?: unknown;
+    };
+    Membership: {
+      /** Format: uuid */
+      householdId: string;
+      householdName: string;
+      /** @enum {string} */
+      colorRole: "partnerA" | "partnerB";
+      isCreator: boolean;
+      /** Format: date-time */
+      joinedAt: string;
+    };
+    Me: {
+      /** Format: uuid */
+      id: string;
+      /** @description Verified email from the sign-in provider */
+      email: string;
+      firstName: string;
+      lastName: string | null;
+      timezone: string;
+      mfaEnabled: boolean;
+      /** Format: date-time */
+      createdAt: string;
+      /** @description Active household memberships */
+      memberships: components["schemas"]["Membership"][];
+    };
+    BootstrapBody: {
+      firstName?: string;
+      lastName?: string | null;
+      /** @description IANA time zone name */
+      timezone?: string;
+    };
+    PatchMeBody: {
+      firstName?: string;
+      lastName?: string | null;
+      /** @description IANA time zone name */
+      timezone?: string;
+    };
+    Household: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      timezone: string;
+      currency: string;
+      /** @description Integer cents */
+      cushionCents: number;
+      primaryIncomeItemId: string | null;
+      /** @enum {string} */
+      plan: "free" | "family_plus";
+      /** @description Local part of the household's forwarding address */
+      forwardingToken: string;
+      deletionScheduledFor: string | null;
+      version: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    CreateHouseholdBody: {
+      name: string;
+      /** @description Defaults to the signed-in user's time zone */
+      timezone?: string;
+      /** @description Integer cents */
+      cushionCents?: number;
+    };
+    PatchHouseholdBody: {
+      name?: string;
+      /** @description IANA time zone name */
+      timezone?: string;
+      /** @description Integer cents */
+      cushionCents?: number;
+    };
+    HouseholdMember: {
+      /** Format: uuid */
+      userId: string;
+      firstName: string;
+      lastName: string | null;
+      /** @enum {string} */
+      colorRole: "partnerA" | "partnerB";
+      isCreator: boolean;
+      /** Format: date-time */
+      joinedAt: string;
+    };
+    Invite: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateInviteBody: {
+      /** Format: email */
+      email: string;
+    };
+    AcceptInviteBody: {
+      token: string;
+    };
+    AcceptInviteResponse: {
+      /** Format: uuid */
+      householdId: string;
+    };
+    HouseholdSummary: {
+      household: components["schemas"]["Household"];
+      members: components["schemas"]["HouseholdMember"][];
+      openInvite: components["schemas"]["Invite"] | null;
+      badges: {
+        reviewQueue: number;
+        tasksDue: number;
+        proposalsPending: number;
+      };
+      entitlements: {
+        /** @enum {string} */
+        plan: "free" | "family_plus";
+        maxAdults: number;
+      };
+      connections: {
+        emailConnections: number;
+      };
     };
   };
   responses: never;

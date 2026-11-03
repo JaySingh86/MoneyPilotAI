@@ -1,4 +1,4 @@
-// HMAC signatures for webhooks (BACKEND_PLAN §8.4): Clerk (Svix) and the billing provider.
+// HMAC signatures for webhooks (BACKEND_PLAN §8.4): the billing provider.
 // Verify the exact raw bytes (plugins/raw-body.ts) before parsing or trusting anything in the payload.
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { AppError } from "@mp/contracts";

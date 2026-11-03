@@ -275,7 +275,7 @@ describe("G1-2 (MEDIUM) users: email, MFA flag and deletion change only through 
     expect((await read())?.deleted).toBe(true);
   });
 
-  it("returns false for an unknown subject, and mp_api cannot execute it", async () => {
+  it("returns false for an unknown subject", async () => {
     expect(
       await worker.withJobTx(hh.id, async (tx) => {
         const res = await tx.execute<{ ok: boolean }>(
@@ -284,11 +284,41 @@ describe("G1-2 (MEDIUM) users: email, MFA flag and deletion change only through 
         return res.rows[0]?.ok;
       }),
     ).toBe(false);
-    await expectDenied(() =>
-      asUser(hh.creator.id, (tx) =>
-        tx.execute(sql`select app_sync_auth_user(${hh.creator.authSubject}, 'h@example.test', true, false)`),
-      ),
+  });
+
+  // ADR-017 / WP-05: mp_api may now execute it (bootstrap), but only for the request's own verified subject.
+  it("mp_api can sync only its own verified subject, never delete, never touch another user", async () => {
+    const user = await createUser(api, "wp05-sync");
+    const other = await createUser(api, "wp05-sync-other");
+    const call = (
+      ctxSubject: string | null,
+      subject: string,
+      email: string,
+      mfa: boolean,
+      deleted: boolean,
+    ): Promise<boolean | undefined> =>
+      api.withHouseholdTx({ userId: null, authSubject: ctxSubject }, async (tx) => {
+        const res = await tx.execute<{ ok: boolean }>(
+          sql`select app_sync_auth_user(${subject}, ${email}, ${mfa}, ${deleted}) as ok`,
+        );
+        return res.rows[0]?.ok;
+      });
+    expect(await call(user.authSubject, user.authSubject, `own-${user.id}@example.test`, true, false)).toBe(
+      true,
     );
+    await expectDenied(() =>
+      call(user.authSubject, other.authSubject, `stolen-${other.id}@example.test`, true, false),
+    );
+    await expectDenied(() =>
+      call(user.authSubject, user.authSubject, `own-${user.id}@example.test`, true, true),
+    );
+    // No subject in the session at all (e.g. a household-scoped request): refused.
+    await expectDenied(() => call(null, user.authSubject, `own-${user.id}@example.test`, true, false));
+    const rows = await api.withHouseholdTx({ userId: null, authSubject: other.authSubject }, async (tx) => {
+      const res = await tx.execute<{ email: string }>(sql`select email from users`);
+      return res.rows;
+    });
+    expect(rows[0]?.email).toBe(other.email);
   });
 });
 

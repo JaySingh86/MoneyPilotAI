@@ -95,6 +95,70 @@ Format (newest first):
 - Blocking: no.
 - Answer: Answered (owner, 2026-10-28). Keep the split: tokens are required for color, type, spacing, radius and shadow; px is allowed for component dimensions and border/outline widths. Off-scale paddings keep their cited disable comments for now. Rules tightened and the config moved to the repo root (`stylelint.config.mjs`).
 
+## Q-087 · WP-05 · Notify the creator when a partner accepts an invite
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: BACKEND_PLAN §6 (Invites, step 3)
+- Question: Accepting should create a notification for the creator, but the `notifications` table and `packages/notify` do not exist yet.
+- Options considered: (a) add the notification in the notify WP; (b) a placeholder table now.
+- Blocking: no. Skipped; the membership and the `invite.accepted` audit event (from `app_accept_invite`) are done. The notify WP should hook `invite.accepted`.
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. Deferred to WP-15 (on its checklist).
+
+## Q-086 · WP-05 · Household PATCH: primary income item
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: BACKEND_PLAN §8.2 (PATCH household: cushion and primary income)
+- Question: `primaryIncomeItemId` needs `recurring_items` (WP-06) to validate that the item belongs to the household and is income. Until then PATCH accepts name, timezone and cushionCents only (a `primaryIncomeItemId` field is a 400).
+- Options considered: (a) WP-06 adds the field and the check to PATCH; (b) WP-05 accepts any uuid (unsafe: cross-household reference).
+- Blocking: no. Skipped until WP-06 lands. Also: the plan recompute on cushion change has no target yet (no plan endpoint).
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. Deferred to WP-06 (on its checklist).
+
+## Q-085 · WP-05 · Can one user belong to several households?
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: BACKEND_PLAN §6, §5.2
+- Question: Nothing forbids a user creating or joining a second household, and `/me` returns a list of memberships. Should the MVP allow only one active household per user?
+- Options considered: (a) allow many (current behaviour, no rule invented); (b) one active household: 409 on create/accept.
+- Blocking: no. Current behaviour is (a).
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. One active household per user, enforced by a partial unique index on active memberships (`household_members_one_active_uq`, in the WP-05 migration). Create or accept into a second household returns 409 `conflict`.
+
+## Q-084 · WP-05 · PATCH /me concurrency
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: BACKEND_PLAN §8.1 (PATCH requires If-Match), §8.2
+- Question: `users` has no `version` column, so `PATCH /me` cannot use If-Match. Only the user edits their own profile.
+- Options considered: (a) last write wins, no If-Match (current); (b) add `users.version` in a migration and require If-Match.
+- Blocking: no. Current behaviour is (a).
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. `PATCH /me` is last-write-wins; documented as a BACKEND_PLAN §8.1 exception.
+
+## Q-083 · WP-05 · Same email, two sign-in identities (password + Google)
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: ADR-017, BACKEND_PLAN §5.2 (`users.email` unique)
+- Question: Cognito creates a separate `sub` for Google federation and for password sign-up with the same email. Bootstrap for the second `sub` hits the unique email and returns 409 `conflict` (and so does an email sync that would collide). Should the pools link accounts?
+- Options considered: (a) link federated and native users in the pool (pre-sign-up trigger, WP-09) so one `sub` exists per email; (b) allow several `auth_subject`s per user.
+- Blocking: no. Current behaviour: 409, no data changed.
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. Keep 409.
+
+## Q-082 · WP-05 · Name for a new user
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: ADR-017, BACKEND_PLAN §6
+- Question: `users.first_name` is NOT NULL but the access token carries no trusted name claim. Bootstrap therefore requires `firstName` in the body the first time (the email is never read from the body).
+- Options considered: (a) body `firstName` (current); (b) add a `given_name` claim in the pre-token-generation trigger and read it from the token.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. The first name comes from the body, first call only. It is untrusted display text (escaped by the invite sender).
+
+## Q-081 · WP-05 · Invite email delivery
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: BACKEND_PLAN §6 (Invites, step 1)
+- Question: `POST /households/:hid/invites` must email a link, but delivery is `packages/notify` (not in WP-05's paths). WP-05 defines an `InviteSender` port, calls it after the invite commits, and cancels the invite if it throws (502). `apps/api/src/index.ts` wires a stub that sends nothing, so invites cannot be delivered in a running stack. The web app's accept route (`/invite?token=`) is also undecided.
+- Options considered: (a) notify WP supplies the sender and link format; (b) WP-05 adds SMTP now.
+- Blocking: yes for end-to-end delivery only. Tests use a capturing sender.
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. Keep the `InviteSender` port. In production with no real sender wired, invite creation fails (the invite is cancelled), it does not return 201. WP-15 supplies the sender. Built: `createUnconfiguredInviteSender` in `apps/api/src/auth/runtime.ts`.
+
+## Q-080 · WP-05 · Problem codes for invite failures
+- Asked by: wp-builder/wp/05-auth · 2026-11-03
+- Where: WORK_PLAN WP-05 acceptance, BACKEND_PLAN §8.1 (code list), §6 (403 with hint)
+- Question: The code list has no invite-specific codes. Current mapping: unknown token 404 `not_found`; expired, revoked, already used, household full or being deleted, already a member: 409 `conflict` (the `detail` text says which); email mismatch: 403 `forbidden` with the masked address (from `app_invite_lookup`). Clients cannot branch on expired vs revoked without reading text.
+- Options considered: (a) keep (current); (b) add codes `invite_expired`, `invite_revoked`, `invite_mismatch` (WP-08 owns the list); (c) 410 for expired/revoked.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-03), spec in e50f29e. Keep 404 / 409 / 403 with the masked hint.
+
 ## Q-032 · WP-08 · Webhook paths: `/webhooks/*` or `/v1/webhooks/*`?
 - Asked by: wp-builder/wp/08-api-platform · 2026-10-27
 - Where: BACKEND_PLAN §8.1 (base URL `/v1`), §8.4 (paths `/webhooks/clerk` …)

@@ -2,3 +2,5 @@
 // the typed client (ADR-008). Module contracts live in src/<module>/ and are re-exported here.
 export * from "./common";
 export * from "./errors";
+export * from "./identity";
+export * from "./households";

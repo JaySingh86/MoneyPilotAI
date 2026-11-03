@@ -4,7 +4,9 @@
 // `defineModule({ name, routes })`; follow the route recipe in `../lib/module.ts`. After adding routes,
 // run `pnpm contracts:gen` and commit the regenerated files in packages/contracts/src/openapi.
 import type { ApiModule } from "../lib/module";
+import { identityModules } from "./identity";
 
 export const modules: readonly ApiModule[] = [
   // Append new modules below this line, one per line.
+  ...identityModules, // WP-05: identity, households
 ];

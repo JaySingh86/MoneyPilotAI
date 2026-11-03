@@ -1,0 +1,116 @@
+// A full API for integration tests: the real identity and households modules, the real Cognito
+// verifier against a fake issuer, and the real database as mp_api. Test-only.
+import { randomUUID } from "node:crypto";
+import pg from "pg";
+import { inject } from "vitest";
+import { createApiDb, type ApiDb } from "@mp/db";
+import { buildServer, type ApiServer } from "../../server";
+import { createHouseholdsModule } from "../../modules/households";
+import { createIdentityModule } from "../../modules/identity";
+import { createAuthenticator } from "../authenticator";
+import { createCognitoProvider } from "../cognito";
+import type { ApiRuntime, InviteSender } from "../runtime";
+import { FakeIssuer, type TokenOptions } from "./fake-issuer";
+
+export interface SentInvite {
+  to: string;
+  token: string;
+  householdName: string;
+  inviterFirstName: string;
+}
+
+export interface TestApi {
+  app: ApiServer;
+  db: ApiDb;
+  issuer: FakeIssuer;
+  sent: SentInvite[];
+  /** Makes invite delivery fail, once. */
+  failNextInvite(): void;
+  /** Bearer headers for a subject. */
+  as(subject: string, options?: TokenOptions): Promise<Record<string, string>>;
+  /** Sign up a verified user (bootstrap) and return its id and auth headers. */
+  signUp(
+    label: string,
+    options?: { firstName?: string; claims?: Record<string, unknown> },
+  ): Promise<TestUser>;
+  /** Fixture helper: runs SQL as the database superuser. */
+  admin<T>(fn: (client: pg.Client) => Promise<T>): Promise<T>;
+  close(): Promise<void>;
+}
+
+export interface TestUser {
+  id: string;
+  subject: string;
+  email: string;
+  headers: Record<string, string>;
+}
+
+export async function createTestApi(): Promise<TestApi> {
+  const issuer = await FakeIssuer.create();
+  const db = createApiDb({ connectionString: inject("apiDatabaseUrl"), max: 4 });
+  const provider = createCognitoProvider(issuer.cognitoConfig());
+  const sent: SentInvite[] = [];
+  let failNext = false;
+  const inviteSender: InviteSender = {
+    async send(invite) {
+      if (failNext) {
+        failNext = false;
+        throw new Error("smtp down");
+      }
+      sent.push({
+        to: invite.to,
+        token: invite.token,
+        householdName: invite.householdName,
+        inviterFirstName: invite.inviterFirstName,
+      });
+    },
+  };
+  const rt: ApiRuntime = { db, provider, inviteSender };
+  const app = buildServer({
+    authenticate: createAuthenticator({ provider, db }),
+    modules: [createIdentityModule(() => rt), createHouseholdsModule(() => rt)],
+  });
+  await app.ready();
+
+  const api: TestApi = {
+    app,
+    db,
+    issuer,
+    sent,
+    failNextInvite: () => {
+      failNext = true;
+    },
+    async as(subject, options) {
+      return { authorization: `Bearer ${await issuer.accessToken(subject, options)}` };
+    },
+    async signUp(label, options) {
+      const subject = `sub-${label}-${randomUUID()}`;
+      const email = `${label}-${randomUUID().slice(0, 8)}@example.test`;
+      const headers = await api.as(subject, { claims: { email, ...options?.claims } });
+      const res = await app.inject({
+        method: "POST",
+        url: "/v1/me/bootstrap",
+        headers,
+        payload: { firstName: options?.firstName ?? label },
+      });
+      if (res.statusCode !== 200) throw new Error(`bootstrap failed: ${res.statusCode} ${res.body}`);
+      return { id: (res.json() as { id: string }).id, subject, email, headers };
+    },
+    async admin(fn) {
+      const client = new pg.Client({ connectionString: inject("adminDatabaseUrl") });
+      await client.connect();
+      try {
+        return await fn(client);
+      } finally {
+        await client.end();
+      }
+    },
+    async close() {
+      await app.close();
+      await db.close();
+    },
+  };
+  return api;
+}
+
+export const key = (): Record<string, string> => ({ "idempotency-key": randomUUID() });

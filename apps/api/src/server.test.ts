@@ -128,7 +128,7 @@ describe("OpenAPI (ADR-008)", () => {
           prefix: "/webhooks",
           routes: async (s) => {
             s.post(
-              "/clerk",
+              "/billing",
               {
                 schema: { body: z.object({ type: z.string() }) },
                 config: { idempotency: "off", rateLimit: false },

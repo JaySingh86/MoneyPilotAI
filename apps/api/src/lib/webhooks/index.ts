@@ -10,7 +10,6 @@ export {
   type HmacVerifyInput,
   type SignatureEncoding,
 } from "./hmac";
-export { signSvix, verifySvixSignature, type SvixHeaders, type SvixVerifyInput } from "./svix";
 export {
   checkSigningCertificate,
   createCertificateLoader,

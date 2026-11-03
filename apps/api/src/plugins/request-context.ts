@@ -5,11 +5,11 @@ import fp from "fastify-plugin";
 import { AppError, isAppError, REQUEST_ID_HEADER, Uuid } from "@mp/contracts";
 import type { ApiContext } from "@mp/db";
 
-/** The caller, as established by the auth provider (WP-05, ADR-011). */
+/** The caller, as established by the auth provider (WP-05, ADR-017). */
 export interface AuthenticatedUser {
   /** `users.id`; null until `POST /v1/me/bootstrap` creates the row. */
   readonly userId: string | null;
-  /** Verified auth-provider subject (Clerk `sub`). */
+  /** Verified auth-provider subject (Cognito `sub`). */
   readonly authSubject: string;
   /** Verified token claims the auth layer wants to keep, e.g. for step-up checks. */
   readonly claims?: Readonly<Record<string, unknown>>;

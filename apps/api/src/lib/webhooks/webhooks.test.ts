@@ -1,14 +1,7 @@
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from "jose";
 import { describe, expect, it } from "vitest";
 import { expectWebhookRejected as rejects } from "../testing";
-import {
-  constantTimeEqual,
-  signHmac,
-  signSvix,
-  verifyGoogleOidcToken,
-  verifyHmacSignature,
-  verifySvixSignature,
-} from "./index";
+import { constantTimeEqual, signHmac, verifyGoogleOidcToken, verifyHmacSignature } from "./index";
 
 describe("HMAC signatures", () => {
   it("verifies hex and base64 signatures in constant time", () => {
@@ -41,79 +34,6 @@ describe("HMAC signatures", () => {
     expect(constantTimeEqual("client-state", "client-state")).toBe(true);
     expect(constantTimeEqual("client-state", "client-statf")).toBe(false);
     expect(constantTimeEqual("short", "longer value")).toBe(false);
-  });
-});
-
-describe("Svix (Clerk) signatures", () => {
-  // Known-answer vector from the Svix documentation.
-  const secret = "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw";
-  const body = '{"test": 2432232314}';
-  const headers = {
-    "svix-id": "msg_p5jXN8AQM9LWM0D4loKWxJek",
-    "svix-timestamp": "1614265330",
-    "svix-signature": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
-  };
-  const now = 1614265330 * 1000;
-
-  it("accepts the documented example", () => {
-    expect(verifySvixSignature({ secret, headers, rawBody: body, nowMs: now })).toEqual({
-      id: "msg_p5jXN8AQM9LWM0D4loKWxJek",
-      timestamp: 1614265330,
-    });
-  });
-
-  it("accepts any matching signature in a rotated list", () => {
-    const multi = { ...headers, "svix-signature": `v1,AAAA ${headers["svix-signature"]}` };
-    expect(() => verifySvixSignature({ secret, headers: multi, rawBody: body, nowMs: now })).not.toThrow();
-  });
-
-  it("round-trips signSvix", () => {
-    const signed = signSvix(secret, "msg_1", 1700000000, '{"type":"user.created"}');
-    expect(() =>
-      verifySvixSignature({
-        secret,
-        headers: signed,
-        rawBody: '{"type":"user.created"}',
-        nowMs: 1700000000_000,
-      }),
-    ).not.toThrow();
-  });
-
-  it("rejects a tampered body, a wrong secret, missing headers and old timestamps", async () => {
-    await rejects(
-      () => verifySvixSignature({ secret, headers, rawBody: '{"test": 1}', nowMs: now }),
-      /invalid/,
-    );
-    await rejects(() =>
-      verifySvixSignature({
-        secret: "whsec_AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        headers,
-        rawBody: body,
-        nowMs: now,
-      }),
-    );
-    await rejects(
-      () =>
-        verifySvixSignature({
-          secret,
-          headers: { ...headers, "svix-id": undefined },
-          rawBody: body,
-          nowMs: now,
-        }),
-      /missing/,
-    );
-    await rejects(
-      () => verifySvixSignature({ secret, headers, rawBody: body, nowMs: now + 301_000 }),
-      /timestamp/,
-    );
-    await rejects(() =>
-      verifySvixSignature({
-        secret,
-        headers: { ...headers, "svix-signature": "v2,abc" },
-        rawBody: body,
-        nowMs: now,
-      }),
-    );
   });
 });
 

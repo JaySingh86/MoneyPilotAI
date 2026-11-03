@@ -90,7 +90,8 @@ describe("RLS posture of every table", () => {
       app_user_email: ["mp_api"],
       app_accept_invite: ["mp_api"],
       app_invite_lookup: ["mp_api"],
-      app_sync_auth_user: ["mp_worker"],
+      app_sync_auth_user: ["mp_api", "mp_worker"],
+      app_transfer_creator: ["mp_api"],
       app_purge_audit_events: ["mp_worker"],
     };
     const res = await apiClient.query<{ proname: string; roles: string[] }>(`

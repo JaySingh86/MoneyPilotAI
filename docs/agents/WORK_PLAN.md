@@ -22,7 +22,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-02 | Engine core: window, runway, safe to spend, schedules | 1 | WP-01 | M | — | done |
 | WP-03 | DB foundation: roles, RLS, migrations, `withHouseholdTx`, RLS test harness | 1 | WP-01 | M | G1 | done (G1 approved) |
 | WP-04 | Format + design tokens packages | 1 | WP-01 | S | — | done |
-| WP-05 | Auth adapter, identity, households, invites | 2 | WP-03, WP-08 | M | G1 | in-progress (wp-builder, wp/05-auth) |
+| WP-05 | Auth adapter, identity, households, invites | 2 | WP-03, WP-08 | M | G1 | done (G1 approved) |
 | WP-06 | Items, schedules, renewals, occurrences | 2 | WP-03, WP-02, WP-08 | L | G1 | in-progress (wp-builder, wp/06-items) |
 | WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | done |
 | WP-08 | API platform + contracts (server, errors, idempotency, OpenAPI, client gen) | 2 | WP-01 | M | — | done |
