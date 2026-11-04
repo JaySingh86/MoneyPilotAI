@@ -21,7 +21,7 @@ const CSV_IMPORTED_ON = riveraFixture.tasks.find((t) => t.id === "d1")?.dueOn ??
 
 export type Scenario = "base" | "shortfall" | "empty";
 
-const owner = (key: string): string => OWNER_IDS[key] ?? key;
+export const owner = (key: string): string => OWNER_IDS[key] ?? key;
 /** Member ids the API accepts in `?owner=`, mapped back to the fixture's. */
 const FIXTURE_OWNER: Readonly<Record<string, string>> = { [SAM_ID]: "m-sam", [JORDAN_ID]: "m-jordan" };
 
@@ -45,7 +45,7 @@ const SCHEDULE_LABELS: Readonly<Record<string, string>> = {
   "inc-jordan": "Monthly, last Friday of the month",
 };
 
-function input(scenario: Scenario): EngineInput {
+export function input(scenario: Scenario): EngineInput {
   if (scenario !== "empty") return riveraInput({ scenario });
   // A household that has only just signed up: paychecks, no bills, goals, tasks or planned expenses.
   const base = riveraInput();
@@ -130,7 +130,7 @@ function dueRows(plan: FullPlanResult, engineInput: EngineInput): DueRowDto[] {
 
 const CREATED_AT = "2026-10-20T14:00:00Z";
 
-function goalRows(engineInput: EngineInput): Goal[] {
+export function goalRows(engineInput: EngineInput): Goal[] {
   if (engineInput.goals.length === 0) return [];
   return goalsSummary(engineInput).goals.map((g, i) => ({
     id: g.goalId,

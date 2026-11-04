@@ -52,7 +52,7 @@ export function summary(tasksDue: number, reviewQueue: number, cushionCents: num
       timezone: "America/New_York",
       currency: "USD",
       cushionCents,
-      primaryIncomeItemId: null,
+      primaryIncomeItemId: "inc-sam",
       plan: "family_plus",
       forwardingToken: "rivera-7k2",
       deletionScheduledFor: null,

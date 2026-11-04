@@ -10,6 +10,12 @@ in. No AWS and no network.
 | `a11y.spec.ts`   | axe (WCAG 2.2 AA, color contrast on) on every screen and state at 1440 and 390                                                                      |
 | `visual.spec.ts` | Full-page snapshots at 1440, 1024 and 390, and no horizontal page scroll                                                                            |
 
+WP-18 adds `lists-flows.spec.ts` (Bills, Renewals, Goals, Tasks golden values, the goal stepper and approval,
+saving a task), `lists-a11y.spec.ts` (axe, including the error states) and `lists-visual.spec.ts` (snapshots in
+`__screenshots__/lists-visual.spec.ts/`: `bills`, `renewals`, `goals` and `tasks` at 1440, 1024 and 390, matching the
+canvas boards Web · Bills & recurring, Subscriptions & renewals, Goals & planned expenses and Household tasks).
+Set `MP_E2E_PORT` to run against a dev server on another port.
+
 Screenshots in `__screenshots__/visual.spec.ts/` sit next to the canvas frames they match:
 
 | Snapshot                                 | Canvas board                           |

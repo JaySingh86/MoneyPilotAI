@@ -54,6 +54,62 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-166 · WP-18 · Overview tasks now come from the tasks API
+- Asked by: wp-builder/wp/18-web-pages · 2026-11-04
+- Where: DESIGN_SPEC §5.1 Overview; Q-095, Q-096
+- Question: The Overview "Household tasks" card read `plan.tasks` (a MOCK-ONLY field). It now reads `GET /tasks` (due this week plus the latest done) and its checkboxes save through `PATCH /tasks/:id`, as Q-095's answer planned. `plan.tasks` in `planning-types.ts` is now unused by the web.
+- Options considered: (a) remove `plan.tasks` and the `PlanResponse.tasks` mock field; (b) keep it. Taken: implemented (a) is left to the owner of planning-types; nothing reads it.
+- Blocking: no
+- Answer:
+
+## Q-165 · WP-18 · Mark a renewal reviewed, and edit its reminders
+- Asked by: wp-builder/wp/18-web-pages · 2026-11-04
+- Where: canvas Web · Subscriptions & renewals; DESIGN_SPEC §5.1
+- Question: The detail aside has "Mark as reviewed" and "Edit reminders". `RenewalDetails` has `priceChangedOn` but no `reviewed` flag or reminder fields, and no endpoint marks a price change reviewed (rule 8: the flag shows until reviewed or for 60 days). What should they call?
+- Options considered: (a) a PATCH on the renewal that sets a reviewed date; reminders come with WP-15's settings; (b) hide them. Taken: both buttons are visible and disabled with a title.
+- Blocking: no (both buttons skipped)
+- Answer:
+
+## Q-164 · WP-18 · Add and edit forms for bills, income and renewals
+- Asked by: wp-builder/wp/18-web-pages · 2026-11-04
+- Where: canvas boards Web · Bills & recurring, Web · Subscriptions & renewals; DESIGN_SPEC §5.1
+- Question: The boards draw "Add bill or income", "Add renewal" and "Edit" but no form or dialog. What do they open, and where does the schedule picker (the `Schedule` union) get drawn?
+- Options considered: (a) a new canvas board for the item form; (b) reuse the Household setup "Enter manually" panel (name, amount, repeats). Taken: the three buttons are disabled with a title until a board exists.
+- Blocking: no (buttons skipped)
+- Answer:
+
+## Q-163 · WP-18 · Fields the Renewals and Bills tables show that the contracts do not carry
+- Asked by: wp-builder/wp/18-web-pages · 2026-11-04
+- Where: canvas Web · Subscriptions & renewals, Web · Bills & recurring; packages/contracts items and planning
+- Question: (1) `RenewalRow` has no provider name ("Lakeside Auto Insurance"); the table shows the category line instead. (2) It has no `paidFrom`, so "$248/mo from pay" reads "monthly". (3) `Item.source` is one value, so "Email + CSV" shows only for items that have a renewal row (its `sources` list); the price-up percent ("Up $19 (+13%)") is not carried, so the chip says "Up $19 a year". Should the contract add `providerName`, `paidFrom` and `sources` to `RenewalRow` and `Item`?
+- Options considered: (a) extend the contracts (WP-12/WP-06); (b) the web joins `GET /items`. Taken: the web shows what the contracts carry.
+- Blocking: no
+- Answer:
+
+## Q-162 · WP-18 · Estimate range and price-up amount on the Bills page
+- Asked by: wp-builder/wp/18-web-pages · 2026-11-04
+- Where: DESIGN_SPEC §5.1 Bills, §6 rule 6; PlanFlag, BillsAverages in packages/contracts
+- Question: The Bills table chips read "Estimate ±$30" and "Price up $3". `PlanFlag` has neither number. The web reads the range from the plan's `estimate` decision params when one exists (Electricity), otherwise the chip says "Estimate"; "Price up $3" is `Item.amountCents` minus `Item.renewal.previousAmountCents`, one difference of two API amounts. Should `GET /items` carry `estimate: {rangeCents, historyCents}` and the flag its delta?
+- Options considered: (a) add both to the items response; (b) keep the web's join. Taken: (b).
+- Blocking: no
+- Answer:
+
+## Q-161 · WP-18 · Reminder offsets for bills
+- Asked by: wp-builder/wp/18-web-pages · 2026-11-04
+- Where: DESIGN_SPEC §6 rules 11 and 12; WP-15
+- Question: The bill detail says "3 days before and on the due date". Renewal rows carry `reminderOffsetsDays`; bills have no equivalent, and the household's offsets are a WP-15 setting. The web uses a constant default [3, 0] (`DEFAULT_BILL_REMINDER_OFFSETS`) for non-renewal bills.
+- Options considered: (a) the items response carries the effective offsets; (b) the household summary does. Taken: constant default.
+- Blocking: no
+- Answer:
+
+## Q-160 · WP-18 · Goal stepper preview needs an API
+- Asked by: wp-builder/wp/18-web-pages · 2026-11-04
+- Where: DESIGN_SPEC §4 Stepper, §5.1 Goals, §6 rules 10 and 16; hard rule 4
+- Question: The stepper shows the effect of a monthly amount nobody has saved yet (the math box, the result, the total in "Saving each month", the suggestion). The web may not import the engine and the contracts have no preview. The mock serves `GET /households/:hid/goals/:id/preview?monthlyCents=` from the engine (type `GoalPreview` in `lib/lists/hooks.ts`). When the real API has no such route, the math box is hidden and the stepper still works.
+- Options considered: (a) add that read endpoint (WP-13); (b) use `POST /plan/what-if` with `set_goal_monthly`, which returns safe to spend but not goal status. Taken: (a) as a request; the stepper holds one draft at a time (switching goals drops it, nothing was sent).
+- Blocking: no
+- Answer:
+
 ## Q-119 · WP-13 · The split's "(rest)" planned expense is attributed to the approver, not the proposer
 - Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
 - Where: Q-116 answer; `planned_expenses_api_insert` (WP-06, G1 L-1: rows the API creates are attributed to the caller)

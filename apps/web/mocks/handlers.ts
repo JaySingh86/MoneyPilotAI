@@ -4,7 +4,9 @@
 import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "../lib/config";
 import { HOUSEHOLD_ID, ME, summary } from "./identity";
-import { buildCalendar, buildPlan, tasksDueBadge } from "./model";
+import { listsHandlers } from "./lists-handlers";
+import { taskBadge as tasksDueBadge } from "./lists-model";
+import { buildCalendar, buildPlan } from "./model";
 import { state } from "./state";
 import type { FaultTarget } from "./state";
 
@@ -24,6 +26,7 @@ async function serve(target: FaultTarget, body: () => unknown): Promise<Response
 }
 
 export const handlers = [
+  ...listsHandlers, // WP-18: items, renewals, goals, tasks
   http.post(`${API}/me/bootstrap`, () => {
     state.bootstrapCalls += 1;
     return HttpResponse.json(ME);

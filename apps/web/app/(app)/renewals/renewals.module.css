@@ -1,0 +1,89 @@
+/* Renewal radar, DESIGN_SPEC §5.1. */
+.radar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+}
+
+.track {
+  position: relative;
+  height: 34px;
+}
+
+.line {
+  position: absolute;
+  top: var(--mp-space-2_5);
+  right: 0;
+  left: 0;
+  height: 4px;
+  border-radius: var(--mp-radius-xs);
+  background: var(--mp-bg-track);
+}
+
+.dot {
+  position: absolute;
+  top: var(--mp-space-1);
+  width: 16px;
+  height: 16px;
+  transform: translateX(-50%);
+  border: 2px solid var(--mp-bg-surface);
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-chart-balance);
+}
+
+.dotAttention {
+  background: var(--mp-attention-mark);
+}
+
+.tick {
+  position: absolute;
+  top: var(--mp-space-5_5);
+  font: var(--mp-type-micro);
+  color: var(--mp-text-muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--mp-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.cards > li {
+  display: flex;
+}
+
+.cards > li > * {
+  flex: 1;
+}
+
+.plainCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  box-sizing: border-box;
+  padding: var(--mp-space-3_5);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-xl);
+}
+
+.plainDate {
+  margin: 0;
+  font: var(--mp-type-caption);
+  font-weight: 600;
+  color: var(--mp-text-secondary);
+}
+
+.plainTitle {
+  margin: 0;
+  font: var(--mp-type-title);
+}
+
+.meta {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}

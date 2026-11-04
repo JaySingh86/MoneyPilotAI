@@ -1,0 +1,190 @@
+/* Shared pieces of the list screens: name buttons, detail asides, notes. */
+.nameButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  color: var(--mp-text-primary);
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: var(--mp-border-strong);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .nameButton {
+    min-height: var(--mp-touch-target);
+  }
+}
+
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--mp-space-5);
+}
+
+.main {
+  display: flex;
+  flex: 2 1 560px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.aside {
+  display: flex;
+  flex: 1 1 300px;
+  flex-direction: column;
+  gap: var(--mp-space-3_5);
+  min-width: 0;
+  box-sizing: border-box;
+  padding: var(--mp-space-5_5);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-bg-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.overline {
+  margin: 0;
+  font: var(--mp-type-overline);
+  letter-spacing: var(--mp-tracking-overline);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.asideTitle {
+  margin: var(--mp-space-0_5) 0 0;
+  font: var(--mp-type-heading-3);
+}
+
+.muted {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.priceRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--mp-space-2);
+  color: var(--mp-text-muted);
+}
+
+.price {
+  font: var(--mp-type-amount-l);
+  color: var(--mp-text-primary);
+}
+
+.priceIncome {
+  color: var(--mp-income-text);
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--mp-space-2) var(--mp-space-3_5);
+  margin: 0;
+  font: var(--mp-type-small);
+}
+
+.dl dt {
+  color: var(--mp-text-muted);
+}
+
+.dl dd {
+  margin: 0;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.note {
+  margin: 0;
+  padding: var(--mp-space-3);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-subtle);
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-3);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-subtle);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-1_5);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2);
+}
+
+.footer {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.link {
+  font: var(--mp-type-small);
+  font-weight: 600;
+  color: var(--mp-brand-default);
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--mp-space-4);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3_5);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-2_5);
+}
+
+.historyChip {
+  padding: var(--mp-space-0_5) var(--mp-space-2_5);
+  border: 1px solid var(--mp-border-strong);
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-bg-surface);
+  font: var(--mp-type-caption);
+  font-weight: 600;
+}
+
+/* A KPI tile in hero colors (not spanning): Yearly cost, Saving each month. */
+.heroTile {
+  border-color: var(--mp-brand-strong);
+  background: var(--mp-brand-strong);
+}
+
+.heroTile > p {
+  color: var(--mp-brand-on-strong-muted);
+}
+
+.heroTile > p:nth-child(2) {
+  color: var(--mp-text-inverse);
+}

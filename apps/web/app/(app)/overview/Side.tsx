@@ -1,11 +1,12 @@
 "use client";
 
 import { money } from "@mp/format";
-import { Card, Checkbox, EmptyState, IconButton, ProgressBar } from "@mp/ui";
+import { Card, Checkbox, EmptyState, ErrorBanner, IconButton, ProgressBar } from "@mp/ui";
 import type { ProgressTone } from "@mp/ui";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Goal, PlanResponse, Task } from "../../../lib/api/planning-types";
+import { useCompleteTask, useTasks } from "../../../lib/lists/hooks";
 import { OwnerCell } from "../../../lib/components/OwnerCell";
 import { shortDate } from "../../../lib/format/dates";
 import type { Owners } from "../../../lib/owners";
@@ -73,37 +74,38 @@ function taskMeta(task: Task, owners: Owners, asOf: string): string {
 }
 
 export function Tasks({ plan, owners }: { plan: PlanResponse; owners: Owners }) {
-  const tasks = [...plan.tasks.dueThisWeek, ...plan.tasks.recentlyDone];
+  // The tasks API (WP-13) is the source: due within 7 days, plus the latest done. Checking one saves it.
+  const groups = useTasks();
+  const complete = useCompleteTask();
+  const tasks = groups.data ? [...groups.data.dueThisWeek, ...groups.data.done.slice(0, 1)] : [];
   return (
     <Card title="Household tasks">
-      {tasks.length === 0 ? (
+      {groups.isError ? (
+        <ErrorBanner title="We couldn’t load your tasks." onRetry={() => void groups.refetch()}>
+          The rest of your plan is unaffected.
+        </ErrorBanner>
+      ) : tasks.length === 0 ? (
         <EmptyState>Nothing is due this week. Tasks from bills and renewals will appear here.</EmptyState>
       ) : (
-        <>
-          <ul className={styles.tasks}>
-            {tasks.map((t) => (
-              <li key={t.id} className={styles.task}>
-                <Checkbox
-                  strikeWhenChecked
-                  checked={t.completed}
-                  disabled
-                  readOnly
-                  aria-describedby="tasks-note"
-                  label={
-                    <>
-                      {t.title}
-                      <span className={styles.taskMeta}>{taskMeta(t, owners, plan.asOf)}</span>
-                    </>
-                  }
-                />
-                <OwnerCell ownerId={taskOwner(t)} owners={owners} size={24} showName={false} />
-              </li>
-            ))}
-          </ul>
-          <p id="tasks-note" className={styles.actionNote}>
-            Saving tasks comes with the Tasks page.
-          </p>
-        </>
+        <ul className={styles.tasks}>
+          {tasks.map((t) => (
+            <li key={t.id} className={styles.task}>
+              <Checkbox
+                strikeWhenChecked
+                checked={t.completed}
+                disabled={complete.isPending}
+                onChange={(e) => complete.mutate({ task: t, completed: e.target.checked })}
+                label={
+                  <>
+                    {t.title}
+                    <span className={styles.taskMeta}>{taskMeta(t, owners, plan.asOf)}</span>
+                  </>
+                }
+              />
+              <OwnerCell ownerId={taskOwner(t)} owners={owners} size={24} showName={false} />
+            </li>
+          ))}
+        </ul>
       )}
     </Card>
   );

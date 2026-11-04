@@ -1,0 +1,131 @@
+/* Household tasks, DESIGN_SPEC §5.1. Cards, fields and chips are @mp/ui; this places them. */
+
+.body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--mp-space-5);
+}
+
+.main {
+  display: flex;
+  flex: 2 1 560px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.aside {
+  display: flex;
+  flex: 1 1 300px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--mp-space-2_5);
+  padding: var(--mp-space-4);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-bg-surface);
+}
+
+.formTitle {
+  flex: 3 1 240px;
+}
+
+.formOwner {
+  flex: 1 1 120px;
+}
+
+.formDue {
+  flex: 1 1 140px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: var(--mp-space-1) var(--mp-space-3);
+  padding: var(--mp-space-3) 0;
+  border-top: 1px solid var(--mp-border-divider);
+}
+
+.row:first-child {
+  border-top: 0;
+}
+
+.meta {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-1_5) var(--mp-space-2_5);
+  padding-left: var(--mp-space-7);
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.avatar {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.due {
+  font-weight: 600;
+  color: var(--mp-text-secondary);
+}
+
+.link {
+  font-weight: 600;
+  color: var(--mp-brand-default);
+}
+
+.count {
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.counts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.counts li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+  margin: 0 0 var(--mp-space-2_5);
+  padding-left: var(--mp-space-5);
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}
+
+.caption {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}

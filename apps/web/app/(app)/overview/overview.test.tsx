@@ -88,7 +88,7 @@ describe("Overview, on track", () => {
     expect(screen.getByText("$6,400 of $10,000")).toBeTruthy();
     expect(screen.getByText("$250 behind")).toBeTruthy();
     expect(screen.getByText("$300 on payday")).toBeTruthy();
-    expect(screen.getByText("Review 2 flagged subscriptions")).toBeTruthy();
+    expect(await screen.findByText("Review 2 flagged subscriptions")).toBeTruthy();
     expect(
       screen.getByText("Sample data · Updated from CSV import Oct 26, 2026 · All amounts in USD"),
     ).toBeTruthy();
@@ -198,14 +198,19 @@ describe("Overview, other states", () => {
     expect(screen.queryByText("Cash runway to payday")).toBeNull();
   });
 
-  it("shows the task list read-only until tasks can be saved", async () => {
+  it("saves a task when it is checked, through the tasks API", async () => {
     renderApp(<OverviewScreen />);
     await loaded();
+    await waitFor(() => expect(screen.getAllByRole("checkbox")).toHaveLength(4));
     const boxes = screen.getAllByRole("checkbox") as HTMLInputElement[];
-    expect(boxes).toHaveLength(4);
-    expect(boxes.every((b) => b.disabled)).toBe(true);
+    expect(boxes.some((b) => b.disabled)).toBe(false);
     expect(boxes.filter((b) => b.checked)).toHaveLength(1);
-    expect(screen.getByText("Saving tasks comes with the Tasks page.")).toBeTruthy();
+    await userEvent.click(screen.getByRole("checkbox", { name: /Review 2 flagged subscriptions/ }));
+    // Saved: it leaves "due this week" (the list refetched from the API).
+    await waitFor(() =>
+      expect(screen.queryByRole("checkbox", { name: /Review 2 flagged subscriptions/ })).toBeNull(),
+    );
+    expect(screen.getAllByRole("checkbox")).toHaveLength(3);
   });
 
   it("shows target dates with the year when it isn't the current one (§7)", async () => {

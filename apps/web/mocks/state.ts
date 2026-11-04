@@ -2,7 +2,7 @@
 // the loading and error states. Read from the URL (`?scenario=shortfall`) and kept for the tab.
 import type { Scenario } from "./model";
 
-export type FaultTarget = "plan" | "calendar" | "me" | "summary";
+export type FaultTarget = "plan" | "calendar" | "me" | "summary" | "items" | "renewals" | "goals" | "tasks";
 
 export interface MockState {
   scenario: Scenario;
@@ -15,7 +15,16 @@ export interface MockState {
 
 const SCENARIO_KEY = "mp.mock.scenario";
 const SCENARIOS: readonly Scenario[] = ["base", "shortfall", "empty"];
-const TARGETS: readonly FaultTarget[] = ["plan", "calendar", "me", "summary"];
+const TARGETS: readonly FaultTarget[] = [
+  "plan",
+  "calendar",
+  "me",
+  "summary",
+  "items",
+  "renewals",
+  "goals",
+  "tasks",
+];
 
 export const state: MockState = { scenario: "base", delayMs: 0, faults: new Set(), bootstrapCalls: 0 };
 
