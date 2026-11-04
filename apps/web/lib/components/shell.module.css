@@ -1,0 +1,226 @@
+/* App shell, DESIGN_SPEC §3.1: sidebar plus content from 800 px; a top bar with a drawer below. */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--mp-sidebar-width) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--mp-bg-canvas);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+}
+
+.sidebarSlot {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--mp-bg-surface);
+}
+
+.topBar {
+  display: none;
+}
+
+.content {
+  min-width: 0;
+  box-sizing: border-box;
+  padding-top: var(--mp-space-7);
+  padding-bottom: var(--mp-space-10);
+  /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §3.1: side padding is clamp(16px, 3vw, 40px) */
+  padding-inline: clamp(16px, 3vw, 40px);
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-6);
+  max-width: var(--mp-content-max-width);
+  margin: 0 auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+  padding: 0 var(--mp-space-2);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-brand-default);
+  color: var(--mp-text-inverse);
+}
+
+.wordmark {
+  display: block;
+  font: var(--mp-type-heading-2);
+  font-weight: 800;
+  letter-spacing: var(--mp-tracking-heading);
+  color: var(--mp-text-primary);
+}
+
+.tagline {
+  display: block;
+  font: var(--mp-type-micro);
+  letter-spacing: var(--mp-tracking-nano);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.household {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+  min-width: 0;
+  box-sizing: border-box;
+  padding: var(--mp-space-2_5) var(--mp-space-3);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-surface);
+}
+
+.householdText {
+  min-width: 0;
+}
+
+.householdName {
+  display: block;
+  font-weight: 600;
+}
+
+.householdMeta {
+  display: block;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+  margin-top: auto;
+  padding: var(--mp-space-3_5);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-canvas);
+}
+
+.sourcesTitle {
+  margin: 0;
+  font: var(--mp-type-small);
+  font-weight: 600;
+}
+
+.sourcesText {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.sourcesLink {
+  font: var(--mp-type-caption);
+  font-weight: 600;
+  color: var(--mp-brand-default);
+}
+
+.signOut {
+  align-self: flex-start;
+}
+
+.skipLink {
+  position: absolute;
+  left: var(--mp-space-2);
+  top: var(--mp-space-2);
+  z-index: 30;
+  padding: var(--mp-space-2) var(--mp-space-3);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-bg-surface);
+  color: var(--mp-brand-default);
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+
+.skipLink:focus {
+  transform: none;
+}
+
+/* The drawer, shown below 800 px. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  background: transparent;
+}
+
+.drawer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--mp-sidebar-width), 85vw);
+  height: 100%;
+  overflow-y: auto;
+  background: var(--mp-bg-surface);
+  box-shadow: var(--mp-shadow-overlay);
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--mp-space-3) var(--mp-space-3) 0;
+}
+
+.scrim {
+  flex: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+}
+
+@media (max-width: 799px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebarSlot {
+    display: none;
+  }
+
+  .topBar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--mp-space-3);
+    padding: var(--mp-space-2_5) var(--mp-mobile-gutter);
+    border-bottom: 1px solid var(--mp-border-default);
+    background: var(--mp-bg-surface);
+  }
+
+  .topBarEnd {
+    display: flex;
+    align-items: center;
+    gap: var(--mp-space-3);
+  }
+
+  .content {
+    padding-top: var(--mp-space-4);
+    padding-inline: var(--mp-mobile-gutter);
+  }
+}
+
+@media (pointer: coarse) {
+  .sourcesLink {
+    display: inline-block;
+    padding-block: var(--mp-space-3_5);
+  }
+}

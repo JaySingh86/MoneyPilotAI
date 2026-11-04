@@ -1,0 +1,266 @@
+/* Overview layout, DESIGN_SPEC §3.1 and §5.1. Components come from @mp/ui; this only places them. */
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--mp-space-4);
+}
+
+/* The hero spans two columns when there is room, and the full row when there is not. */
+.hero {
+  display: flex;
+  grid-column: span 2;
+  min-width: 0;
+}
+
+.hero > * {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .hero {
+    grid-column: 1 / -1;
+  }
+}
+
+.body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--mp-space-5);
+}
+
+.main {
+  display: flex;
+  flex: 2 1 560px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.footer {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+/* Header actions. */
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  height: var(--mp-button-height-web);
+  box-sizing: border-box;
+  padding: 0 var(--mp-space-3);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-bg-surface);
+  color: var(--mp-text-muted);
+}
+
+.search:focus-within {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.searchInput {
+  align-self: stretch;
+  width: 180px;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--mp-text-primary);
+  font: inherit;
+}
+
+/* Breakdown row in the hero. */
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Decide this week. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3_5);
+}
+
+.footnote {
+  display: flex;
+  gap: var(--mp-space-2);
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.footnoteIcon {
+  flex: none;
+  margin-top: var(--mp-space-0_5);
+}
+
+.suggestion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+  padding: var(--mp-space-3_5);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-xl);
+  background: var(--mp-bg-surface);
+}
+
+.suggestionLabel {
+  margin: 0;
+  font: var(--mp-type-overline);
+  color: var(--mp-text-secondary);
+}
+
+.suggestionLabelBrand {
+  color: var(--mp-brand-default);
+}
+
+.suggestionTitle {
+  margin: 0;
+  font: var(--mp-type-title);
+}
+
+.suggestionBody {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}
+
+.actionNote {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+/* Goals. */
+.goals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-4);
+}
+
+.captionRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--mp-space-2);
+}
+
+.behind {
+  font-weight: 600;
+  color: var(--mp-attention-text);
+}
+
+/* Tasks. */
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-1_5) 0;
+}
+
+.taskMeta {
+  display: block;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.taskDone {
+  color: var(--mp-text-muted);
+}
+
+/* Ways to cover the gap. */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2_5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-3) var(--mp-space-3_5);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-xl);
+}
+
+.optionText {
+  flex: 1;
+  min-width: 0;
+}
+
+.optionTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.optionMeta {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2);
+  align-items: center;
+}
+
+@media (max-width: 560px) {
+  .option {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search {
+    flex: 1 1 100%;
+  }
+
+  .searchInput {
+    flex: 1;
+    width: auto;
+  }
+}
+
+@media (pointer: coarse) {
+  .linkButton {
+    padding-block: var(--mp-space-3_5);
+  }
+
+  /* The input fills the label, so the label is the 44 px of input plus its 1 px borders. */
+  .search {
+    height: calc(var(--mp-touch-target) + 2px);
+  }
+}

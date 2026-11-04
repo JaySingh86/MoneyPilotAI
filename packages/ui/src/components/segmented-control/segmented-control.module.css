@@ -63,3 +63,10 @@
   box-shadow: var(--mp-shadow-selected);
   color: var(--mp-text-primary);
 }
+
+/* Touch screens: segments are 44 px tall (36 with a mouse). */
+@media (pointer: coarse) {
+  .segment {
+    height: var(--mp-touch-target);
+  }
+}

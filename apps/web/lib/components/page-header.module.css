@@ -1,0 +1,51 @@
+/* Page header, DESIGN_SPEC §3.1. */
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+  min-width: 0;
+}
+
+.overline {
+  margin: 0;
+  font: var(--mp-type-overline);
+  letter-spacing: var(--mp-tracking-overline);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.title {
+  margin: 0;
+  font: var(--mp-type-heading-1);
+  letter-spacing: var(--mp-tracking-heading);
+  color: var(--mp-text-primary);
+}
+
+.subtitle {
+  margin: 0;
+  font: var(--mp-type-body-l);
+  color: var(--mp-text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+}
+
+@media (max-width: 799px) {
+  .title {
+    font: var(--mp-type-heading-1m);
+    letter-spacing: var(--mp-tracking-heading);
+  }
+}

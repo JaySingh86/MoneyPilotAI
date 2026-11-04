@@ -1,8 +1,10 @@
 // Calendar cell and event chip, DESIGN_SPEC §4.2.
-import { date as formatDate, money } from "@mp/format";
+import { money } from "@mp/format";
+import { useId } from "react";
 import type { ButtonHTMLAttributes } from "react";
 import { OwnerDot } from "../avatar/Avatar";
 import { cx } from "../internal/cx";
+import { VisuallyHidden } from "../internal/VisuallyHidden";
 import type { CalendarDate } from "../internal/types";
 import type { OwnerRole } from "../internal/types";
 import styles from "./calendar.module.css";
@@ -25,6 +27,7 @@ export function EventChip({ kind, owner, name, amountCents }: EventChipProps) {
     <span className={cx(styles.chip, styles[kind])} data-kind={kind}>
       <OwnerDot role={owner} />
       <span className={styles.chipName}>{name}</span>
+      <VisuallyHidden> </VisuallyHidden>
       <span className={styles.chipAmount}>{kind === "estimate" ? `~${amount}` : amount}</span>
     </span>
   );
@@ -51,7 +54,26 @@ function itemCount(n: number): string {
   return n === 1 ? "1 item" : `${n} items`;
 }
 
-/** A day cell: a button, min-height 112. Selection is `aria-pressed`. */
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+
+/**
+ * A day cell: a button, min-height 112. Selection is `aria-pressed`. The name comes from the
+ * visible content plus visually hidden words ("November 4, payday, Car insurance −$684"), so it
+ * always contains what is drawn (WCAG 2.5.3, Q-049); the item count is its description.
+ */
 export function CalendarCell({
   date,
   events,
@@ -62,26 +84,19 @@ export function CalendarCell({
   className,
   ...rest
 }: CalendarCellProps) {
+  const countId = useId();
   const shown = outsideMonth ? [] : events.slice(0, MAX_CHIPS);
   const more = outsideMonth ? 0 : events.length - shown.length;
-  const label = outsideMonth
-    ? formatDate(date, { relativeTo: date, month: "long" })
-    : [
-        formatDate(date, { relativeTo: date, month: "long" }),
-        payday ? "payday" : null,
-        itemCount(events.length),
-      ]
-        .filter(Boolean)
-        .join(", ");
+  const showsPayday = payday && !outsideMonth;
   return (
     <button
       type="button"
-      aria-label={label}
       aria-pressed={outsideMonth ? undefined : selected}
+      aria-describedby={outsideMonth ? undefined : countId}
       disabled={outsideMonth}
       className={cx(
         styles.cell,
-        payday && !outsideMonth && styles.payday,
+        showsPayday && styles.payday,
         selected && !outsideMonth && styles.selected,
         outsideMonth && styles.outside,
         className,
@@ -90,13 +105,34 @@ export function CalendarCell({
       {...rest}
     >
       <span className={styles.cellHead}>
-        <span className={styles.dayNumber}>{date.day}</span>
-        {payday && !outsideMonth && <span className={styles.paydayLabel}>Payday</span>}
+        <span className={styles.dayNumber}>
+          <VisuallyHidden>{`${MONTHS[date.month - 1]} `}</VisuallyHidden>
+          {date.day}
+        </span>
+        {showsPayday && (
+          <>
+            <VisuallyHidden>, </VisuallyHidden>
+            <span className={styles.paydayLabel}>payday</span>
+          </>
+        )}
       </span>
       {shown.map((event, i) => (
-        <EventChip key={`${event.name}-${i}`} {...event} />
+        <span key={`${event.name}-${i}`} className={styles.chipSlot}>
+          <VisuallyHidden>, </VisuallyHidden>
+          <EventChip {...event} />
+        </span>
       ))}
-      {more > 0 && <span className={styles.more}>{`+${more} more`}</span>}
+      {more > 0 && (
+        <span className={styles.chipSlot}>
+          <VisuallyHidden>, </VisuallyHidden>
+          <span className={styles.more}>{`+${more} more`}</span>
+        </span>
+      )}
+      {!outsideMonth && (
+        <span id={countId} hidden>
+          {itemCount(events.length)}
+        </span>
+      )}
     </button>
   );
 }

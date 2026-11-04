@@ -78,6 +78,23 @@ describe("dependency rules (ARCHITECTURE §3)", () => {
     );
   });
 
+  it("lets only apps/web/mocks run the engine on the fixture (WP-17), nothing else in apps/web", async () => {
+    expect(await violationsIn([`${FIX}/apps/web/mocks`])).toEqual([]);
+    expect(await violationsIn([`${FIX}/apps/web/imports-db.ts`])).toContain("web-boundaries");
+  });
+
+  it("lets only app/providers.tsx import the mock API, in apps/web", async () => {
+    expect(await violationsIn([`${FIX}/apps/web/app/providers.tsx`])).not.toContain(
+      "mocks-only-from-providers",
+    );
+    expect(await violationsIn([`${FIX}/apps/web/app/screen-imports-mocks.ts`])).toContain(
+      "mocks-only-from-providers",
+    );
+    expect(await violationsIn([`${FIX}/apps/web/lib/imports-mocks.ts`])).toContain(
+      "mocks-only-from-providers",
+    );
+  });
+
   it("finds no violations in the real codebase", async () => {
     expect(await violationsIn(["apps", "packages"])).toEqual([]);
   });

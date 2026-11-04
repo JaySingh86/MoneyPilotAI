@@ -34,7 +34,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | done |
 | WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | in-progress (wp-builder, wp/15-notify) |
 | WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | in-progress (wp-builder, wp/16-csv-import) |
-| WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | in-progress (wp-builder, wp/17-web-overview) |
+| WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | done |
 | WP-18 | Web: Bills, Renewals, Goals, Tasks | 3 | WP-10, WP-08 (WP-12, WP-13 for live data) | L | — | in-progress (wp-builder, wp/18-web-pages) |
 | WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | done |
 | WP-20 | Forwarding channel (SES inbound) | 4 | WP-19, WP-09 | M | G2 | todo |
@@ -280,11 +280,11 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 - **Read first:** DESIGN_SPEC §3, §5.1 Overview + Calendar + Safe-to-spend states, §5.3; canvas boards Web · Overview, Calendar, Safe-to-spend states.
 - **Build:** the app shell (sidebar, compact top bar under 800 px), Cognito sign-in with Amplify Auth (our screens, UI kit components), the API client with React Query, MSW mocks from the fixture, the Overview (on track **and** shortfall states, What-if “See the math” drawer) and the Calendar.
 - **Acceptance:**
-  - [ ] With fixture data (mock or seeded), every golden value on the canvas renders exactly.
-  - [ ] Layout matches at 1440, 1024 and 390 widths (Playwright screenshots attached next to the canvas frames).
-  - [ ] WP-10 follow-ups: add 1440 visual baselines for RunwayChart and HeroCard, and assert no horizontal page scroll at 1440/1024/390; apply Q-045 to Q-049 in `packages/ui` (icon button 18/`text.secondary`, error banner 12×14 radius lg, calendar cell named from visible content and the axe exemption removed); if CI runs on x86, regenerate the visual baselines there or run the job on an arm64 runner.
-  - [ ] Loading, empty and error states exist; axe passes; keyboard navigation works through the calendar grid.
-  - [ ] The web app calls `POST /me/bootstrap` after sign-in and token refresh, so email and MFA changes sync promptly.
+  - [x] With fixture data (mock or seeded), every golden value on the canvas renders exactly.
+  - [x] Layout matches at 1440, 1024 and 390 widths (Playwright screenshots attached next to the canvas frames).
+  - [x] WP-10 follow-ups: add 1440 visual baselines for RunwayChart and HeroCard, and assert no horizontal page scroll at 1440/1024/390; apply Q-045 to Q-049 in `packages/ui` (icon button 18/`text.secondary`, error banner 12×14 radius lg, calendar cell named from visible content and the axe exemption removed); if CI runs on x86, regenerate the visual baselines there or run the job on an arm64 runner.
+  - [x] Loading, empty and error states exist; axe passes; keyboard navigation works through the calendar grid.
+  - [x] The web app calls `POST /me/bootstrap` after sign-in and token refresh, so email and MFA changes sync promptly.
 
 ## WP-18 · Web: Bills, Renewals, Goals, Tasks
 - **Owns:** `apps/web/app/(app)/{bills,renewals,goals,tasks}/**`

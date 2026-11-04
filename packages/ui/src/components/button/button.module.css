@@ -114,7 +114,8 @@
   padding: 0;
   border: 1px solid var(--mp-border-default);
   background: var(--mp-bg-surface);
-  color: var(--mp-text-primary);
+  /* Q-045: the canvas draws web icon buttons in text.secondary. */
+  color: var(--mp-text-secondary);
   cursor: pointer;
   transition: background-color var(--mp-duration) var(--mp-easing);
 }
@@ -148,4 +149,17 @@
   border: 2px solid var(--mp-bg-surface);
   border-radius: var(--mp-radius-full);
   background: var(--mp-attention-mark);
+}
+
+/* Touch screens (decision on DESIGN_SPEC §4, minimum touch target): every button is at least 44 px
+   tall. With a mouse the web sizes (40, and 36 with an invisible 44 px hit area) stay as drawn. */
+@media (pointer: coarse) {
+  .web,
+  .compact {
+    height: var(--mp-touch-target);
+  }
+
+  .icon-web {
+    height: var(--mp-touch-target);
+  }
 }

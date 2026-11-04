@@ -1,0 +1,261 @@
+/* Calendar layout, DESIGN_SPEC §4.2 and §5.1. Cells and chips are @mp/ui; this places them. */
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+}
+
+.monthNav {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+}
+
+.monthTitle {
+  margin: 0;
+  font: var(--mp-type-heading-1);
+  letter-spacing: var(--mp-tracking-heading);
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2) var(--mp-space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-secondary);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-1_5);
+}
+
+.key {
+  width: 12px;
+  height: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--mp-radius-xs);
+}
+
+.keyIncome {
+  background: var(--mp-income-soft);
+  border-color: var(--mp-income-border);
+}
+
+.keyBill {
+  background: var(--mp-bg-canvas);
+  border-color: var(--mp-border-default);
+}
+
+.keyEstimate {
+  background: var(--mp-bg-surface);
+  border-style: dashed;
+  border-color: var(--mp-info-border);
+}
+
+.keyDecision {
+  background: var(--mp-attention-soft);
+  border-color: var(--mp-attention-chip-border);
+}
+
+.body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--mp-space-5);
+}
+
+.gridCard {
+  flex: 2 1 600px;
+  min-width: 0;
+  overflow-x: auto;
+  box-sizing: border-box;
+  padding: var(--mp-space-4);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-bg-surface);
+}
+
+.grid {
+  min-width: 640px;
+}
+
+.weekdays,
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--mp-space-1_5);
+}
+
+.weekdays {
+  padding-bottom: var(--mp-space-2);
+  font: var(--mp-type-micro);
+  font-weight: 600;
+  letter-spacing: var(--mp-tracking-overline);
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.weeks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+}
+
+.hint {
+  margin: var(--mp-space-2) 0 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.side {
+  display: flex;
+  flex: 1 1 300px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.overline {
+  margin: 0;
+  font: var(--mp-type-overline);
+  letter-spacing: var(--mp-tracking-overline);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.dayTitle {
+  margin: var(--mp-space-0_5) 0 0;
+  font: var(--mp-type-heading-3);
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3_5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-3_5);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-xl);
+}
+
+.itemHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--mp-space-2_5);
+}
+
+.itemName {
+  margin: 0;
+  font: var(--mp-type-title);
+}
+
+.itemAmount {
+  font: var(--mp-type-heading-2m);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.itemMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-1_5);
+  font: var(--mp-type-caption);
+  color: var(--mp-text-secondary);
+}
+
+.owner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-1_5);
+}
+
+.note {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}
+
+.glance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.glanceRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--mp-space-2);
+}
+
+.glanceRow dt {
+  color: var(--mp-text-secondary);
+}
+
+.glanceRow dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.glanceTotal {
+  padding-top: var(--mp-space-3);
+  border-top: 1px solid var(--mp-border-default);
+}
+
+.glanceTotal dt {
+  font-weight: 600;
+  color: var(--mp-text-primary);
+}
+
+.glanceTotal dd {
+  font: var(--mp-type-heading-2m);
+  font-weight: 800;
+  color: var(--mp-brand-default);
+}
+
+.caption {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.footer {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+@media (max-width: 799px) {
+  .monthTitle {
+    font: var(--mp-type-heading-1m);
+    letter-spacing: var(--mp-tracking-heading);
+  }
+}

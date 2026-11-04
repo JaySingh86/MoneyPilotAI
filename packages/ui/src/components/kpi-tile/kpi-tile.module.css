@@ -29,6 +29,16 @@
   font-weight: 500;
 }
 
+/* Canvas: margin-top auto, a divider rule, 12 px muted. */
+.footnote {
+  margin: auto 0 0;
+  padding-top: var(--mp-space-2_5);
+  border-top: 1px solid var(--mp-border-divider);
+  font: var(--mp-type-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--mp-text-muted);
+}
+
 .value {
   margin: 0;
   letter-spacing: var(--mp-tracking-heading);

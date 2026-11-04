@@ -62,7 +62,11 @@ exit $status
 // on Apple Silicon without Rosetta); set VISUAL_PLATFORM=linux/arm64 to run the same pinned
 // image natively there. Pixels can differ slightly between architectures: baselines meant for CI
 // should be generated on amd64 (a Linux x86 machine, or Rosetta-enabled Docker).
-const platform = process.env.VISUAL_PLATFORM ?? "linux/amd64";
+//
+// BASELINE ARCHITECTURE (WP-17 note): the committed baselines are arm64 renders (VISUAL_PLATFORM=
+// linux/arm64 on Apple Silicon). CI therefore runs the `visual` and `web-e2e` jobs on an arm64
+// runner (`ubuntu-24.04-arm`). If CI must run on x86, regenerate the baselines on x86 first.
+const platform = process.env.VISUAL_PLATFORM ?? "linux/arm64";
 
 const build = spawnSync("pnpm", ["--filter", "@mp/ui", "build-storybook"], {
   cwd: repoRoot,

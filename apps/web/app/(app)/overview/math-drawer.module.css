@@ -1,0 +1,80 @@
+/* "See the math" side sheet: a native modal dialog docked to the right. */
+
+.drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-4);
+  width: min(440px, 100vw);
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  margin: 0;
+  box-sizing: border-box;
+  padding: var(--mp-space-5_5);
+  overflow-y: auto;
+  border: 0;
+  border-left: 1px solid var(--mp-border-default);
+  background: var(--mp-bg-surface);
+  box-shadow: var(--mp-shadow-overlay);
+  color: var(--mp-text-primary);
+}
+
+.drawer:not([open]) {
+  display: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+}
+
+.title {
+  margin: 0;
+  font: var(--mp-type-heading-2);
+  letter-spacing: var(--mp-tracking-heading);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2_5);
+}
+
+.sectionTitle {
+  margin: 0;
+  font: var(--mp-type-title);
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mp-space-3);
+  margin: 0;
+}
+
+.compare > div {
+  padding: var(--mp-space-3);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-subtle);
+}
+
+.compare dt {
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.compare dd {
+  margin: 0;
+  font: var(--mp-type-amount-l);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}

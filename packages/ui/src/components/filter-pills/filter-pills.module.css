@@ -50,3 +50,10 @@
   opacity: 0.75;
   font-variant-numeric: tabular-nums;
 }
+
+/* Touch screens: pills are 44 px tall (36 with a mouse). */
+@media (pointer: coarse) {
+  .pill {
+    height: var(--mp-touch-target);
+  }
+}

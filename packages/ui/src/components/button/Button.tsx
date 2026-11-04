@@ -87,7 +87,7 @@ export function IconButton({
       className={cx(styles.iconButton, styles[`icon-${shape}`], className)}
       {...rest}
     >
-      <Icon icon={icon} size={20} />
+      <Icon icon={icon} size={18} />
       {notification && <span className={styles.dot} aria-hidden="true" data-notification-dot="" />}
     </button>
   );

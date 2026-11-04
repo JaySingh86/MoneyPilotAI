@@ -13,6 +13,13 @@
     ],
     "esModuleInterop": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "app", "lib", "next-env.d.ts", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next-prodcheck/types/**/*.ts",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    ".next-dbg/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".next", ".next-*"]
 }

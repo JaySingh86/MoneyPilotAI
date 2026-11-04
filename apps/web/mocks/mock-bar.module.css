@@ -1,0 +1,23 @@
+/* Dev-only toolbar for the mock API (mock mode). */
+
+.bar {
+  position: fixed;
+  left: var(--mp-space-4);
+  bottom: var(--mp-space-4);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+  padding: var(--mp-space-1_5) var(--mp-space-3);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-bg-surface);
+  box-shadow: var(--mp-shadow-overlay);
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.label {
+  font-weight: 600;
+  white-space: nowrap;
+}

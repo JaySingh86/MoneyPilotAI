@@ -1,9 +1,18 @@
 // Pixel snapshots (DESIGN_SPEC §9: matches the canvas at 1440, 1024 and 390). Baselines live in
 // visual/__screenshots__ and are generated in the pinned Playwright image only.
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { openStory } from "./helpers";
 
-const WIDTHS = [1024, 390] as const;
+const WIDTHS = [1440, 1024, 390] as const;
+
+/** The page itself never scrolls horizontally (DESIGN_SPEC §3.1). */
+async function expectNoHorizontalScroll(page: Page): Promise<void> {
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+}
 
 const RUNWAY = [
   ["normal", "components-runwaychart--normal"],
@@ -16,21 +25,25 @@ for (const width of WIDTHS) {
     for (const [name, id] of RUNWAY) {
       test(`${name}${width === 390 ? " (scrolls sideways)" : ""}`, async ({ page }) => {
         await openStory(page, id);
+        await expectNoHorizontalScroll(page);
         await expect(page.locator("#storybook-root")).toHaveScreenshot(`runway-${name}-${width}.png`);
       });
     }
   });
 }
 
-test.describe("HeroCard", () => {
-  test.use({ viewport: { width: 1024, height: 600 } });
-  for (const [name, id] of [
-    ["default", "components-card--hero"],
-    ["shortfall", "components-card--hero-shortfall"],
-  ] as const) {
-    test(name, async ({ page }) => {
-      await openStory(page, id);
-      await expect(page.locator("#storybook-root")).toHaveScreenshot(`hero-${name}-1024.png`);
-    });
-  }
-});
+for (const width of WIDTHS) {
+  test.describe(`HeroCard at ${width}`, () => {
+    test.use({ viewport: { width, height: 600 } });
+    for (const [name, id] of [
+      ["default", "components-card--hero"],
+      ["shortfall", "components-card--hero-shortfall"],
+    ] as const) {
+      test(name, async ({ page }) => {
+        await openStory(page, id);
+        await expectNoHorizontalScroll(page);
+        await expect(page.locator("#storybook-root")).toHaveScreenshot(`hero-${name}-${width}.png`);
+      });
+    }
+  });
+}

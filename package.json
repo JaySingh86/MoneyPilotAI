@@ -23,7 +23,7 @@
     "db:migrate": "pnpm --filter @mp/db migrate",
     "db:seed": "pnpm --filter @mp/db seed",
     "contracts:gen": "pnpm --filter @mp/contracts gen",
-    "e2e": "node tooling/scripts/not-yet.mjs e2e WP-17",
+    "e2e": "pnpm --filter @mp/web e2e",
     "ai:eval": "pnpm --filter @mp/ai eval",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

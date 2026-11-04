@@ -52,6 +52,11 @@ describe("Button", () => {
 });
 
 describe("IconButton", () => {
+  it("draws an 18 px glyph (Q-045)", () => {
+    const { container } = render(<IconButton icon={Bell} label="Notifications" />);
+    expect(container.querySelector("svg")?.getAttribute("width")).toBe("18");
+  });
+
   it("is named by its required label and hides the icon and dot", () => {
     const { container } = render(<IconButton icon={Bell} label="Notifications, 2 new" notification />);
     expect(screen.getByRole("button", { name: "Notifications, 2 new" })).toBeTruthy();

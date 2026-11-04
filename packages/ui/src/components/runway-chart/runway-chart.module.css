@@ -169,9 +169,28 @@
 
 .tooltipAbove {
   position: absolute;
+  /* Above the neighbouring bar, which it overlaps near the right edge. */
+  z-index: 1;
   bottom: calc(100% + var(--mp-space-3_5));
   display: flex;
   justify-content: center;
+}
+
+/* On the first and last bar the tooltip is anchored to the plot's edge, so it is never cut off. */
+.column[data-edge="first"] .tooltipAbove {
+  left: 0;
+}
+
+.column[data-edge="last"] .tooltipAbove {
+  right: 0;
+}
+
+.column[data-edge="first"] .negative .tooltip {
+  align-self: flex-start;
+}
+
+.column[data-edge="last"] .negative .tooltip {
+  align-self: flex-end;
 }
 
 .tooltip {

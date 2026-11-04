@@ -1,0 +1,37 @@
+/* Page basics on the design tokens (DESIGN_SPEC §2). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--mp-bg-canvas);
+  color: var(--mp-text-primary);
+  font: var(--mp-type-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--mp-brand-default);
+}
+
+a:hover {
+  color: var(--mp-brand-strong);
+}
+
+:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+/* Touch screens: every control is at least 44 px (DESIGN_SPEC §4); inline links get it through
+   padding, which grows the tap area without moving the text. With a mouse nothing changes. */
+@media (pointer: coarse) {
+  main a:not([class]) {
+    display: inline-block;
+    padding-block: var(--mp-space-3_5);
+  }
+}

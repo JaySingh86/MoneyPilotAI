@@ -6,6 +6,15 @@ import { expectNoAxeViolations } from "../test/axe";
 import { CalendarCell, EventChip } from "./Calendar";
 import type { EventChipProps } from "./Calendar";
 
+/** Browsers and dom-accessibility-api put a space around each flex item: "November 4 , payday". */
+const named = (expected: string | RegExp) => (accessibleName: string) => {
+  const name = accessibleName.replace(/\s+,/g, ",");
+  return typeof expected === "string" ? name === expected : expected.test(name);
+};
+
+const describedBy = (el: Element) =>
+  document.getElementById(el.getAttribute("aria-describedby") ?? "")?.textContent;
+
 const nov4 = Temporal.PlainDate.from("2026-11-04");
 const insurance: EventChipProps = {
   kind: "decision",
@@ -27,26 +36,29 @@ describe("EventChip", () => {
     );
     const chips = [...container.querySelectorAll("[data-kind]")].map((c) => c.textContent);
     expect(chips).toEqual([
-      "Car insurance−$684",
-      "Sam’s pay+$3,150",
-      "Internet−$70",
-      "Electricity~−$142",
-      "Streaming−$22.99",
+      "Car insurance −$684",
+      "Sam’s pay +$3,150",
+      "Internet −$70",
+      "Electricity ~−$142",
+      "Streaming −$22.99",
     ]);
   });
 });
 
 describe("CalendarCell", () => {
-  it("is a button labelled with the day and item count, pressed when selected", async () => {
+  it("is named from its visible content plus hidden words, described by its item count (Q-049)", async () => {
     const onSelect = vi.fn();
     render(<CalendarCell date={nov4} events={[insurance]} selected onSelect={onSelect} />);
-    const cell = screen.getByRole("button", { name: "November 4, 1 item" });
+    const cell = screen.getByRole("button", { name: named("November 4, Car insurance −$684") });
+    expect(cell.hasAttribute("aria-label")).toBe(false);
     expect(cell.getAttribute("aria-pressed")).toBe("true");
+    expect(cell.getAttribute("aria-describedby")).toBeTruthy();
+    expect(describedBy(cell)).toBe("1 item");
     await userEvent.click(cell);
     expect(onSelect).toHaveBeenCalledWith(nov4);
   });
 
-  it("marks paydays in text and in its label", () => {
+  it("marks paydays in text and in its name", () => {
     render(
       <CalendarCell
         date={Temporal.PlainDate.from("2026-11-06")}
@@ -54,8 +66,7 @@ describe("CalendarCell", () => {
         payday
       />,
     );
-    expect(screen.getByRole("button", { name: "November 6, payday, 1 item" })).toBeTruthy();
-    expect(screen.getByText("Payday")).toBeTruthy();
+    expect(screen.getByRole("button", { name: named("November 6, payday, Sam’s pay +$3,150") })).toBeTruthy();
   });
 
   it("shows up to 3 chips, then +N more", () => {
@@ -63,7 +74,10 @@ describe("CalendarCell", () => {
     render(<CalendarCell date={nov4} events={events} />);
     expect(screen.getByText("+2 more")).toBeTruthy();
     expect(screen.queryByText("Bill 3")).toBeNull();
-    expect(screen.getByRole("button", { name: "November 4, 5 items" })).toBeTruthy();
+    const cell = screen.getByRole("button", {
+      name: named(/^November 4, Bill 0 −\$684, Bill 1 −\$684, Bill 2 −\$684, \+2 more$/),
+    });
+    expect(describedBy(cell)).toBe("5 items");
   });
 
   it("can't select days outside the month", () => {

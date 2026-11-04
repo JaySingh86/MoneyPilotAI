@@ -42,10 +42,26 @@ module.exports = {
     },
     {
       name: "web-boundaries",
-      comment: "apps/web never imports db, engine, ai, email or crypto (numbers come from the API).",
+      comment:
+        "apps/web never imports db, engine, ai, email or crypto (numbers come from the API). " +
+        "The one exception is apps/web/mocks, the dev-only MSW stand-in for the planning API, which " +
+        "runs the engine on the golden fixture (WP-17). It is never imported statically and the " +
+        "production build refuses to enable it.",
       severity: "error",
-      from: { path: app("web") },
+      from: { path: app("web"), pathNot: "(^|/)apps/web/mocks/" },
       to: { path: [`(^|/)packages/(engine|detection|${ADAPTERS})/`] },
+    },
+    {
+      name: "mocks-only-from-providers",
+      comment:
+        "apps/web/mocks is the dev-only mock API. Only app/providers.tsx may import it (behind a " +
+        "NODE_ENV check that production builds drop); no screen or lib module may, and tests are exempt.",
+      severity: "error",
+      from: {
+        path: "(^|/)apps/web/(app|lib)/",
+        pathNot: ["(^|/)apps/web/app/providers\\.tsx$", "\\.test\\.tsx?$"],
+      },
+      to: { path: "(^|/)apps/web/mocks/" },
     },
     {
       name: "only-worker-touches-secrets",
@@ -85,7 +101,15 @@ module.exports = {
       name: "engine-testing-only-in-tests",
       comment: "@mp/engine/testing (fixture loader, test generators) is for tests only.",
       severity: "error",
-      from: { pathNot: ["\\.test\\.ts$", "(^|/)packages/engine/src/testing/", "(^|/)packages/[a-z]+/test/"] },
+      from: {
+        pathNot: [
+          "\\.test\\.tsx?$",
+          "(^|/)packages/engine/src/testing/",
+          "(^|/)packages/[a-z]+/test/",
+          // WP-17: the dev-only mock API serves the fixture household.
+          "(^|/)apps/web/mocks/",
+        ],
+      },
       to: { path: "(^|/)packages/engine/src/testing/" },
     },
     {

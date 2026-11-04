@@ -64,6 +64,7 @@ exports[`RunwayChart with the fixture runway (normal) > matches the structural s
         <div
           class="column"
           data-date="2026-10-27"
+          data-edge="first"
           data-kind="balance"
           data-negative="false"
           data-runway-bar=""
@@ -363,6 +364,7 @@ exports[`RunwayChart with the fixture runway (normal) > matches the structural s
         <div
           class="column"
           data-date="2026-11-06"
+          data-edge="last"
           data-kind="payday"
           data-negative="false"
           data-runway-bar=""
@@ -539,201 +541,203 @@ exports[`RunwayChart with the fixture runway (normal) > matches the structural s
       </div>
     </div>
   </div>
-  <table
+  <div
     class="visuallyHidden"
   >
-    <caption
-      id="runway-caption"
-    >
-      Projected end-of-day balance to payday
-    </caption>
-    <thead>
-      <tr>
-        <th
-          scope="col"
-        >
-          Date
-        </th>
-        <th
-          scope="col"
-        >
-          Projected balance
-        </th>
-        <th
-          scope="col"
-        >
-          Scheduled
-        </th>
-        <th
-          scope="col"
-        >
-          Note
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th
-          scope="row"
-        >
-          Tue, Oct 27
-        </th>
-        <td>
-          $3,400
-        </td>
-        <td>
-          Nothing scheduled
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Wed, Oct 28
-        </th>
-        <td>
-          $3,400
-        </td>
-        <td>
-          Nothing scheduled
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Thu, Oct 29
-        </th>
-        <td>
-          $3,011
-        </td>
-        <td>
-          Car −$389.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Fri, Oct 30
-        </th>
-        <td>
-          $5,911
-        </td>
-        <td>
-          Pay +$2,900.00
-        </td>
-        <td>
-          Payday
-        </td>
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Sat, Oct 31
-        </th>
-        <td>
-          $5,816
-        </td>
-        <td>
-          Phone −$95.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Sun, Nov 1
-        </th>
-        <td>
-          $3,666
-        </td>
-        <td>
-          Rent −$2,150.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Mon, Nov 2
-        </th>
-        <td>
-          $2,403
-        </td>
-        <td>
-          Daycare & TV −$1,262.99
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Tue, Nov 3
-        </th>
-        <td>
-          $2,261
-        </td>
-        <td>
-          Power ~−$142.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Wed, Nov 4
-        </th>
-        <td>
-          $1,577
-        </td>
-        <td>
-          Insurance −$684.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Thu, Nov 5
-        </th>
-        <td>
-          $1,507
-        </td>
-        <td>
-          Internet −$70.00
-        </td>
-        <td>
-          Lowest
-        </td>
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Fri, Nov 6
-        </th>
-        <td>
-          $4,657
-        </td>
-        <td>
-          Pay +$3,150.00
-        </td>
-        <td>
-          Payday
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <table>
+      <caption
+        id="runway-caption"
+      >
+        Projected end-of-day balance to payday
+      </caption>
+      <thead>
+        <tr>
+          <th
+            scope="col"
+          >
+            Date
+          </th>
+          <th
+            scope="col"
+          >
+            Projected balance
+          </th>
+          <th
+            scope="col"
+          >
+            Scheduled
+          </th>
+          <th
+            scope="col"
+          >
+            Note
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th
+            scope="row"
+          >
+            Tue, Oct 27
+          </th>
+          <td>
+            $3,400
+          </td>
+          <td>
+            Nothing scheduled
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Wed, Oct 28
+          </th>
+          <td>
+            $3,400
+          </td>
+          <td>
+            Nothing scheduled
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Thu, Oct 29
+          </th>
+          <td>
+            $3,011
+          </td>
+          <td>
+            Car −$389.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Fri, Oct 30
+          </th>
+          <td>
+            $5,911
+          </td>
+          <td>
+            Pay +$2,900.00
+          </td>
+          <td>
+            Payday
+          </td>
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Sat, Oct 31
+          </th>
+          <td>
+            $5,816
+          </td>
+          <td>
+            Phone −$95.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Sun, Nov 1
+          </th>
+          <td>
+            $3,666
+          </td>
+          <td>
+            Rent −$2,150.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Mon, Nov 2
+          </th>
+          <td>
+            $2,403
+          </td>
+          <td>
+            Daycare & TV −$1,262.99
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Tue, Nov 3
+          </th>
+          <td>
+            $2,261
+          </td>
+          <td>
+            Power ~−$142.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Wed, Nov 4
+          </th>
+          <td>
+            $1,577
+          </td>
+          <td>
+            Insurance −$684.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Thu, Nov 5
+          </th>
+          <td>
+            $1,507
+          </td>
+          <td>
+            Internet −$70.00
+          </td>
+          <td>
+            Lowest
+          </td>
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Fri, Nov 6
+          </th>
+          <td>
+            $4,657
+          </td>
+          <td>
+            Pay +$3,150.00
+          </td>
+          <td>
+            Payday
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 `;
 
@@ -801,6 +805,7 @@ exports[`RunwayChart with the fixture shortfall scenario > matches the structura
         <div
           class="column"
           data-date="2026-10-27"
+          data-edge="first"
           data-kind="balance"
           data-negative="false"
           data-runway-bar=""
@@ -1138,6 +1143,7 @@ exports[`RunwayChart with the fixture shortfall scenario > matches the structura
         <div
           class="column"
           data-date="2026-11-06"
+          data-edge="last"
           data-kind="payday"
           data-negative="false"
           data-runway-bar=""
@@ -1319,201 +1325,203 @@ exports[`RunwayChart with the fixture shortfall scenario > matches the structura
       </div>
     </div>
   </div>
-  <table
+  <div
     class="visuallyHidden"
   >
-    <caption
-      id="runway-caption"
-    >
-      Projected end-of-day balance to payday
-    </caption>
-    <thead>
-      <tr>
-        <th
-          scope="col"
-        >
-          Date
-        </th>
-        <th
-          scope="col"
-        >
-          Projected balance
-        </th>
-        <th
-          scope="col"
-        >
-          Scheduled
-        </th>
-        <th
-          scope="col"
-        >
-          Note
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th
-          scope="row"
-        >
-          Tue, Oct 27
-        </th>
-        <td>
-          $3,400
-        </td>
-        <td>
-          Nothing scheduled
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Wed, Oct 28
-        </th>
-        <td>
-          $1,600
-        </td>
-        <td>
-          Repair −$1,800.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Thu, Oct 29
-        </th>
-        <td>
-          $1,211
-        </td>
-        <td>
-          Car −$389.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Fri, Oct 30
-        </th>
-        <td>
-          $4,111
-        </td>
-        <td>
-          Pay +$2,900.00
-        </td>
-        <td>
-          Payday
-        </td>
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Sat, Oct 31
-        </th>
-        <td>
-          $4,016
-        </td>
-        <td>
-          Phone −$95.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Sun, Nov 1
-        </th>
-        <td>
-          $1,866
-        </td>
-        <td>
-          Rent −$2,150.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Mon, Nov 2
-        </th>
-        <td>
-          $603
-        </td>
-        <td>
-          Daycare & TV −$1,262.99
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Tue, Nov 3
-        </th>
-        <td>
-          $461
-        </td>
-        <td>
-          Power ~−$142.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Wed, Nov 4
-        </th>
-        <td>
-          −$223
-        </td>
-        <td>
-          Insurance −$684.00
-        </td>
-        <td />
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Thu, Nov 5
-        </th>
-        <td>
-          −$293
-        </td>
-        <td>
-          Internet −$70.00
-        </td>
-        <td>
-          Lowest
-        </td>
-      </tr>
-      <tr>
-        <th
-          scope="row"
-        >
-          Fri, Nov 6
-        </th>
-        <td>
-          $2,857
-        </td>
-        <td>
-          Pay +$3,150.00
-        </td>
-        <td>
-          Payday
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <table>
+      <caption
+        id="runway-caption"
+      >
+        Projected end-of-day balance to payday
+      </caption>
+      <thead>
+        <tr>
+          <th
+            scope="col"
+          >
+            Date
+          </th>
+          <th
+            scope="col"
+          >
+            Projected balance
+          </th>
+          <th
+            scope="col"
+          >
+            Scheduled
+          </th>
+          <th
+            scope="col"
+          >
+            Note
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th
+            scope="row"
+          >
+            Tue, Oct 27
+          </th>
+          <td>
+            $3,400
+          </td>
+          <td>
+            Nothing scheduled
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Wed, Oct 28
+          </th>
+          <td>
+            $1,600
+          </td>
+          <td>
+            Repair −$1,800.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Thu, Oct 29
+          </th>
+          <td>
+            $1,211
+          </td>
+          <td>
+            Car −$389.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Fri, Oct 30
+          </th>
+          <td>
+            $4,111
+          </td>
+          <td>
+            Pay +$2,900.00
+          </td>
+          <td>
+            Payday
+          </td>
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Sat, Oct 31
+          </th>
+          <td>
+            $4,016
+          </td>
+          <td>
+            Phone −$95.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Sun, Nov 1
+          </th>
+          <td>
+            $1,866
+          </td>
+          <td>
+            Rent −$2,150.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Mon, Nov 2
+          </th>
+          <td>
+            $603
+          </td>
+          <td>
+            Daycare & TV −$1,262.99
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Tue, Nov 3
+          </th>
+          <td>
+            $461
+          </td>
+          <td>
+            Power ~−$142.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Wed, Nov 4
+          </th>
+          <td>
+            −$223
+          </td>
+          <td>
+            Insurance −$684.00
+          </td>
+          <td />
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Thu, Nov 5
+          </th>
+          <td>
+            −$293
+          </td>
+          <td>
+            Internet −$70.00
+          </td>
+          <td>
+            Lowest
+          </td>
+        </tr>
+        <tr>
+          <th
+            scope="row"
+          >
+            Fri, Nov 6
+          </th>
+          <td>
+            $2,857
+          </td>
+          <td>
+            Pay +$3,150.00
+          </td>
+          <td>
+            Payday
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 `;
 

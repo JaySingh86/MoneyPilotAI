@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import fixture from "../../../../../design/fixtures/rivera-household.json";
 import { expectNoAxeViolations } from "../test/axe";
 import { BILLS_BEFORE_PAYDAY } from "../testing/bills-before-payday";
@@ -67,5 +67,50 @@ describe("Table", () => {
   it("has no axe violations", async () => {
     const { container } = renderBills("b-rent");
     await expectNoAxeViolations(container);
+  });
+});
+
+describe("Table scroll region", () => {
+  const original = {
+    scrollWidth: Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollWidth"),
+    clientWidth: Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth"),
+  };
+  afterEach(() => {
+    for (const key of ["scrollWidth", "clientWidth"] as const) {
+      const d = original[key];
+      if (d) Object.defineProperty(HTMLElement.prototype, key, d);
+      else delete (HTMLElement.prototype as unknown as Record<string, unknown>)[key];
+    }
+  });
+  const size = (scrollWidth: number, clientWidth: number) => {
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+      configurable: true,
+      get: () => scrollWidth,
+    });
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      get: () => clientWidth,
+    });
+  };
+  const table = () => (
+    <Table
+      caption="Due before payday"
+      columns={BILL_COLUMNS}
+      rows={BILLS_BEFORE_PAYDAY}
+      rowKey={(r) => r.id}
+    />
+  );
+
+  it("is not a tab stop when everything fits", () => {
+    size(600, 600);
+    render(table());
+    expect(screen.queryByRole("region", { name: "Due before payday" })).toBeNull();
+  });
+
+  it("becomes a focusable, named region when it overflows (scrollWidth > clientWidth)", () => {
+    size(700, 300);
+    render(table());
+    const region = screen.getByRole("region", { name: "Due before payday" });
+    expect(region.tabIndex).toBe(0);
   });
 });

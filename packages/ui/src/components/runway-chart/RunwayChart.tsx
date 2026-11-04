@@ -167,7 +167,7 @@ export function RunwayChart({
               data-runway-axis=""
               data-negative={String(hasNegative)}
             />
-            {days.map((day) => {
+            {days.map((day, index) => {
               const iso = day.date.toString();
               const isLowest = iso === lowestDate;
               const kind = barKind(day, isLowest);
@@ -180,6 +180,7 @@ export function RunwayChart({
                   key={iso}
                   className={styles.column}
                   data-runway-bar=""
+                  data-edge={index === 0 ? "first" : index === days.length - 1 ? "last" : undefined}
                   data-date={iso}
                   data-kind={kind}
                   data-value={value}
@@ -236,34 +237,37 @@ export function RunwayChart({
         </div>
       </div>
 
-      <table className={shared.visuallyHidden}>
-        <caption id={captionId}>{label}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Projected balance</th>
-            <th scope="col">Scheduled</th>
-            <th scope="col">Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          {days.map((day) => {
-            const iso = day.date.toString();
-            const note = iso === lowestDate ? "Lowest" : day.payday ? "Payday" : "";
-            const scheduled = day.event
-              ? `${day.event.label} ${day.event.estimate ? "~" : ""}${money(day.event.amountCents, { mode: "signed" })}`
-              : "Nothing scheduled";
-            return (
-              <tr key={iso}>
-                <th scope="row">{date(day.date, { relativeTo: today, weekday: true })}</th>
-                <td>{money(day.balanceCents, { mode: "headline" })}</td>
-                <td>{scheduled}</td>
-                <td>{note}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {/* A table ignores width and overflow, so the hidden wrapper clips it; otherwise it widens the page. */}
+      <div className={shared.visuallyHidden}>
+        <table>
+          <caption id={captionId}>{label}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Projected balance</th>
+              <th scope="col">Scheduled</th>
+              <th scope="col">Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {days.map((day) => {
+              const iso = day.date.toString();
+              const note = iso === lowestDate ? "Lowest" : day.payday ? "Payday" : "";
+              const scheduled = day.event
+                ? `${day.event.label} ${day.event.estimate ? "~" : ""}${money(day.event.amountCents, { mode: "signed" })}`
+                : "Nothing scheduled";
+              return (
+                <tr key={iso}>
+                  <th scope="row">{date(day.date, { relativeTo: today, weekday: true })}</th>
+                  <td>{money(day.balanceCents, { mode: "headline" })}</td>
+                  <td>{scheduled}</td>
+                  <td>{note}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

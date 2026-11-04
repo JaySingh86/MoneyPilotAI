@@ -1,5 +1,6 @@
 // Table, DESIGN_SPEC §4. Wide tables scroll inside their wrapper (min-width 640, §3.1).
 import { money } from "@mp/format";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { cx } from "../internal/cx";
 import shared from "../internal/shared.module.css";
@@ -50,9 +51,30 @@ export function Table<R>({
   empty,
   className,
 }: TableProps<R>) {
-  if (rows.length === 0 && empty) return <>{empty}</>;
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scrolls, setScrolls] = useState(false);
+  const hasRows = rows.length > 0 || !empty;
+  // The wrapper is a focusable, named region only while it actually scrolls, so keyboard users can
+  // reach what a narrow screen cuts off (§3.1) without an extra tab stop when it all fits.
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const check = () => setScrolls(el.scrollWidth > el.clientWidth);
+    check();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    const table = el.querySelector("table");
+    if (table) observer.observe(table);
+    return () => observer.disconnect();
+  }, [hasRows, rows.length, columns.length]);
+  if (!hasRows) return <>{empty}</>;
   return (
-    <div className={cx(styles.wrapper, className)}>
+    <div
+      ref={wrapperRef}
+      className={cx(styles.wrapper, className)}
+      {...(scrolls ? { role: "region", "aria-label": caption, tabIndex: 0 } : {})}
+    >
       <table className={cx(styles.table, dense && styles.dense)}>
         <caption className={showCaption ? styles.caption : shared.visuallyHidden}>{caption}</caption>
         <thead>

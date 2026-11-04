@@ -38,9 +38,10 @@
   display: flex;
   align-items: flex-start;
   gap: var(--mp-space-2_5);
-  padding: var(--mp-space-3_5);
+  /* Q-046: the canvas error banner is padding 12×14, radius lg (not the attention card's). */
+  padding: var(--mp-space-3) var(--mp-space-3_5);
   border: 1px solid var(--mp-attention-border);
-  border-radius: var(--mp-radius-xl);
+  border-radius: var(--mp-radius-lg);
   background: var(--mp-attention-surface);
   color: var(--mp-text-primary);
   font: var(--mp-type-small);
@@ -100,4 +101,12 @@
 
 .statusIcon {
   flex: none;
+}
+
+/* Touch screens: the retry link gets a 44 px tall hit area through padding. */
+@media (pointer: coarse) {
+  .retry {
+    display: inline-block;
+    padding-block: var(--mp-space-3_5);
+  }
 }

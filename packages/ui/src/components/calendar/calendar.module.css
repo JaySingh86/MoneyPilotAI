@@ -1,6 +1,9 @@
 /* Calendar cell and event chip, DESIGN_SPEC §4.2. */
 
 .cell {
+  /* The cell's visually hidden words are absolutely positioned; contain them so a scroll wrapper
+     clips them instead of widening the page. */
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -42,6 +45,11 @@
   cursor: default;
 }
 
+/* Wraps a chip with its hidden separator without adding a box. */
+.chipSlot {
+  display: contents;
+}
+
 .cellHead {
   display: flex;
   align-items: center;
@@ -78,8 +86,11 @@
 /* Event chip: padding 3 × 6, radius xs, 11 px. */
 .chip {
   display: flex;
+  /* In a narrow cell (about 100 px) the amount drops under the name instead of squeezing it to a
+     couple of pixels; in a wide cell everything stays on one line. */
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--mp-space-1);
+  gap: 0 var(--mp-space-1);
   min-width: 0;
   /* stylelint-disable-next-line declaration-property-unit-disallowed-list -- DESIGN_SPEC §4.2: chip padding 3×6; 3 has no spacing token */
   padding: 3px var(--mp-space-1_5);
@@ -89,8 +100,9 @@
 }
 
 .chipName {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 4.5ch;
+  /* Wide enough for "Rent" and "Phone" before the ellipsis starts. */
+  min-width: 4.5ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -98,6 +110,7 @@
 
 .chipAmount {
   flex: none;
+  margin-left: auto;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

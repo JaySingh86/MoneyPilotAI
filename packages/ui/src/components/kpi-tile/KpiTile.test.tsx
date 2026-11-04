@@ -47,6 +47,18 @@ describe("KpiTile", () => {
     expect(screen.getByText("$9,726")).toBeTruthy();
   });
 
+  it("draws a footnote under the caption", () => {
+    render(
+      <KpiTile
+        label="Income expected"
+        value={{ cents: 290000, mode: "detail" }}
+        caption="Fri, Oct 30 · Jordan’s paycheck"
+        footnote="Next: Sam’s paycheck $3,150 on Nov 6, then $550 to goals"
+      />,
+    );
+    expect(screen.getByText(/^Next: Sam’s paycheck/)).toBeTruthy();
+  });
+
   it("has no axe violations", async () => {
     const { container } = renderBills();
     await expectNoAxeViolations(container);

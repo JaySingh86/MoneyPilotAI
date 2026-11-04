@@ -53,6 +53,15 @@ export const Brand: Story = {
   },
 };
 
+export const IncomeWithFootnote: Story = {
+  args: {
+    label: "Income expected",
+    value: { cents: 290000, mode: "detail" },
+    caption: "Fri, Oct 30 · Jordan’s paycheck",
+    footnote: "Next: Sam’s paycheck $3,150 on Nov 6, then $550 to goals",
+  },
+};
+
 export const Info: Story = {
   args: {
     label: "Estimates to confirm",

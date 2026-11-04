@@ -211,6 +211,85 @@ Format (newest first):
 - Options considered: (a) the engine's shape (built; the contract test fails if the engine adds a field the schema lacks); (b) the §8.3 shape with an adapter in the API (a second source of names for the same numbers).
 - Blocking: no. WP-17 is built against mocks and needs the shape above to switch to the live API.
 - Answer: Answered (tech lead for owner, 2026-11-03): Keep the engine (`FullPlanResult`) shape. BACKEND_PLAN section 8.3 now says its examples are abridged and the contracts are the source of truth.
+## Q-099 · WP-17 · Third-party wording in the shortfall options
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: DESIGN_SPEC §5.3 ("Only if … allows it"); canvas "Web · Safe-to-spend states"
+- Question: The canvas writes "Only if the repair shop allows it" and "Only if your insurer allows it". The engine only says `onlyIfAllowed` and gives the bill's `itemKind`, so the repair shop is not derivable.
+- Options considered: (a) insurance bills say "your insurer", everything else "your provider", and a split expense says "the payee" (implemented); (b) add a `payee` or `counterparty` field to items and planned expenses.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03). Accepted: "your insurer" for insurance, "your provider" for other bills, "the payee" for a split expense.
+
+## Q-098 · WP-17 · Overview goal caption for a planned expense
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: canvas "Web · Overview" (Holiday gifts: "Planned expense") vs fixture `expected.goalsPage.gifts.status` ("$380 to set aside")
+- Question: On the Overview side card the canvas shows the kind ("Planned expense") on the right of the Holiday gifts row, while the Goals page golden value is "$380 to set aside". Which should the Overview show?
+- Options considered: the canvas (implemented, the canvas wins); the engine status.
+- Blocking: no. The Goals screen (WP-18) shows "$380 to set aside".
+- Answer: Answered (tech lead for owner, 2026-11-03). Keep "Planned expense". Implemented.
+
+## Q-097 · WP-17 · Dates without a year for goals
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: DESIGN_SPEC §7 (dates in another year show the year: "Jan 9, 2027"); canvas Overview ("Lake Tahoe trip · Mar 1", "by Mar 1")
+- Question: The Tahoe target date is Mar 1, 2027, but the canvas draws it without a year.
+- Options considered: follow the canvas for goal target dates (implemented: `shortDateNoYear` for `targetDate` and `alternativeTargetDate`); follow §7 everywhere ("Mar 1, 2027").
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03). Follow §7: show the year when the date isn't in the current year ("Mar 1, 2027"). Implemented for goal titles and the decision templates.
+
+## Q-096 · WP-17 · Fields the Overview needs beyond the engine's FullPlanResult
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: BACKEND_PLAN §8.3 and the WP-12 plan contract (FullPlanResult); `apps/web/lib/api/planning-types.ts`
+- Question: The canvas needs data the engine result does not carry: the short runway label under each bar ("Rent", "Daycare & TV"), the bills table's frequency text and flag chips, goal rows, the tasks due this week, the data-source freshness, and for the calendar the schedule label, price change and goal deposits per entry. Where should they come from?
+- Options considered: (a) WP-12 adds them to the plan and calendar responses (what the mock does; each is marked "WP-12 adds" in `planning-types.ts`); (b) the web joins `GET /items`, `/goals` and `/tasks` itself.
+- Blocking: no. The mock serves option (a). The `runwayDetail.excludedEvents` of the engine result is served as `goalTransfersOnPayday`.
+- Answer: Answered (tech lead for owner, 2026-11-03). (a): every mock-only field is marked `MOCK-ONLY` in `apps/web/lib/api/planning-types.ts`, and the web's plan and calendar types are now the `@mp/contracts` `Plan` and `CalendarMonth` plus those fields (the runway, flags, runwayDetail, decisions, shortfall options, math and calendar entries all come from the contract; goal transfers on payday are read from `runwayDetail.excludedEvents`). Goals and tasks are the WP-13 `Goal` and `Task` contracts (the mock serves them with the plan; WP-18 calls the goals and tasks endpoints). Remaining gaps for WP-18 to wire from the items endpoints and the rest: the due-before-payday rows (frequency label, flag chips, estimate range, price-up amount), data-source freshness, the short runway labels (Q-091), the reminder offsets, and the calendar entry details (schedule label, estimate history, price change, billing interval, goal deposits). The shortfall option names come from the due rows. "{Month} at a glance" comes from an unfiltered calendar request, because the contract's summary follows the owner filter.
+
+## Q-095 · WP-17 · Buttons whose APIs don't exist yet
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: canvas "Web · Overview" and "Web · Safe-to-spend states" ("Decide with Jordan", "Plan for it", "Enter actual amount", the task checkboxes)
+- Question: Approvals (proposals, WP-13), marking an actual amount and completing a task have no endpoints yet. What should these controls do until then?
+- Options considered: (a) "Decide with {partner}" is disabled with a visible note; "Plan for it" opens the what-if in the side sheet (it can't ask for approval yet); "Enter actual amount", "Compare options" and "Open renewals" link to the WP-18 screens; task checkboxes update the view only and are not saved (implemented); (b) hide them until the APIs exist.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03). Task checkboxes are disabled with the note "Saving tasks comes with the Tasks page" until WP-13 and WP-18. "Decide with {partner}" stays disabled with its note. Implemented.
+
+## Q-094 · WP-17 · Canvas sizes with no token
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: DESIGN_SPEC §4.2 (calendar title "`heading-1` at 30", day amount "Manrope 800 17"), canvas Calendar
+- Question: There is no 30 px or 17 px type token. The tokens-only rule (hard rule 6) forbids raw sizes.
+- Options considered: use `heading-1` (32) and `heading-2m` at weight 800 (16) (implemented); add `heading-1s` and `amount-m` tokens.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03). Accepted: use `heading-1` and `heading-2m` at weight 800; no new tokens.
+
+## Q-093 · WP-17 · Order and wording of the Overview task list
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: canvas "Web · Overview" (Household tasks); DESIGN_SPEC §6 rule 15
+- Question: The canvas lists "Compare car insurance renewal quote", "Enter the actual electricity amount", then "Review 2 flagged subscriptions", which is neither due-date nor id order, and its third row carries prose ("streaming price up $3, two music services") that no field holds. Which order and meta line?
+- Options considered: due date ascending, as the engine's `tasksDueThisWeek` returns it, with "{owner} · by {weekday, date}" or the fixture's `dueHint` (implemented), then the latest done task as "done {date}" using its due date (the fixture has no completion date); the canvas order and prose.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03). Accepted: due-date order from the engine, with the fixture's `dueHint`.
+
+## Q-092 · WP-17 · What "use the mobile screen patterns" means for the web app under 800 px
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: DESIGN_SPEC §3.1 (table row "< 800")
+- Question: Under 800 px the web app gets a top bar with a drawer "and the mobile screen patterns". There is no web board at 390; the mobile boards ("Mobile · Today", "Mobile · Calendar") are the native app's screens, with a tab bar and a mini runway in the hero.
+- Options considered: keep the web components in one column with the top bar and drawer (implemented, and the page never scrolls sideways); rebuild the mobile Today and Calendar layouts for the web at this width.
+- Blocking: no. The 390 screenshots show the single-column web layout.
+- Answer: Answered (tech lead for owner, 2026-11-03). Accepted: a single column with the top bar and drawer.
+
+## Q-091 · WP-17 · Where the short runway names come from
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: DESIGN_SPEC §4.1 (event under each bar), canvas ("Car", "Phone", "Daycare & TV", "Insurance")
+- Question: The data model has one `name` per item ("Car payment", "Streaming bundle"). The canvas uses shorter names, and "TV" for the streaming bundle.
+- Options considered: an optional `short_name` on items and planned expenses (the mock has a lookup keyed by the fixture ids); truncate the name.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-03). Add an optional `shortName` on items (a WP-06 contract change, optional and additive). Any fixture-id lookup stays mock-only. WP-17 keeps the lookup in `apps/web/mocks`; the web falls back to the event's name when the plan carries no short name.
+
+## Q-090 · WP-17 · "Decide this week" card text: engine templates or the canvas prose
+- Asked by: wp-builder/wp/17-web-overview · 2026-11-03
+- Where: canvas "Web · Overview" (Decide this week) vs the engine's `templateText` and `detailTemplateText` (Q-017)
+- Question: The canvas card reads "This twice-yearly bill causes the lowest point before payday. If your insurer allows paying on Nov 6, safe to spend rises to $1,691." The engine's template reads "This bill comes every 6 months, so it isn’t in your usual month. Paying on Nov 6 instead changes safe to spend to $1,691. Only if your provider allows it." The canvas text looks like the AI explanation (WP-27).
+- Options considered: render the engine's templates until WP-27 provides `aiText` (implemented; every number in them is an engine parameter); change the templates to the canvas wording.
+- Blocking: no. All golden numbers ($684, $1,691, $142 ±$30, $250 behind, $313) show.
+- Answer: Answered (tech lead for owner, 2026-11-03). Engine templates are accepted. The AI explanation (WP-27) replaces them through `aiText`.
 
 ## Q-076 · WP-11 · Refusals in backfill batches get no fallback
 - Asked by: wp-builder/wp/11-ai · 2026-11-03

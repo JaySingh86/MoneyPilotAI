@@ -43,11 +43,20 @@ jobs:
   # Pixel snapshots and browser axe for the UI kit. Runs in the official Playwright image, pinned
   # to the @playwright/test version in packages/ui/package.json, so the Linux Chromium that made
   # the committed baselines (`pnpm --filter @mp/ui test:visual:update`) is the one checking them.
+  #
+  # The image is pinned by digest (the multi-arch index of v1.64.1-noble), not just by tag. When
+  # @playwright/test is bumped, update the tag and the digest together
+  # (`curl -sI -H 'Accept: application/vnd.oci.image.index.v1+json'
+  # https://mcr.microsoft.com/v2/playwright/manifests/<tag>` shows it as Docker-Content-Digest).
+  #
+  # The committed baselines are arm64 renders (Apple Silicon, Colima). Chromium's anti-aliasing differs
+  # slightly on x86, so these jobs run on an arm64 runner. If CI must run on x86, regenerate the
+  # baselines there first (see apps/web/scripts/e2e-docker.mjs).
   visual:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 20
     container:
-      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
     env:
       HOME: /root
     steps:
@@ -64,4 +73,29 @@ jobs:
           path: |
             packages/ui/playwright-report
             packages/ui/test-results
+          retention-days: 7
+
+  # Web app end to end: functional flows, axe and pixel snapshots at 1440, 1024 and 390, against
+  # `next dev` in mock mode (no AWS). Same pinned image and arm64 runner as the UI kit's visual job.
+  web-e2e:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - run: pnpm install --frozen-lockfile --filter @mp/web...
+      - name: Web e2e, axe and visual tests
+        run: pnpm --filter @mp/web e2e
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: web-playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
           retention-days: 7

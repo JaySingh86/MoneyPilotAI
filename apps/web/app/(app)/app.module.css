@@ -1,0 +1,12 @@
+/* Full-page states shown before the shell: loading, first name, sign-in failure. */
+
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--mp-space-4);
+  max-width: 420px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: var(--mp-space-10) var(--mp-mobile-gutter);
+}

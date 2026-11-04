@@ -29,6 +29,11 @@ export interface KpiTileProps {
   value: KpiValue;
   tone?: KpiTone;
   caption?: ReactNode;
+  /**
+   * A 12 px muted note at the bottom of the tile, under a divider rule: "Next: Sam’s paycheck $3,150
+   * on Nov 6, then $550 to goals" (canvas Overview, Income expected).
+   */
+  footnote?: ReactNode;
   /** Owner split bar (height 8) with a legend of names and amounts. */
   split?: readonly OwnerSplitSegment[];
   density?: Density;
@@ -46,6 +51,7 @@ export function KpiTile({
   value,
   tone = "default",
   caption,
+  footnote,
   split,
   density = "web",
   className,
@@ -56,6 +62,7 @@ export function KpiTile({
       <p className={styles.label}>{label}</p>
       <p className={cx(styles.value, styles[tone])}>{formatValue(value)}</p>
       {caption && <p className={styles.caption}>{caption}</p>}
+      {footnote && <p className={styles.footnote}>{footnote}</p>}
       {split && split.length > 0 && (
         <div className={styles.split}>
           <div className={styles.splitBar} aria-hidden="true">
