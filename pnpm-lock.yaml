@@ -65,6 +65,9 @@ importers:
       '@mp/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@mp/detection':
+        specifier: workspace:*
+        version: link:../../packages/detection
       '@mp/engine':
         specifier: workspace:*
         version: link:../../packages/engine
@@ -187,12 +190,24 @@ importers:
       '@mp/billing':
         specifier: workspace:*
         version: link:../../packages/billing
+      '@mp/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@mp/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@mp/detection':
+        specifier: workspace:*
+        version: link:../../packages/detection
       '@mp/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+      '@mp/review-rules':
+        specifier: workspace:*
+        version: link:../../packages/review-rules
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(@opentelemetry/api@1.10.0)(@types/pg@8.23.1)(pg@8.23.1)
       pg:
         specifier: ^8.23.1
         version: 8.23.1
@@ -280,7 +295,18 @@ importers:
         specifier: ^12.2.1
         version: 12.2.1
 
-  packages/detection: {}
+  packages/detection:
+    dependencies:
+      '@js-temporal/polyfill':
+        specifier: ^0.5.1
+        version: 0.5.1
+      papaparse:
+        specifier: ^5.7.0
+        version: 5.7.0
+    devDependencies:
+      '@types/papaparse':
+        specifier: ^5.5.2
+        version: 5.5.2
 
   packages/email:
     dependencies:
@@ -2067,6 +2093,9 @@ packages:
   '@types/node@22.20.5':
     resolution: {integrity: sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==}
 
+  '@types/papaparse@5.5.2':
+    resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
+
   '@types/pg@8.23.1':
     resolution: {integrity: sha512-fKVHpikPdg4GKks3JuLEhvwSyvwzF23hnabPy6DD8ljVbC7+6J5dQzdv4arV6jqq57djnMgs1HKBxX4P8aBI3A==}
 
@@ -3733,6 +3762,9 @@ packages:
 
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
+
+  papaparse@5.7.0:
+    resolution: {integrity: sha512-qBGxg/7Q3Kl9Wfhrz2Z74UnvnHTXLNG6jmKJFeBvP2+y4lV7So+7SR62+Zd47JvdrCkX+nDcnr0ObPzek/+6RA==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -6365,6 +6397,10 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/papaparse@5.5.2':
+    dependencies:
+      '@types/node': 22.20.5
+
   '@types/pg@8.23.1':
     dependencies:
       '@types/node': 22.20.5
@@ -8068,6 +8104,8 @@ snapshots:
       p-limit: 3.1.0
 
   package-json-from-dist@1.0.1: {}
+
+  papaparse@5.7.0: {}
 
   parent-module@1.0.1:
     dependencies:

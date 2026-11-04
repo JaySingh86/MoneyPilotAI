@@ -13,6 +13,9 @@ const ENGINE_NPM_ALLOWLIST = ["@js-temporal/polyfill", "rrule"];
 // npm packages the pure review-rules package may use in production code (none today).
 const REVIEW_RULES_NPM_ALLOWLIST = [];
 
+// npm packages the pure detection package may use in production code (BACKEND_PLAN §3: papaparse; ADR-007).
+const DETECTION_NPM_ALLOWLIST = ["papaparse", "@js-temporal/polyfill"];
+
 module.exports = {
   forbidden: [
     {
@@ -145,6 +148,33 @@ module.exports = {
         pathNot: REVIEW_RULES_NPM_ALLOWLIST.length
           ? `node_modules/(${REVIEW_RULES_NPM_ALLOWLIST.map((p) => p.replace("/", "\\/")).join("|")})/`
           : "^$",
+      },
+    },
+    {
+      name: "detection-is-pure",
+      comment:
+        "packages/detection must not import apps or other internal packages (CSV parsing + detection only).",
+      severity: "error",
+      from: { path: pkg("detection") },
+      to: { path: ["(^|/)packages/(?!detection/)", "(^|/)apps/"] },
+    },
+    {
+      name: "detection-no-io",
+      comment:
+        "packages/detection must not import any Node core module (no I/O, clock, randomness). Tests and the " +
+        "synthetic-CSV generator under testing/ may read the fixture.",
+      severity: "error",
+      from: { path: pkg("detection"), pathNot: ["\\.test\\.ts$", "(^|/)packages/detection/testing/"] },
+      to: { dependencyTypes: ["core"] },
+    },
+    {
+      name: "detection-npm-allowlist",
+      comment: `packages/detection may use only ${DETECTION_NPM_ALLOWLIST.join(", ")} in production code. Extend only with an ADR.`,
+      severity: "error",
+      from: { path: pkg("detection"), pathNot: ["\\.test\\.ts$", "(^|/)packages/detection/testing/"] },
+      to: {
+        dependencyTypes: ["npm", "npm-dev", "npm-optional", "npm-peer", "npm-no-pkg", "npm-unknown"],
+        pathNot: `node_modules/(${DETECTION_NPM_ALLOWLIST.map((p) => p.replace("/", "\\/")).join("|")})/`,
       },
     },
     {

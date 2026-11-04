@@ -13,6 +13,7 @@ import {
   handleBillingSync,
 } from "./jobs/billing/sync";
 import { guardJob } from "./jobs/guard";
+import { registerImportJobs } from "./jobs/imports/register";
 import { MATERIALIZE_QUEUE, handleMaterialize } from "./jobs/occurrences/materialize";
 import {
   OCCURRENCES_SWEEP_CRON,
@@ -84,6 +85,7 @@ export async function registerJobs(boss: PgBoss, deps: JobDeps): Promise<void> {
 
   // Nightly at 02:00 UTC; the sweep fans out one materialize job per household (Q-051).
   await boss.schedule(OCCURRENCES_SWEEP_QUEUE, OCCURRENCES_SWEEP_CRON, null, { tz: "UTC" });
+  await registerImportJobs(boss, deps); // WP-16: imports.process, imports.sweep, transactions.purge
 }
 
 export interface StartedJobs {

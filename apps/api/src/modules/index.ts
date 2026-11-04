@@ -7,6 +7,7 @@ import type { ApiModule } from "../lib/module";
 import { billingModules } from "./billing";
 import { identityModules } from "./identity";
 import { wp13Modules } from "./goals";
+import { importsModule } from "./imports";
 import { itemsModule } from "./items";
 import { planningModule } from "./planning";
 import { reviewModule } from "./review";
@@ -19,4 +20,5 @@ export const modules: readonly ApiModule[] = [
   reviewModule, // WP-14
   ...wp13Modules, // WP-13: goals, proposals, tasks
   ...billingModules, // WP-25: billing, billing webhook
+  importsModule, // WP-16: CSV import
 ];

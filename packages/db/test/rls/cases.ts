@@ -160,4 +160,27 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
     update: (t) => sql`update billing_events set processed_at = now(), outcome = 'applied'
       where household_id = ${t.householdId}`,
   },
+  // ===== WP-16: CSV import =====
+  {
+    table: "imports",
+    insert: (t) => sql`insert into imports (household_id, uploaded_by, filename, status)
+      values (${t.householdId}, ${t.actorUserId ?? t.someUserId}, 'probe.csv', 'uploaded')`,
+    update: (t) => sql`update imports set status = 'processing' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "transactions",
+    insert: (
+      t,
+    ) => sql`insert into transactions (household_id, posted_on, description, merchant_norm, amount_cents, dedupe_hash)
+      values (${t.householdId}, '2026-10-01', 'probe', 'probe', -100, ${randomBytes(32)})`,
+    update: (t) =>
+      sql`update transactions set merchant_norm = 'tampered' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "import_mappings",
+    insert: (t) => sql`insert into import_mappings (household_id, fingerprint, mapping, created_by)
+      values (${t.householdId}, 'probe', '{}'::jsonb, ${t.actorUserId})`,
+    update: (t) =>
+      sql`update import_mappings set mapping = '{"x":1}'::jsonb where household_id = ${t.householdId}`,
+  },
 ];

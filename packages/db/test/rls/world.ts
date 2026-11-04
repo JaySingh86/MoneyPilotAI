@@ -12,6 +12,7 @@ import {
 import type { ApiDb } from "../../src/tx";
 import { seedBillingWorld, type BillingWorldRows } from "./billing-world";
 import { seedItemsWorld, type ItemsWorldRows } from "./items-world";
+import { seedImportsWorld, type ImportsWorldRows } from "./imports-world";
 import { seedReviewWorld, type ReviewWorldRows } from "./review-world";
 
 export interface TestHousehold {
@@ -26,6 +27,8 @@ export interface TestHousehold {
   review: ReviewWorldRows;
   /** One row in every WP-25 table. */
   billing: BillingWorldRows;
+  /** One row in every WP-16 table. */
+  imports: ImportsWorldRows;
 }
 
 export interface World {
@@ -69,7 +72,8 @@ export async function buildHousehold(db: ApiDb, label: string): Promise<TestHous
   const items = await seedItemsWorld(db, household);
   const review = await seedReviewWorld(db, household, items.itemId);
   const billing = await seedBillingWorld(db, id);
-  return { ...household, items, review, billing };
+  const imports = await seedImportsWorld(db, household);
+  return { ...household, items, review, billing, imports };
 }
 
 export async function buildWorld(db: ApiDb): Promise<World> {

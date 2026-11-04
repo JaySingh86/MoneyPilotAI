@@ -58,6 +58,19 @@ describe("dependency rules (ARCHITECTURE §3)", () => {
     expect(await violationsIn([`${FIX}/packages/review-rules/types-only.ts`])).toEqual([]);
   });
 
+  it("rejects detection that does I/O, imports another internal package or uses a non-allowlisted npm package", async () => {
+    const rules = await violationsIn([`${FIX}/packages/detection/impure.ts`]);
+    expect(rules).toContain("detection-is-pure");
+    expect(rules).toContain("detection-no-io");
+    expect(await violationsIn([`${FIX}/packages/detection/uses-npm.ts`])).toContain(
+      "detection-npm-allowlist",
+    );
+  });
+
+  it("lets the real detection package use papaparse and the Temporal polyfill", async () => {
+    expect(await violationsIn(["packages/detection/src"])).toEqual([]);
+  });
+
   it("rejects adapters importing each other", async () => {
     expect(await violationsIn([`${FIX}/packages/ai/src/imports-db.ts`])).toContain("adapters-isolated");
   });

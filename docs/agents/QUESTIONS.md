@@ -110,6 +110,62 @@ Format (newest first):
 - Blocking: no
 - Answer:
 
+## Q-146 · WP-16 · Detection thresholds, what is not queued, and what a stranger sees
+- Asked by: wp-builder/wp/16-csv-import · 2026-11-04
+- Where: BACKEND_PLAN §7.7 step 5, §8.2
+- Question: Confirm the choices the spec leaves open. (1) At least 70% of the gaps between hits must sit in the cadence band (so a merchant visited at random is not a bill), and a subscription whose last hit is more than 2 median gaps + 7 days old is treated as cancelled. (2) Minimum hits: 4 weekly, 3 for biweekly to quarterly, 2 for every 6 months and yearly (a yearly needs one prior hit). (3) A weekday that is always the LAST of its month (a "last Friday" paycheck) is monthly even though its gaps alternate 28 and 35 days. (4) Same-day charges from one merchant are one hit (amounts summed). (5) A candidate that matches an item we track with the same fixed amount is counted (`detected_count`) but NOT queued (no `duplicate` review rows); a candidate that already has a CSV review row (queued, confirmed, edited or ignored) is not queued again, so an ignored item does not come back with every import. (6) `GET /imports/:id` of an import in another household or by a non-member answers 404, not 403 (nothing leaks about its existence).
+- Options considered: queue `duplicate` rows too (noise); resurface ignored items after 90 days.
+- Blocking: no.
+- Answer: …
+
+## Q-145 · WP-16 · The running balance is reported on the import, not proposed as a `balances` row
+- Asked by: wp-builder/wp/16-csv-import · 2026-11-04
+- Where: BACKEND_PLAN §7.7 step 6 ("propose a `balances` row")
+- Question: There is no review-queue shape for a balance (`ExtractedFields` has none, WP-14 owns the queue), and a balance written without a person looking would change safe to spend. The import keeps `latest_balance_cents` / `latest_balance_on` (from the balance column, after the most recent transaction) and `GET /imports/:id` returns `latestBalance`; the web should ask "Use $X as of {date} as your balance?" and call the balances endpoint (WP-06). Is that the intended meaning of "propose"? Nothing writes `balances` from an import.
+- Options considered: a new review `docType` for balances; write a `source = csv` balance row automatically (rejected: a number changes the plan without consent).
+- Blocking: no (the Setup UI is WP-18/WP-17 territory).
+- Answer: …
+
+## Q-144 · WP-16 · `imports.process` is started by a per-minute sweep until the API can enqueue
+- Asked by: wp-builder/wp/16-csv-import · 2026-11-04
+- Where: Q-105 (no queue role for the API), BACKEND_PLAN §9 (`imports.process`: API call, singleton per import)
+- Question: `POST /imports/:id/process` marks the import `processing` (the only status a member may set; a trigger enforces it) and calls an optional `ImportQueue.enqueueProcess`, which is not wired. Until the `mp_queue` role exists (WP-09), the worker job `imports.sweep` (cron every minute, fan-out over `app_list_household_ids()` like Q-051) finds `processing` imports and enqueues `imports.process` with the singleton key `imports.process:{importId}`. It also finishes the file clean-up of a `done`/`failed` import whose file is still stored. Latency is up to a minute. OK as the interim? When WP-09 lands, the route should enqueue directly and the sweep can drop to a safety net.
+- Options considered: poll from the worker per import; wait for the queue role.
+- Blocking: no.
+- Answer: …
+
+## Q-143 · WP-16 · The S3 adapters are not built; storage is an interface
+- Asked by: wp-builder/wp/16-csv-import · 2026-11-04
+- Where: BACKEND_PLAN §7.7 step 1 (presigned URL, max 10 MB, `text/csv`), step 7 (delete after processing); `infra/`
+- Question: There is no AWS SDK in the repo and no bucket in infra yet, so the API depends on `ImportStorage` (`createUpload`, `head`, `delete`) and the worker on `ImportFileStore` (`get`, `delete`). Both default to "unconfigured" (the API answers 503 on `POST /imports`; the job fails and retries), and tests use in-memory fakes. Who builds the S3 adapters and the bucket (SSE-KMS, a lifecycle rule that expires abandoned `imports/` objects after 24 h, since a file that is uploaded but never processed is not purged by the job)? The adapter must use a presigned POST with a `content-length-range` condition (a presigned PUT cannot enforce a size); the size is re-checked at `/process` (413 and delete) and in the worker (10 MB, 50,000 rows, 100 columns, 2,000 characters per cell).
+- Options considered: add `@aws-sdk/client-s3` and `@aws-sdk/s3-presigned-post` in this WP (needs a bucket and credentials the agents do not have).
+- Blocking: yes for a real upload; everything behind the interfaces is tested.
+- Answer: …
+
+## Q-142 · WP-16 · CSV matches go through `decideExtraction`, and always end in review
+- Asked by: wp-builder/wp/16-csv-import · 2026-11-04
+- Where: WP-14 rules (`@mp/review-rules`), BACKEND_PLAN §7.8.2 auto-apply policy
+- Question: As instructed, a CSV candidate that matches an item we track is run through `decideExtraction` with honest signals: an uploaded file has no authenticated sender (`dmarcAligned: false`) and no provider-domain match (`domainMatch: false`), so the policy always answers "review" (reasons are stored in `checks.decision.reasons`). The worker queues the row whatever the verdict, so a CSV never auto-applies. Confirm that is intended (the alternative is a CSV-specific rule, for example "estimate replaced by an actual within ±50%", which would be a policy change).
+- Options considered: n/a
+- Blocking: no.
+- Answer: …
+
+## Q-141 · WP-16 · The review contract cannot say "fixed amount" for a CSV item
+- Asked by: wp-builder/wp/16-csv-import · 2026-11-04
+- Where: `itemFromFields` in `packages/review-rules/src/apply.ts` (amountType), `ExtractedFields`
+- Question: Confirming a `new` item maps `amountDueCents = null` to an `estimated` item, and an amount with `docType` `bill` or `statement` to a `statement` item; every other docType gives `fixed`. A fixed recurring bill found in a bank file therefore has to be written as `docType: "receipt"` (a bank line is a record of a payment made) to be created as `fixed`; an estimated one is written as `bill` with a null amount. That works but is a quiet convention. Should `ExtractedFields` get an explicit `amountType`, or a `docType` for "recurring payment"? The detection result keeps the true `amountType` in `checks.csv.amountType`.
+- Options considered: `bill` with an amount (would create `statement` items, wrong for rent).
+- Blocking: no.
+- Answer: …
+
+## Q-140 · WP-16 · `ExtractedFields.frequency` has no weekly, biweekly or "last weekday" value (paychecks)
+- Asked by: wp-builder/wp/16-csv-import · 2026-11-04
+- Where: `packages/contracts/src/review/index.ts` (EXTRACTED_FREQUENCIES), `scheduleFor` in `packages/review-rules/src/apply.ts`; fixture incomes (`biweekly`, `monthly_last_weekday`)
+- Question: Detection finds Sam's biweekly paycheck and Jordan's last-Friday paycheck (acceptance), but a review row can only say monthly, every 2 months, quarterly, every 6 months, yearly or one-time. Built: weekly and biweekly candidates are queued with `frequency: null` (the cadence, weekday and schedule hint are in `checks.csv`), so confirming asks the person for "how often it repeats" (`itemFromFields` returns a `frequency` problem) instead of guessing; the last-weekday paycheck is queued as `monthly` with the due date of the next hit, which `itemFromFields` turns into "day N of every month" (wrong for a last Friday). Skipped: creating a correct biweekly or last-Friday income item from review. Should WP-14 widen `frequency` (`weekly`, `biweekly`, `monthly_last_weekday`) and `scheduleFor`?
+- Options considered: put the schedule in a new `fields` key (strict schema, a WP-14 change); create income items directly (forbidden: items come only from `fromReview`).
+- Blocking: no for detection; yes for a one-click biweekly paycheck.
+- Answer: …
+
 ## Q-119 · WP-13 · The split's "(rest)" planned expense is attributed to the approver, not the proposer
 - Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03
 - Where: Q-116 answer; `planned_expenses_api_insert` (WP-06, G1 L-1: rows the API creates are attributed to the caller)

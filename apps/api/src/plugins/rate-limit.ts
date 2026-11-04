@@ -17,6 +17,8 @@ export const RATE_LIMITS = {
   authSensitive: { max: 20, timeWindow: "1 minute" },
   /** Engine calculations (plan, what-if, calendar): 60 per minute per user, shared (WP-12). */
   compute: { max: 60, timeWindow: "1 minute" },
+  /** CSV import calls (create, process, mapping): 10 per minute per user, shared (WP-16). */
+  imports: { max: 10, timeWindow: "1 minute" },
 } as const;
 
 /**
@@ -26,6 +28,7 @@ export const RATE_LIMITS = {
 export const RATE_LIMIT_GROUPS = {
   authSensitive: RATE_LIMITS.authSensitive,
   compute: RATE_LIMITS.compute,
+  imports: RATE_LIMITS.imports,
 } as const;
 export type RateLimitGroup = keyof typeof RATE_LIMIT_GROUPS;
 
@@ -45,6 +48,8 @@ export interface RateLimitOptions {
   /** Override the global per-minute limit (tests). */
   max?: number;
   timeWindow?: string | number;
+  /** Override named group budgets (tests that make many calls in one group). */
+  groups?: Partial<Record<RateLimitGroup, { max: number; timeWindow: string | number }>>;
 }
 
 const rateLimitPlugin: FastifyPluginAsync<RateLimitOptions> = async (app, opts) => {
@@ -53,7 +58,7 @@ const rateLimitPlugin: FastifyPluginAsync<RateLimitOptions> = async (app, opts) 
   const groupLimiter = (group: RateLimitGroup): onRequestHookHandler => {
     let hook = shared.get(group);
     if (!hook) {
-      hook = app.rateLimit({ ...RATE_LIMIT_GROUPS[group] }) as onRequestHookHandler;
+      hook = app.rateLimit({ ...RATE_LIMIT_GROUPS[group], ...opts.groups?.[group] }) as onRequestHookHandler;
       shared.set(group, hook);
     }
     return hook;

@@ -3380,6 +3380,241 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/households/{hid}/imports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Start a CSV import: returns a presigned upload (max 10 MB) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateImportInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["CreatedImport"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/imports/{id}/process": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Process the uploaded file: parse, dedupe, detect recurring items */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Import"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/imports/{id}/mapping": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Say which column is the date, description and amount; the saved mapping is reused */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["ImportColumnMappingInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Import"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/imports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Import status and counts */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Import"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5214,6 +5449,103 @@ export interface components {
       dueHint?: string | null;
       completed?: boolean;
     };
+    ImportColumnMappingInput: {
+      date: string;
+      description: string;
+      amount?: string;
+      debit?: string;
+      credit?: string;
+      balance?: string;
+      account?: string;
+      /**
+       * @default outflow_negative
+       * @enum {string}
+       */
+      amountSign: "outflow_negative" | "outflow_positive";
+    };
+    CreateImportInput: {
+      filename: string;
+      sizeBytes: number;
+      /**
+       * @default text/csv
+       * @constant
+       */
+      contentType: "text/csv";
+    };
+    ImportBalanceInput: {
+      /** @description Integer cents */
+      cents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      on: string;
+    };
+    ImportInput: {
+      /** Format: uuid */
+      id: string;
+      filename: string;
+      /** @enum {string} */
+      status: "uploaded" | "needs_mapping" | "processing" | "done" | "failed";
+      columns: string[] | null;
+      suggestedMapping: {
+        date?: string;
+        description?: string;
+        amount?: string;
+        debit?: string;
+        credit?: string;
+        balance?: string;
+        account?: string;
+        /**
+         * @default outflow_negative
+         * @enum {string}
+         */
+        amountSign: "outflow_negative" | "outflow_positive";
+      } | null;
+      mapping: components["schemas"]["ImportColumnMappingInput"] | null;
+      rowCount: number | null;
+      addedCount: number | null;
+      duplicateCount: number | null;
+      rejectedCount: number | null;
+      detectedCount: number | null;
+      queuedCount: number | null;
+      latestBalance: components["schemas"]["ImportBalanceInput"] | null;
+      error:
+        | (
+            | "too_large"
+            | "empty"
+            | "no_rows"
+            | "too_many_rows"
+            | "too_many_columns"
+            | "bad_encoding"
+            | "parse_failed"
+            | "missing_file"
+            | "bad_mapping"
+          )
+        | null;
+      /** Format: date-time */
+      createdAt: string;
+      processedAt: string | null;
+    };
+    ImportUploadInput: {
+      /** @enum {string} */
+      method: "PUT" | "POST";
+      /** Format: uri */
+      url: string;
+      headers: {
+        [key: string]: string;
+      };
+      fields: {
+        [key: string]: string;
+      };
+      /** Format: date-time */
+      expiresAt: string;
+      maxBytes: number;
+    };
+    CreatedImportInput: {
+      import: components["schemas"]["ImportInput"];
+      upload: components["schemas"]["ImportUploadInput"];
+    };
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -7043,6 +7375,103 @@ export interface components {
       dueOn?: string | null;
       dueHint?: string | null;
       completed?: boolean;
+    };
+    ImportColumnMapping: {
+      date: string;
+      description: string;
+      amount?: string;
+      debit?: string;
+      credit?: string;
+      balance?: string;
+      account?: string;
+      /**
+       * @default outflow_negative
+       * @enum {string}
+       */
+      amountSign: "outflow_negative" | "outflow_positive";
+    };
+    CreateImport: {
+      filename: string;
+      sizeBytes: number;
+      /**
+       * @default text/csv
+       * @constant
+       */
+      contentType: "text/csv";
+    };
+    ImportBalance: {
+      /** @description Integer cents */
+      cents: number;
+      /**
+       * Format: date
+       * @description Calendar date YYYY-MM-DD (household timezone)
+       */
+      on: string;
+    };
+    Import: {
+      /** Format: uuid */
+      id: string;
+      filename: string;
+      /** @enum {string} */
+      status: "uploaded" | "needs_mapping" | "processing" | "done" | "failed";
+      columns: string[] | null;
+      suggestedMapping: {
+        date?: string;
+        description?: string;
+        amount?: string;
+        debit?: string;
+        credit?: string;
+        balance?: string;
+        account?: string;
+        /**
+         * @default outflow_negative
+         * @enum {string}
+         */
+        amountSign: "outflow_negative" | "outflow_positive";
+      } | null;
+      mapping: components["schemas"]["ImportColumnMapping"] | null;
+      rowCount: number | null;
+      addedCount: number | null;
+      duplicateCount: number | null;
+      rejectedCount: number | null;
+      detectedCount: number | null;
+      queuedCount: number | null;
+      latestBalance: components["schemas"]["ImportBalance"] | null;
+      error:
+        | (
+            | "too_large"
+            | "empty"
+            | "no_rows"
+            | "too_many_rows"
+            | "too_many_columns"
+            | "bad_encoding"
+            | "parse_failed"
+            | "missing_file"
+            | "bad_mapping"
+          )
+        | null;
+      /** Format: date-time */
+      createdAt: string;
+      processedAt: string | null;
+    };
+    ImportUpload: {
+      /** @enum {string} */
+      method: "PUT" | "POST";
+      /** Format: uri */
+      url: string;
+      headers: {
+        [key: string]: string;
+      };
+      fields: {
+        [key: string]: string;
+      };
+      /** Format: date-time */
+      expiresAt: string;
+      maxBytes: number;
+    };
+    CreatedImport: {
+      import: components["schemas"]["Import"];
+      upload: components["schemas"]["ImportUpload"];
     };
   };
   responses: never;

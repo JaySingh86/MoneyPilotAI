@@ -143,11 +143,12 @@ describe("occurrences.sweep", () => {
         before + 2,
       "the materialize jobs to be enqueued",
     );
+    // Other test files add households to the same database, so wait for THIS test's two, not for any two.
     await until(
       async () =>
         (await count(
-          "select count(*)::int as n from pgboss.job where name = 'occurrences.materialize' and state = 'completed'",
-          [],
+          "select count(distinct data->>'householdId')::int as n from pgboss.job where name = 'occurrences.materialize' and state = 'completed' and data->>'householdId' = any($1::text[])",
+          [[seeded.householdId, secondHousehold]],
         )) >= 2,
       "the materialize jobs to complete",
     );

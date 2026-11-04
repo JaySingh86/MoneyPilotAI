@@ -19,6 +19,7 @@
     "@mp/billing": "workspace:*",
     "@mp/contracts": "workspace:*",
     "@mp/db": "workspace:*",
+    "@mp/detection": "workspace:*",
     "@mp/engine": "workspace:*",
     "@mp/observability": "workspace:*",
     "@mp/review-rules": "workspace:*",
