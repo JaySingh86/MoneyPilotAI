@@ -3,7 +3,7 @@
 // mock API or its engine may be in the bundle (security finding M1). The build goes into its own
 // folder so it never disturbs a running dev server.
 import { execFileSync } from "node:child_process";
-import { readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -55,10 +55,15 @@ function failure(extra: Record<string, string | undefined>): string {
 }
 
 describe("production build", () => {
+  // `next build` rewrites the tracked next-env.d.ts to point at DIST; put it back afterwards.
+  const NEXT_ENV = join(WEB, "next-env.d.ts");
+  let nextEnv: string;
   beforeAll(() => {
+    nextEnv = readFileSync(NEXT_ENV, "utf8");
     rmSync(join(WEB, DIST), { recursive: true, force: true });
   });
   afterAll(() => {
+    writeFileSync(NEXT_ENV, nextEnv);
     rmSync(join(WEB, DIST), { recursive: true, force: true });
   });
 
