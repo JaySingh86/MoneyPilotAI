@@ -110,6 +110,14 @@ Format (newest first):
 - Blocking: no
 - Answer:
 
+## Q-147 · WP-16 · Mask digit runs of 7 or more in imported text, not 9
+- Asked by: review of wp/16-csv-import · 2026-11-04
+- Where: BACKEND_PLAN §7.7 / §7.8 ("mask long digit runs, keep last 4"), CLAUDE.md hard rule 7, `packages/detection/src/sanitize.ts`
+- Question: `maskLongNumbers` masks runs of 9 or more digits, so an 8-digit account or member number in a CSV description is stored in full. Lowering the threshold to 7 (dates excepted) closes that, but changes the expected value in `units.test.ts` ("keeps short numbers and dates" keeps `ref 12345678`). OK to lower it and update that test?
+- Options considered: keep 9 (current; the test stays as written).
+- Blocking: no (9 is in place).
+- Answer: Pending.
+
 ## Q-146 · WP-16 · Detection thresholds, what is not queued, and what a stranger sees
 - Asked by: wp-builder/wp/16-csv-import · 2026-11-04
 - Where: BACKEND_PLAN §7.7 step 5, §8.2

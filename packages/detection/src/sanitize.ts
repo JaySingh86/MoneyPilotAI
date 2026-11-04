@@ -12,7 +12,11 @@ function isControl(code: number): boolean {
 const stripControl = (text: string): string =>
   Array.from(text, (ch) => (isControl(ch.codePointAt(0) ?? 0) ? " " : ch)).join("");
 const FORMULA_START = /^[=+\-@\t\r]/;
-const LONG_NUMBER = /\d(?:[ -]?\d){8,}/g;
+// A date (10/18/2026, 2026-10-18) is left alone; any other run of 9 or more digits is masked, with up to three
+// non-alphanumeric separators (space, dash, dot, slash, bullet, a fullwidth dash after NFKC) between the digits.
+// Q-147 asks whether to lower this to 7.
+const LONG_NUMBER =
+  /\b\d{1,2}[/.-]\d{1,2}[/.-](?:\d{4}|\d{2})\b|\b\d{4}[/.-]\d{2}[/.-]\d{2}\b|\d(?:[^A-Za-z0-9]{0,3}\d){8,}/g;
 
 export const MAX_TEXT_CHARS = 200;
 
@@ -21,9 +25,13 @@ export function neutralizeFormula(text: string): string {
   return FORMULA_START.test(text) ? `'${text}` : text;
 }
 
-/** Replaces any run of 9 or more digits (spaces and dashes allowed between them) with `****` and the last 4. */
+/** Replaces a run of 9 or more digits (separators allowed between them, dates excepted) with `****` and the last 4. */
 export function maskLongNumbers(text: string): string {
-  return text.replace(LONG_NUMBER, (run) => `****${run.replace(/\D/g, "").slice(-4)}`);
+  return text.normalize("NFKC").replace(LONG_NUMBER, (run) =>
+    /^\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}$|^\d{4}[/.-]\d{2}[/.-]\d{2}$/.test(run)
+      ? run
+      : `****${run.replace(/\D/g, "").slice(-4)}`,
+  );
 }
 
 /**
@@ -31,7 +39,7 @@ export function maskLongNumbers(text: string): string {
  * collapsed, formulas are neutralised, and the length is capped.
  */
 export function cleanText(text: string, max = MAX_TEXT_CHARS): string {
-  const collapsed = maskLongNumbers(stripControl(text)).replace(/\s+/g, " ").trim();
+  const collapsed = maskLongNumbers(stripControl(text.normalize("NFKC"))).replace(/\s+/g, " ").trim();
   return neutralizeFormula(collapsed).slice(0, max);
 }
 

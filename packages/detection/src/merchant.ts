@@ -41,7 +41,7 @@ const STORE_NO = /(?:#|\bstore\s|\bstr\s|\bno\.?\s)\s*\d+/g;
 const MAX_WORDS = 4;
 
 export function normalizeMerchant(description: string): string {
-  let s = description.toLowerCase();
+  let s = description.normalize("NFKC").toLowerCase();
   s = s.replace(DATE_LIKE, " ").replace(REF_PHRASE, " ").replace(STORE_NO, " ");
   s = s.replace(/[^a-z0-9]+/g, " ").trim();
   let words = s
