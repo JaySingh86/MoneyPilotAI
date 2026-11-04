@@ -49,6 +49,8 @@ export interface WorkerDb {
    * SECURITY DEFINER `app_list_household_ids()`; ids only, nothing else is readable this way.
    */
   listHouseholdIds(): Promise<string[]>;
+  /** Households with billing events to apply, or a plan out of step with an ended subscription (WP-25). */
+  listBillingPendingHouseholds(): Promise<string[]>;
   close(): Promise<void>;
 }
 
@@ -164,6 +166,13 @@ export function createWorkerDb(options: DbOptions): WorkerDb {
       const none: Session = { "app.user_id": "", "app.household_id": "", "app.auth_subject": "" };
       const res = await runner.run(none, (tx) =>
         tx.execute<{ id: string }>(sql`select app_list_household_ids() as id`),
+      );
+      return res.rows.map((r) => r.id);
+    },
+    async listBillingPendingHouseholds() {
+      const none: Session = { "app.user_id": "", "app.household_id": "", "app.auth_subject": "" };
+      const res = await runner.run(none, (tx) =>
+        tx.execute<{ id: string }>(sql`select app_billing_pending_households() as id`),
       );
       return res.rows.map((r) => r.id);
     },

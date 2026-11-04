@@ -12,6 +12,7 @@ import {
   type Invite,
   type PatchHouseholdBody,
 } from "@mp/contracts";
+import { entitlementsForPlan } from "@mp/billing";
 import type { ApiDb, ApiContext, Tx } from "@mp/db";
 import { assertVersion } from "../../lib/if-match";
 import type { InviteSender } from "../../auth/runtime";
@@ -289,7 +290,7 @@ export class HouseholdService {
         openInvite: open ? toInvite(open) : null,
         // The review queue count is stubbed until WP-14; tasks and proposals come from WP-13.
         badges: { reviewQueue: 0, tasksDue: counts.tasksDue, proposalsPending: counts.proposalsPending },
-        entitlements: { plan: household.plan, maxAdults: MAX_ADULTS },
+        entitlements: entitlementsForPlan(household.plan), // WP-25: the feature map from @mp/billing
         // Stubbed until WP-21 (email connections).
         connections: { emailConnections: 0 },
       };

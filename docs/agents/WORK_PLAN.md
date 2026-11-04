@@ -42,7 +42,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | todo |
 | WP-23 | Web: Email & imports, Members & privacy, setup flow, review UI | 4 | WP-10, WP-14, WP-21 | L | — | in-progress (wp-builder, wp/23-web-imports-settings) |
 | WP-24 | Privacy ops: export, leave, delete, retention, activity | 4 | WP-05, WP-21 | M | G2 | todo |
-| WP-25 | Billing + entitlements | 4 | WP-05, WP-08 | M | — | in-progress (wp-builder, wp/25-billing) |
+| WP-25 | Billing + entitlements | 4 | WP-05, WP-08 | M | — | done (real provider pending H-01) |
 | WP-26 | Hardening: security, observability, E2E, load | 4 | WP-12…WP-25 | L | G4 | todo |
 | WP-27 | P1 · Explain (AI text) + number validator | P1 | WP-11, WP-12 | M | G3 | todo |
 | WP-28 | P1 · Ask MoneyPilot (engine tools, SSE) | P1 | WP-27 | L | G3 | todo |
@@ -351,6 +351,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Account deletion anonymizes `ip` and `user_agent` on that user's household-less audit events, which otherwise live 2 years (WP-03 G1 re-review).
   - [ ] The retention purge nulls `extracted_items.message_meta` and `evidence` after 13 months and expires `queued` review items after the configured age; soft-deleted items and goals are hard-deleted after the retention period (WP-06 Q-055).
   - [ ] The purge covers `calc_snapshots` older than 90 days that no `ai_texts` row or proposal references, through a SECURITY DEFINER function (Q-104).
+  - [ ] Deletion and retention cover `subscriptions` and `billing_events` (cascade from households; processed events and `webhook_events` purged at 13 months, Q-154).
 - **Gate:** G2.
 
 ## WP-25 · Billing + entitlements

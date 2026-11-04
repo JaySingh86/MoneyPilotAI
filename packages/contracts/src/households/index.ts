@@ -1,5 +1,6 @@
 // Household contracts (BACKEND_PLAN §6, §8.2): households, the summary, partner invites, leave.
 import { z } from "zod";
+import { Entitlements } from "../billing";
 import { Cents, HouseholdParams, Timestamp, Uuid, Version } from "../common";
 import { ColorRole, TimeZone } from "../identity";
 
@@ -99,10 +100,7 @@ export const HouseholdSummary = z
       tasksDue: z.number().int().min(0),
       proposalsPending: z.number().int().min(0),
     }),
-    entitlements: z.object({
-      plan: z.enum(["free", "family_plus"]),
-      maxAdults: z.number().int().min(1),
-    }),
+    entitlements: Entitlements,
     connections: z.object({ emailConnections: z.number().int().min(0) }),
   })
   .meta({ id: "HouseholdSummary" });

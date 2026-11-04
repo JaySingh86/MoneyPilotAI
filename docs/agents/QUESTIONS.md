@@ -5,6 +5,46 @@ Agents add questions here instead of guessing. The tech lead answers them. If an
 Format (newest first):
 
 ```
+## Q-154 · WP-25 · WP-24 deletion and retention scope for the billing tables
+- Asked by: wp-builder/wp/25-billing · 2026-11-04
+- Where: BACKEND_PLAN §7.11 (delete household, retention schedule); migration `202611041100_wp25_billing.sql`
+- Question: `subscriptions` and `billing_events` both reference `households(id) on delete cascade`, so household deletion removes them without extra code. `webhook_events` has no household and holds only provider plus event id. The retention schedule lists neither table. Should WP-24's nightly purge delete processed `billing_events` (ids and states only, no card data) and `webhook_events` older than 13 months, and should household deletion also cancel the provider subscription ("cancel billing", §7.11) through the adapter? The WP-24 checklist should list both tables.
+- Options considered: (a) cascade only, keep processed events indefinitely; (b) purge processed `billing_events` and their `webhook_events` after 13 months, like the other event metadata.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-04): the WP-24 checklist will list `subscriptions` and `billing_events` (cascade from households is sufficient for deletion). The tech lead adds the line; no code change in WP-25.
+
+## Q-153 · WP-25 · How does a verified billing webhook reach the worker, with no queue connection in the API?
+- Asked by: wp-builder/wp/25-billing · 2026-11-04
+- Where: BACKEND_PLAN §7.10 ("webhooks ... update `subscriptions` and `households.plan`"), §9 (`billing.sync`, webhook trigger), WP-03 (`households.plan` writable by mp_worker only), Q-102/Q-105 (the API has no pg-boss role yet)
+- Question: The API cannot enqueue a `billing.sync` job, and it must not write `households.plan`. Built: the route verifies the signature (WP-08 HMAC helper), then calls the new SECURITY DEFINER `app_billing_ingest` (executable by mp_api only), which records the event id in `webhook_events` (the dedupe) and the normalized event in `billing_events` in one statement. The worker's `billing.drain` cron (every minute) lists households with queued events through `app_billing_pending_households()` (ids only, mp_worker only) and enqueues one `billing.sync` each; the sync applies events under that household's scope, the only writer of `subscriptions` and `households.plan`. mp_api got no INSERT/UPDATE privilege on either table. The drain also picks up a household whose canceled subscription's paid period has ended, so the plan drops to Free without a new webhook. Cost: up to about a minute of delay between payment and the plan change. Is this acceptable, or should the API enqueue directly once the `mp_queue` role exists (WP-09)?
+- Options considered: (a) outbox plus drain (built; the definer function is new and needs G1 sign-off); (b) pg-boss `send` from the API after the queue role exists, keeping `billing_events` as the durable record; (c) a narrow `grant update (plan)` to mp_api through a definer function that takes the verified payload (rejected: it would let a compromised API set any plan).
+- Blocking: no. Both functions are listed in the definer allowlist test (`coverage.test.ts`).
+- Answer: Answered (tech lead for owner, 2026-11-04): accept the outbox plus drain now; move to enqueueing from the API through the `mp_queue` role after WP-09 (tracked on the WP-09 and WP-26 checklists). Review hardening built: `app_billing_ingest` refuses an `occurred_at` more than 5 minutes ahead and any type or payload that is not a known shape (SQLSTATE 42501, `billing_event_invalid`, mapped to 400); the sync stores `last_event_at` as the earlier of the provider's time and our receive time; each event is applied in a savepoint, and a failing event is marked `ignored` so later ones still apply; an event for a different provider subscription id applies only when it is `active` or `trialing` and newer, so an old subscription's late `expired` cannot downgrade a paying household.
+
+## Q-152 · WP-25 · Step-up MFA on billing actions?
+- Asked by: wp-builder/wp/25-billing · 2026-11-04
+- Where: BACKEND_PLAN §6 (step-up list: connect email, export, delete, leave), §8.2 (`billing` rows say "Billing owner" only), ADR-018
+- Question: The brief says to require step-up "where the spec marks billing actions". No spec text marks one: the step-up list does not include checkout, the portal or cancelling. So `GET/POST /households/:hid/billing…` check the billing owner only and do not call `requireStepUp`. Should starting checkout or opening the customer portal (payment method, cancel) require step-up?
+- Options considered: (a) none (built); (b) step-up on the portal only, since it can cancel the plan and change the payment method; (c) step-up on both. Adding it is one line per route (`requireStepUp(provider, request)`), as in `households/routes.ts`.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-04): step-up (`requireStepUp`, ADR-018) on the customer portal only, because it can cancel the plan and change the payment method. Not on checkout. Built and tested (`mfa_required` without a fresh `mfa_verified_at`).
+
+## Q-151 · WP-25 · What is the Free-plan item limit behind "unlimited items"?
+- Asked by: wp-builder/wp/25-billing · 2026-11-04
+- Where: BACKEND_PLAN §7.10 ("Family Plus: ... unlimited items"; Free lists no number)
+- Question: "Unlimited items" implies Free has a cap, but no document gives it. The entitlement config has `freeItemLimit` (default `null`) and `entitlements.limits.items` reports it to the UI, but no route enforces a cap, because enforcing one means choosing a number and a behavior at the limit (block creates, or read-only beyond N). What is the number, and does hitting it return `entitlement_required` on item creation?
+- Options considered: (a) no cap until decided (built); (b) a cap such as 10 enforced in `POST /items` (WP-06's module).
+- Blocking: no. Nothing was enforced.
+- Answer: Answered (tech lead for owner, 2026-11-04): keep `freeItemLimit` as `null`. This stays an open owner decision; nothing is enforced.
+
+## Q-150 · WP-25 · Free vs Plus: which routes are gated now?
+- Asked by: wp-builder/wp/25-billing · 2026-11-04
+- Where: BACKEND_PLAN §7.10 and §17 item 5 (open owner decision), `docs/DESIGN_SPEC.md` (no plan split on any screen)
+- Question: The feature map in `packages/billing/src/features.ts` (`DEFAULT_FEATURE_TIERS`) follows the §7.10 text: partner sharing, goals, reminders, Gmail/Outlook connection, renewal alerts and unlimited items are Plus. Only goals is enforced on routes today (every non-GET goals route answers 403 `entitlement_required` on Free; reads stay open, so a downgrade is read-only and deletes nothing). Partner sharing (invites) and email connections are the two items §17 leaves open, and gating invites would make every Free household single-adult and change most WP-05 tests, so I left them in the map but did not attach the guard. Reminders, renewal alerts and email connections belong to WP-16 and WP-21, which can add `requireEntitlement` (billing module export) in one line. Decide: are partner sharing and Gmail/Outlook Free or Plus? Does a household on Free keep reminders and renewal alerts it already had?
+- Options considered: (a) as built; (b) gate invites now (breaks existing Free-household invite tests unless they upgrade first); (c) make both Free and flip the map.
+- Blocking: no. Changing the answer is one value in `DEFAULT_FEATURE_TIERS` plus the guard on the invite route.
+- Answer: Answered (tech lead for owner, 2026-11-04): goals-only gating for now. Partner sharing and email connections stay ungated until the owner decides BACKEND_PLAN §17 item 5. The proposal bypass is closed: goal-type proposals (`goal_*` and `shortfall_move_from_fund`) are checked against the goals entitlement when created and again when approved (a lapse in between ends the proposal as `superseded`).
+
 ## Q-001 · WP-xx · short title
 - Asked by: {agent/branch} · {date}
 - Where: {file §section}

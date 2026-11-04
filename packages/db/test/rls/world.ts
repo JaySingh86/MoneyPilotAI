@@ -10,6 +10,7 @@ import {
   type UserProfile,
 } from "../../src/seed/flows";
 import type { ApiDb } from "../../src/tx";
+import { seedBillingWorld, type BillingWorldRows } from "./billing-world";
 import { seedItemsWorld, type ItemsWorldRows } from "./items-world";
 import { seedReviewWorld, type ReviewWorldRows } from "./review-world";
 
@@ -23,6 +24,8 @@ export interface TestHousehold {
   items: ItemsWorldRows;
   /** One row in every WP-14 table. */
   review: ReviewWorldRows;
+  /** One row in every WP-25 table. */
+  billing: BillingWorldRows;
 }
 
 export interface World {
@@ -65,7 +68,8 @@ export async function buildHousehold(db: ApiDb, label: string): Promise<TestHous
   // One row in every WP-06 table, so the cross-household tests have a victim in each.
   const items = await seedItemsWorld(db, household);
   const review = await seedReviewWorld(db, household, items.itemId);
-  return { ...household, items, review };
+  const billing = await seedBillingWorld(db, id);
+  return { ...household, items, review, billing };
 }
 
 export async function buildWorld(db: ApiDb): Promise<World> {

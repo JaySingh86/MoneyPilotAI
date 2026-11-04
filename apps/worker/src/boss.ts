@@ -4,6 +4,14 @@
 import { PgBoss, type Job } from "pg-boss";
 import type { Logger } from "@mp/observability";
 import type { WorkerDb } from "@mp/db";
+import {
+  BILLING_DRAIN_CRON,
+  BILLING_DRAIN_QUEUE,
+  BILLING_SYNC_QUEUE,
+  BILLING_SYNC_QUEUE_OPTIONS,
+  handleBillingDrain,
+  handleBillingSync,
+} from "./jobs/billing/sync";
 import { guardJob } from "./jobs/guard";
 import { MATERIALIZE_QUEUE, handleMaterialize } from "./jobs/occurrences/materialize";
 import {
@@ -34,6 +42,8 @@ const QUEUES = [
   },
   { name: PLAN_RECOMPUTE_QUEUE, options: PLAN_RECOMPUTE_QUEUE_OPTIONS },
   { name: OCCURRENCES_SWEEP_QUEUE, options: { retryLimit: 3, retryDelay: 60, retryBackoff: true } },
+  { name: BILLING_SYNC_QUEUE, options: { policy: "short", ...BILLING_SYNC_QUEUE_OPTIONS } }, // WP-25
+  { name: BILLING_DRAIN_QUEUE, options: { retryLimit: 1 } }, // WP-25
 ] as const;
 
 /** Creates the queues, workers and schedules. Safe to call on every start: queues and schedules upsert. */
@@ -61,6 +71,16 @@ export async function registerJobs(boss: PgBoss, deps: JobDeps): Promise<void> {
     );
     deps.log.info(result, "nightly occurrence sweep enqueued");
   });
+
+  // WP-25: apply verified billing webhooks (the API cannot enqueue, so the drain finds them every minute).
+  await boss.work(BILLING_SYNC_QUEUE, options, async (jobs: Job<unknown>[]) => {
+    for (const job of jobs)
+      await guardJob(BILLING_SYNC_QUEUE, deps.log, () => handleBillingSync(deps, job.data));
+  });
+  await boss.work(BILLING_DRAIN_QUEUE, options, async () => {
+    await guardJob(BILLING_DRAIN_QUEUE, deps.log, () => handleBillingDrain({ db: deps.db, sender: boss }));
+  });
+  await boss.schedule(BILLING_DRAIN_QUEUE, BILLING_DRAIN_CRON, null, { tz: "UTC" });
 
   // Nightly at 02:00 UTC; the sweep fans out one materialize job per household (Q-051).
   await boss.schedule(OCCURRENCES_SWEEP_QUEUE, OCCURRENCES_SWEEP_CRON, null, { tz: "UTC" });

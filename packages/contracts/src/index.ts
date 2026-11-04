@@ -10,3 +10,4 @@ export * from "./review";
 export * from "./goals";
 export * from "./proposals";
 export * from "./tasks";
+export * from "./billing";

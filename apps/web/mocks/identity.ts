@@ -80,7 +80,20 @@ export function summary(tasksDue: number, reviewQueue: number, cushionCents: num
     ],
     openInvite: null,
     badges: { reviewQueue, tasksDue, proposalsPending: 0 },
-    entitlements: { plan: "family_plus", maxAdults: 2 },
+    // The Rivera household is on Family Plus: every feature is writable (WP-25 entitlements).
+    entitlements: {
+      plan: "family_plus",
+      maxAdults: 2,
+      features: {
+        partnerSharing: { read: true, write: true },
+        goals: { read: true, write: true },
+        reminders: { read: true, write: true },
+        emailConnections: { read: true, write: true },
+        renewalAlerts: { read: true, write: true },
+        unlimitedItems: { read: true, write: true },
+      },
+      limits: { items: null },
+    },
     connections: { emailConnections: 1 },
   };
 }

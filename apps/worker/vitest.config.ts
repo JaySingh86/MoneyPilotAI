@@ -4,6 +4,8 @@ import { defineConfig } from "vitest/config";
 // container (Testcontainers) with the real roles and migrations, and runs real pg-boss against it.
 export default defineConfig({
   test: {
+    // One shared database: the sweep test counts jobs for every household, so test files must not overlap.
+    fileParallelism: false,
     projects: [
       {
         test: {

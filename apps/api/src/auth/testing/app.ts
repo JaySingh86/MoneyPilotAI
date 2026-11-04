@@ -7,6 +7,8 @@ import { createApiDb, type ApiDb } from "@mp/db";
 import { buildServer, type ApiServer } from "../../server";
 import { createHouseholdsModule } from "../../modules/households";
 import { createIdentityModule } from "../../modules/identity";
+import type { BillingProvider } from "@mp/billing";
+import { createBillingModules } from "../../modules/billing";
 import { createWp13Modules } from "../../modules/goals";
 import { createItemsModule } from "../../modules/items";
 import { createPlanningModule } from "../../modules/planning";
@@ -52,6 +54,8 @@ export interface TestUser {
 export interface TestApiOptions {
   /** The API clock (UTC instant). Default: the fixture date, 2026-10-27. */
   now?: () => string;
+  /** The billing provider behind the billing routes (WP-25). Default: none configured. */
+  billingProvider?: BillingProvider | null;
 }
 
 export async function createTestApi(options: TestApiOptions = {}): Promise<TestApi> {
@@ -84,6 +88,7 @@ export async function createTestApi(options: TestApiOptions = {}): Promise<TestA
       createItemsModule(() => rt, { now }),
       ...createWp13Modules(() => rt, { now }),
       createPlanningModule(() => rt, { now }),
+      ...createBillingModules(() => rt, { now, provider: options.billingProvider ?? null }),
     ],
   });
   await app.ready();

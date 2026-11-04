@@ -246,7 +246,12 @@ describe("summary", () => {
     expect(JSON.stringify(body.members)).not.toContain("@");
     expect(body.badges).toEqual({ reviewQueue: 0, tasksDue: 0, proposalsPending: 0 });
     expect(body.openInvite).toBeNull();
-    expect(body.entitlements).toEqual({ plan: "free", maxAdults: 2 });
+    // WP-25: the summary carries the feature map; on Free every Plus feature is read-only.
+    expect(body.entitlements).toMatchObject({
+      plan: "free",
+      maxAdults: 2,
+      features: { goals: { read: true, write: false } },
+    });
   });
 });
 

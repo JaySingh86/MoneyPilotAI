@@ -15,12 +15,19 @@ import {
   Proposal,
 } from "@mp/contracts";
 import { requireIfMatch, setVersionTag } from "../../lib/if-match";
+import { requireEntitlement } from "../billing/guard";
 import { actor } from "../items/actor";
 import * as service from "./service";
 import type { GoalsDeps } from "./service";
 
 export function goalsRoutes(deps: () => GoalsDeps): FastifyPluginAsyncZod {
   return async (scope) => {
+    // WP-25: goals are a Family Plus feature. Reads stay open after a downgrade; writes need the plan.
+    scope.addHook(
+      "preHandler",
+      requireEntitlement(() => ({ db: deps().db }), "goals"),
+    );
+
     scope.get(
       "/households/:hid/goals",
       {

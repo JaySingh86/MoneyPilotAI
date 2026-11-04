@@ -12,10 +12,20 @@ import { mapDbError, type Actor, type ItemsDeps } from "../items/service";
 import { engineSafe } from "../goals/service";
 import { loadPlanInput } from "../goals/load-input";
 import * as goalsRepo from "../goals/repo";
+import { assertCanWrite, canWriteFeature } from "../billing/guard";
 import { applyPayload, Superseded } from "./apply";
 import { insertProposal, PROPOSAL_COLUMNS, toProposal } from "./core";
 
 export type ProposalsDeps = ItemsDeps;
+
+/**
+ * Payloads that change a goal or a goal's saved money. Goals are a Family Plus feature (WP-25), and a
+ * proposal is just another way to write one, so it is checked when it is created and again when it is
+ * approved (the plan can lapse in between).
+ */
+function changesGoals(type: string): boolean {
+  return type.startsWith("goal_") || type === "shortfall_move_from_fund";
+}
 
 async function inTx<T>(deps: ProposalsDeps, a: Actor, fn: (tx: Tx) => Promise<T>): Promise<T> {
   try {
@@ -69,6 +79,7 @@ async function requireApprover(tx: Tx, a: Actor): Promise<void> {
 
 export async function createProposal(deps: ProposalsDeps, a: Actor, body: CreateProposal): Promise<Proposal> {
   return inTx(deps, a, async (tx) => {
+    if (body.type === "goal_monthly") await assertCanWrite(tx, a.householdId, "goals");
     await requireApprover(tx, a);
     const input = await loadPlanInput(tx, a.householdId, deps.now(), { requireBalance: true });
     let payload: ProposalPayload;
@@ -143,6 +154,7 @@ export async function createProposal(deps: ProposalsDeps, a: Actor, body: Create
         };
       }
     }
+    if (changesGoals(payload.type)) await assertCanWrite(tx, a.householdId, "goals");
     return insertProposal(tx, {
       householdId: a.householdId,
       proposedBy: a.userId,
@@ -236,6 +248,13 @@ export async function approveProposal(deps: ProposalsDeps, a: Actor, id: string)
       await closeProposal(tx, id, "superseded", "The request could not be read.");
       await audit(tx, a, "proposal.superseded", id, "invalid");
       return { kind: "stale", message: "This proposal is no longer valid. Ask again." };
+    }
+    // The plan can lapse between create and approve. A blocked approval ends the proposal like any other one
+    // that can no longer be applied, instead of leaving it pending for a plan that may never come back.
+    if (changesGoals(parsed.data.type) && !(await canWriteFeature(tx, a.householdId, "goals"))) {
+      await closeProposal(tx, id, "superseded", "Goals need Family Plus.");
+      await audit(tx, a, "proposal.superseded", id, parsed.data.type);
+      return { kind: "stale", message: "This change needs Family Plus, so it was not applied." };
     }
     try {
       // A savepoint: a failed apply (a database error aborts the transaction) leaves nothing half applied

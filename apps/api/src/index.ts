@@ -1,3 +1,4 @@
+import { createProviderFromEnv } from "@mp/billing";
 import { createLogger } from "@mp/observability";
 import { createAuthenticator } from "./auth/authenticator";
 import { AuthConfigError, loadCognitoConfig } from "./auth/config";
@@ -49,6 +50,18 @@ try {
     process.exit(1);
   }
   throw err;
+}
+
+// Billing (WP-25): a misconfigured provider (an unknown name, or the fake outside development and test) stops
+// the API at startup instead of letting it run without the billing it was asked to have.
+try {
+  createProviderFromEnv(process.env);
+} catch (err) {
+  log.error(
+    { reason: err instanceof Error ? err.message : "invalid" },
+    "billing is misconfigured; refusing to start",
+  );
+  process.exit(1);
 }
 
 // The invite sender is packages/notify's job (WP-15, Q-081). Until it is wired, this one fails in

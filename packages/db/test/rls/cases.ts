@@ -143,4 +143,21 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
       values (${t.householdId}, 'Attacker task', 'both', 'user', ${t.actorUserId})`,
     update: (t) => sql`update tasks set title = 'tampered' where household_id = ${t.householdId}`,
   },
+  // ===== WP-25: subscriptions and the billing event inbox =====
+  {
+    table: "subscriptions",
+    insert: (t) => sql`insert into subscriptions
+        (household_id, provider, provider_customer_id, provider_subscription_id, status, billing_interval, last_event_at)
+      values (${t.householdId}, 'fake', 'cus_attacker', ${`sub_${randomUUID()}`}, 'active', 'month', now())`,
+    update: (t) => sql`update subscriptions set status = 'active' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "billing_events",
+    insert: (
+      t,
+    ) => sql`insert into billing_events (household_id, provider, event_id, type, occurred_at, payload)
+      values (${t.householdId}, 'fake', ${`evt_${randomUUID()}`}, 'subscription.updated', now(), '{}'::jsonb)`,
+    update: (t) => sql`update billing_events set processed_at = now(), outcome = 'applied'
+      where household_id = ${t.householdId}`,
+  },
 ];

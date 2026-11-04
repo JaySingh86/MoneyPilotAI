@@ -94,6 +94,8 @@ describe("RLS posture of every table", () => {
       app_transfer_creator: ["mp_api"],
       app_purge_audit_events: ["mp_worker"],
       app_list_household_ids: ["mp_worker"],
+      app_billing_ingest: ["mp_api"], // WP-25: the API's only path from a verified webhook to the worker
+      app_billing_pending_households: ["mp_worker"], // WP-25: ids only
     };
     const res = await apiClient.query<{ proname: string; roles: string[] }>(`
       select p.proname,

@@ -4,6 +4,7 @@
 // `defineModule({ name, routes })`; follow the route recipe in `../lib/module.ts`. After adding routes,
 // run `pnpm contracts:gen` and commit the regenerated files in packages/contracts/src/openapi.
 import type { ApiModule } from "../lib/module";
+import { billingModules } from "./billing";
 import { identityModules } from "./identity";
 import { wp13Modules } from "./goals";
 import { itemsModule } from "./items";
@@ -17,4 +18,5 @@ export const modules: readonly ApiModule[] = [
   planningModule, // WP-12: plan, what-if, calendar, renewals
   reviewModule, // WP-14
   ...wp13Modules, // WP-13: goals, proposals, tasks
+  ...billingModules, // WP-25: billing, billing webhook
 ];

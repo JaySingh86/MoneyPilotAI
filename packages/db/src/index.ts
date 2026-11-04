@@ -53,3 +53,10 @@ export {
 } from "./items/materialize";
 export { expireProposals } from "./proposals/expire";
 export { autoCompleteTasks, type AutoCompleteEvent, type AutoCompleted } from "./tasks/auto-complete";
+export {
+  applyBillingEvents,
+  type BillingStatus,
+  type BillingSyncDeps,
+  type BillingSyncResult,
+  type StoredSubscription,
+} from "./billing/sync";

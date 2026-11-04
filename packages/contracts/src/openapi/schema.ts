@@ -3208,6 +3208,178 @@ export interface paths {
     };
     trace?: never;
   };
+  "/v1/households/{hid}/billing": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Plan, subscription state and entitlements */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["BillingState"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/billing/checkout": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Start a Family Plus checkout (billing owner) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CheckoutBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["BillingUrl"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/billing/portal": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Open the provider's customer portal (billing owner, step-up MFA) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["BillingUrl"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3296,6 +3468,89 @@ export interface components {
       /** @description IANA time zone name */
       timezone?: string;
     };
+    EntitlementsInput: {
+      /** @enum {string} */
+      plan: "free" | "family_plus";
+      maxAdults: number;
+      features: {
+        partnerSharing: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        goals: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        reminders: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        emailConnections: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        renewalAlerts: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        unlimitedItems: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+      };
+      limits: {
+        items: number | null;
+      };
+    };
+    BillingStateInput: {
+      /** @enum {string} */
+      plan: "free" | "family_plus";
+      status: ("trialing" | "active" | "past_due" | "canceled" | "expired") | null;
+      interval: ("month" | "year") | null;
+      currentPeriodEnd: string | null;
+      cancelAtPeriodEnd: boolean;
+      isBillingOwner: boolean;
+      available: boolean;
+      entitlements: components["schemas"]["EntitlementsInput"];
+    };
+    CheckoutBodyInput: {
+      /** @enum {string} */
+      interval: "month" | "year";
+    };
+    BillingUrlInput: {
+      /** Format: uri */
+      url: string;
+    };
     HouseholdInput: {
       /** Format: uuid */
       id: string;
@@ -3372,11 +3627,7 @@ export interface components {
         tasksDue: number;
         proposalsPending: number;
       };
-      entitlements: {
-        /** @enum {string} */
-        plan: "free" | "family_plus";
-        maxAdults: number;
-      };
+      entitlements: components["schemas"]["EntitlementsInput"];
       connections: {
         emailConnections: number;
       };
@@ -5047,6 +5298,89 @@ export interface components {
       /** @description IANA time zone name */
       timezone?: string;
     };
+    Entitlements: {
+      /** @enum {string} */
+      plan: "free" | "family_plus";
+      maxAdults: number;
+      features: {
+        partnerSharing: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        goals: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        reminders: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        emailConnections: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        renewalAlerts: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+        unlimitedItems: {
+          /**
+           * @description A downgrade never hides data
+           * @constant
+           */
+          read: true;
+          /** @description False: the feature is read-only on this plan (writes answer entitlement_required) */
+          write: boolean;
+        };
+      };
+      limits: {
+        items: number | null;
+      };
+    };
+    BillingState: {
+      /** @enum {string} */
+      plan: "free" | "family_plus";
+      status: ("trialing" | "active" | "past_due" | "canceled" | "expired") | null;
+      interval: ("month" | "year") | null;
+      currentPeriodEnd: string | null;
+      cancelAtPeriodEnd: boolean;
+      isBillingOwner: boolean;
+      available: boolean;
+      entitlements: components["schemas"]["Entitlements"];
+    };
+    CheckoutBody: {
+      /** @enum {string} */
+      interval: "month" | "year";
+    };
+    BillingUrl: {
+      /** Format: uri */
+      url: string;
+    };
     Household: {
       /** Format: uuid */
       id: string;
@@ -5123,11 +5457,7 @@ export interface components {
         tasksDue: number;
         proposalsPending: number;
       };
-      entitlements: {
-        /** @enum {string} */
-        plan: "free" | "family_plus";
-        maxAdults: number;
-      };
+      entitlements: components["schemas"]["Entitlements"];
       connections: {
         emailConnections: number;
       };
