@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import pg from "pg";
+import { pgConfig } from "./connection";
 
 export const MIGRATIONS_TABLE = "schema_migrations";
 /** Arbitrary constant key for pg_advisory_lock so concurrent runners serialize. */
@@ -156,7 +157,7 @@ export function assertMigratorRole(role: {
 
 export async function runMigrations(options: RunMigrationsOptions): Promise<RunMigrationsResult> {
   const files = await loadMigrations(options.migrationsDir);
-  const client = new pg.Client({ connectionString: options.databaseUrl });
+  const client = new pg.Client(pgConfig(options.databaseUrl));
   await client.connect();
   try {
     const role = await client.query<{ rolname: string; rolsuper: boolean; rolbypassrls: boolean }>(

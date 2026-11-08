@@ -86,6 +86,7 @@ describe("RLS posture of every table", () => {
     // G1 sign-off table. Any new definer function must be added here deliberately.
     const expected: Record<string, readonly string[]> = {
       app_is_household_member: ["mp_api"],
+      app_enqueue_job: ["mp_api"], // WP-09: allowlisted queues, members only (queue.test.ts)
       app_household_unclaimed_by_me: ["mp_api"],
       app_user_email: ["mp_api"],
       app_accept_invite: ["mp_api"],

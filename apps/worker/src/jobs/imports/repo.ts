@@ -201,6 +201,19 @@ export async function markPurged(tx: Tx, householdId: string, id: string): Promi
   );
 }
 
+/** Whether an import row exists for the id, its status, and whether it still points at a stored file. */
+export async function importFileState(
+  tx: Tx,
+  householdId: string,
+  id: string,
+): Promise<{ status: string; hasKey: boolean } | null> {
+  const res = await tx.execute(
+    sql`select status, s3_key is not null as has_key from imports where id = ${id} and household_id = ${householdId}`,
+  );
+  const row = res.rows[0];
+  return row ? { status: str(row.status), hasKey: row.has_key === true } : null;
+}
+
 /** Imports waiting for the worker, and finished ones whose file is still stored. */
 export async function pendingImportIds(tx: Tx, householdId: string): Promise<string[]> {
   const res = await tx.execute(

@@ -14,6 +14,15 @@ export {
   type WorkerDb,
 } from "./tx";
 export {
+  DbTlsError,
+  pgConfig,
+  splitPoolerUser,
+  tlsMode,
+  tlsWarning,
+  urlForRole,
+  type TlsMode,
+} from "./connection";
+export {
   assertMigratorRole,
   findTransactionControl,
   loadMigrations,

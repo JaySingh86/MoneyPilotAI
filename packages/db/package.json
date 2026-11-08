@@ -13,7 +13,9 @@
     "test": "vitest run",
     "test:rls": "vitest run --config vitest.rls.config.ts",
     "migrate": "tsx src/cli/migrate.ts",
-    "seed": "tsx src/cli/seed.ts"
+    "seed": "tsx src/cli/seed.ts",
+    "bootstrap:supabase": "tsx src/cli/bootstrap-supabase.ts",
+    "test:supabase-compat": "vitest run --config vitest.supabase.config.ts"
   },
   "dependencies": {
     "@mp/engine": "workspace:*",
@@ -24,6 +26,7 @@
     "@mp/format": "workspace:^",
     "@testcontainers/postgresql": "^12.2.1",
     "@types/pg": "^8.23.1",
+    "pg-boss": "12.38.0",
     "testcontainers": "^12.2.1"
   }
 }

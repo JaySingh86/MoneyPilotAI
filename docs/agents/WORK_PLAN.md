@@ -49,7 +49,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-29 | P1 · Realtime invalidation (SSE) | P1 | WP-12 | S | — | todo |
 | WP-30 | P1 · Mobile app (React Native CLI) | P1 | WP-08, WP-04 | L | — | todo |
 | WP-31 | P1 · Bank adapter (Plaid) in staging | P1 | WP-16 | M | G2 | todo |
-| WP-32 | Supabase database + storage, live local stack (ADR-020) | R | WP-03, WP-16 | M | G2 | in-progress (wp-builder, wp/32-supabase-data) |
+| WP-32 | Supabase database + storage, live local stack (ADR-020) | R | WP-03, WP-16 | M | G2 | done (real Supabase project, pooler TLS and Storage S3 size enforcement verified by the owner's runbook; Q-210/Q-211 open) |
 | WP-33 | Supabase Auth through the API (ADR-020) | R | WP-05, WP-17 | M | G1 | in-progress (wp-builder, wp/33-supabase-auth) |
 
 **Human gates:**

@@ -1,6 +1,7 @@
 // Startup checks for the pg-boss connection (security review M2, Q-105). pg-boss owns a schema and runs
 // DDL, so its connection is more powerful than the job handlers' `mp_worker` one. In production it must be
 // explicitly configured and must not be a role that could read around row-level security.
+import { pgConfig } from "@mp/db";
 import pg from "pg";
 
 export class StartupCheckError extends Error {
@@ -46,7 +47,7 @@ export function assertQueueRole(role: RoleInfo): void {
 }
 
 export async function readConnectionRole(connectionString: string): Promise<RoleInfo> {
-  const client = new pg.Client({ connectionString });
+  const client = new pg.Client(pgConfig(connectionString));
   await client.connect();
   try {
     const res = await client.query<RoleInfo>(

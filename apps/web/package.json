@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "NEXT_PUBLIC_MP_MOCK=1 next dev --port 3100",
     "dev:cognito": "next dev --port 3100",
+    "dev:live": "next dev --port ${WEB_PORT:-3100}",
     "build": "next build",
     "start": "next start --port 3100",
     "typecheck": "next typegen && tsc -p tsconfig.json",

@@ -6,6 +6,7 @@
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import pg from "pg";
+import { pgConfig } from "./connection";
 import * as schema from "./schema";
 
 export type DbSchema = typeof schema;
@@ -95,7 +96,10 @@ interface Session {
 }
 
 function createRunner(expected: AppRole, options: DbOptions) {
-  const pool = new pg.Pool({ connectionString: options.connectionString, max: options.max ?? 10 });
+  const pool = new pg.Pool({
+    ...pgConfig(options.connectionString),
+    max: options.max ?? 10,
+  });
   const db = drizzle(pool, { schema });
   let roleChecked: Promise<void> | null = null;
 

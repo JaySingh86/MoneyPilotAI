@@ -8,7 +8,10 @@ import { configureRuntime } from "./auth/runtime";
 import { loadEmailConfig } from "./modules/email";
 import { createDbSendQuota } from "./modules/notify";
 import { unauthorized, type AuthProvider } from "./auth/provider";
+import { DbTlsError, pgConfig, tlsWarning } from "@mp/db";
 import { createSharedDb, installShutdown } from "./lib/db-pool";
+import { configureImportStorage } from "./modules/imports";
+import { createS3ImportStorage, loadS3Config } from "./modules/imports/s3-storage";
 import { buildServer } from "./server";
 
 const log = createLogger("api");
@@ -20,6 +23,16 @@ if (!databaseUrl) {
   log.error("DATABASE_URL is not set");
   process.exit(1);
 }
+// TLS to the database (ADR-020): Supabase hosts are verified; production refuses an unverified remote database.
+try {
+  pgConfig(databaseUrl);
+} catch (err) {
+  if (!(err instanceof DbTlsError)) throw err;
+  log.error({ reason: err.message }, "database TLS is misconfigured; refusing to start");
+  process.exit(1);
+}
+const tlsProblem = tlsWarning([databaseUrl]);
+if (tlsProblem) log.warn(tlsProblem);
 // The one pool of the process: every module reaches it through the runtime and it is closed on shutdown.
 const pool = createSharedDb({ connectionString: databaseUrl });
 const db = pool.db;
@@ -94,6 +107,20 @@ try {
   process.exit(1);
 }
 configureRuntime({ db, provider, inviteSender });
+
+// CSV upload storage (WP-32): MinIO locally, Supabase Storage's S3 endpoint in the real-data phase. Without S3_*
+// settings uploads answer 503 and the rest of the API works.
+try {
+  const s3 = loadS3Config(process.env);
+  if (s3) configureImportStorage(createS3ImportStorage(s3));
+  else log.warn("S3_ENDPOINT is not set: CSV uploads are unavailable");
+} catch (err) {
+  log.error(
+    { reason: err instanceof Error ? err.message : "invalid" },
+    "storage is misconfigured; refusing to start",
+  );
+  process.exit(1);
+}
 
 // TODO(WP-26): database-backed idempotency store (lib/idempotency-store.ts); the in-memory default is per process.
 const app = buildServer({

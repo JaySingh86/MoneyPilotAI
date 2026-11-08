@@ -5,6 +5,50 @@ Agents add questions here instead of guessing. The tech lead answers them. If an
 Format (newest first):
 
 ```
+## Q-215 · WP-32 · `revoke all on schema public from public` on a Supabase database
+- Asked by: wp-builder/wp/32-supabase-data · 2026-11-09
+- Where: `packages/db/supabase/bootstrap.sql` section 4; WP-32 acceptance ("revokes anon/authenticated access to our objects")
+- Question: Supabase grants USAGE on schema `public` to PUBLIC and to anon/authenticated/service_role. Our SECURITY DEFINER functions rely on a vanilla database where PUBLIC has no usage (init.sql does the revoke), so the bootstrap revokes it. That cannot break our own roles (they are granted explicitly), and the compat suite passes, but a hosted Supabase service that assumes PUBLIC usage on `public` (none known; Auth, Storage and Realtime use their own schemas) would lose it. OK, or should the bootstrap only revoke from the three API roles and rely on per-function revokes?
+- Options considered: revoke from the three roles only (leaves every future function with default PUBLIC EXECUTE reachable by them through PUBLIC usage, which migrations avoid with `alter default privileges ... revoke execute on functions from public` anyway).
+- Blocking: no. Unverified on a real hosted project by design.
+- Answer: …
+
+## Q-214 · WP-32 · `imports.process` still starts from the per-minute sweep, though `app_enqueue_job` now exists
+- Asked by: wp-builder/wp/32-supabase-data · 2026-11-09
+- Where: Q-144; migration `202611091400_wp09_pgboss-queue-role.sql` (`app_enqueue_job`); `apps/api/src/modules/imports/service.ts` (optional `ImportQueue`)
+- Question: The salvaged WP-09 migration lets mp_api enqueue a named job. WP-32 does not wire `ImportQueue.enqueueProcess` to it (the imports module is WP-16's), so in live mode a CSV waits for the sweep (up to a minute; the end-to-end run took about 30 s). Wire it, as Q-144 planned?
+- Blocking: no.
+- Answer: …
+
+## Q-213 · WP-32 · Live mode cannot sign in until WP-33
+- Asked by: wp-builder/wp/32-supabase-data · 2026-11-09
+- Where: `apps/api/src/index.ts` (Cognito-only provider; without COGNITO_* every token is refused), `FakeIssuer` is test-only
+- Question: There is no development sign-in in the running API, by design ("no development bypass"). `pnpm dev:live` therefore starts api, worker and web for real, but the web app cannot sign in until WP-33 lands. Until then `pnpm live:smoke` runs the whole path (fake token issuer, in-process API, real database, storage and worker). Acceptable, or should WP-33 land before the browser check in the WP-32 acceptance is called done?
+- Blocking: the browser part of "a CSV uploaded in the browser shows up in the review queue" only. Verified instead through `live:smoke` and the web's own unit tests for the upload URL and CSP.
+- Answer: …
+
+## Q-212 · WP-32 · The migrations name a fifth role, `mp_analytics`
+- Asked by: wp-builder/wp/32-supabase-data · 2026-11-09
+- Where: `202610271502_wp03_platform.sql` (`revoke update, delete, truncate on audit_events from mp_api, mp_worker, mp_analytics`), `docker/postgres/init.sql`
+- Question: The statement fails if the role does not exist, so the Supabase bootstrap creates `mp_analytics` as NOLOGIN (the local init.sql makes it LOGIN). It has no password and no use yet. Keep it NOLOGIN until a reporting WP needs it?
+- Blocking: no.
+- Answer: …
+
+## Q-211 · WP-32 · Uploads are a presigned PUT with a signed exact size, not a POST policy
+- Asked by: wp-builder/wp/32-supabase-data · 2026-11-09
+- Where: Q-143 (asked for POST with `content-length-range`); `apps/api/src/modules/imports/s3-storage.ts`
+- Question: Supabase Storage's S3 layer does not document POST policy support, so the adapter signs `content-type` and `content-length` into a PUT URL (verified on MinIO: a larger body, another type, or an expired URL gets 403). `maxBytes` from the service is the declared size capped at 10 MB, so the file must be exactly the declared size; a file larger than 10 MB cannot be uploaded at all. The server-side `head` check at `/process` stays. Whether Supabase's S3 endpoint honors the signed content-length is unverified (needs the owner's project; runbook step 6 has a one-line check). If it does not, the fallback is an API-proxied upload route with a 10 MB stream limit.
+- Options considered: presigned POST (not portable), API-proxied upload (extra route and bandwidth through the API).
+- Blocking: no.
+- Answer: …
+
+## Q-210 · WP-32 · MinIO is no longer on Docker Hub; the local image changed
+- Asked by: wp-builder/wp/32-supabase-data · 2026-11-09
+- Where: `docker-compose.yml` (`minio/minio:RELEASE.2024-12-18T13-15-44Z` no longer pulls), WP-01
+- Question: MinIO stopped publishing images to Docker Hub, and `quay.io/minio/minio` answered 401 from here. The compose file and the integration tests now use `ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z`, a community build of the same release, for local and CI use with synthetic data only. Accept a third-party image, build MinIO from source, or use another local S3 (for example Supabase's own storage container)?
+- Blocking: no.
+- Answer: …
+
 ## Q-154 · WP-25 · WP-24 deletion and retention scope for the billing tables
 - Asked by: wp-builder/wp/25-billing · 2026-11-04
 - Where: BACKEND_PLAN §7.11 (delete household, retention schedule); migration `202611041100_wp25_billing.sql`
@@ -347,7 +391,7 @@ Format (newest first):
 - Question: There is no AWS SDK in the repo and no bucket in infra yet, so the API depends on `ImportStorage` (`createUpload`, `head`, `delete`) and the worker on `ImportFileStore` (`get`, `delete`). Both default to "unconfigured" (the API answers 503 on `POST /imports`; the job fails and retries), and tests use in-memory fakes. Who builds the S3 adapters and the bucket (SSE-KMS, a lifecycle rule that expires abandoned `imports/` objects after 24 h, since a file that is uploaded but never processed is not purged by the job)? The adapter must use a presigned POST with a `content-length-range` condition (a presigned PUT cannot enforce a size); the size is re-checked at `/process` (413 and delete) and in the worker (10 MB, 50,000 rows, 100 columns, 2,000 characters per cell).
 - Options considered: add `@aws-sdk/client-s3` and `@aws-sdk/s3-presigned-post` in this WP (needs a bucket and credentials the agents do not have).
 - Blocking: yes for a real upload; everything behind the interfaces is tested.
-- Answer: …
+- Answer: Built in WP-32 (S3 adapters for API and worker, tested against MinIO). The upload is a presigned PUT with a signed size instead of a POST policy: see Q-211.
 
 ## Q-142 · WP-16 · CSV matches go through `decideExtraction`, and always end in review
 - Asked by: wp-builder/wp/16-csv-import · 2026-11-04

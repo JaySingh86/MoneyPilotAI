@@ -5,6 +5,8 @@
 CREATE ROLE mp_migrator LOGIN PASSWORD 'mp_local_migrator' NOSUPERUSER NOBYPASSRLS NOCREATEROLE;
 CREATE ROLE mp_api      LOGIN PASSWORD 'mp_local_api'      NOSUPERUSER NOBYPASSRLS NOCREATEROLE;
 CREATE ROLE mp_worker   LOGIN PASSWORD 'mp_local_worker'   NOSUPERUSER NOBYPASSRLS NOCREATEROLE;
+-- mp_queue runs pg-boss and reaches only the `pgboss` schema (WP-09, Q-105); it has no access to `public`.
+CREATE ROLE mp_queue    LOGIN PASSWORD 'mp_local_queue'    NOSUPERUSER NOBYPASSRLS NOCREATEROLE;
 CREATE ROLE mp_analytics LOGIN PASSWORD 'mp_local_analytics' NOSUPERUSER NOBYPASSRLS NOCREATEROLE;
 
 -- The migrator owns the database and its public schema, so it creates tables and policies.

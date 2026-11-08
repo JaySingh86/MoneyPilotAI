@@ -1,8 +1,11 @@
-import { createWorkerDb } from "@mp/db";
+import { createWorkerDb, DbTlsError, pgConfig, tlsWarning } from "@mp/db";
 import { createEmailSender, type EmailSender } from "@mp/notify";
 import { createLogger } from "@mp/observability";
+import { MAX_CSV_BYTES } from "@mp/detection";
 import { startJobs } from "./boss";
 import { loadEmailJobDeps } from "./jobs/email/discover/register";
+import { createS3ImportFileStore, loadS3Config } from "./jobs/imports/s3-storage";
+import { configureImportFileStore } from "./jobs/imports/storage";
 import { StartupCheckError, checkBossConnection } from "./startup-checks";
 
 const log = createLogger("worker");
@@ -49,9 +52,37 @@ try {
   process.exit(1);
 }
 
+// CSV file store (WP-32). Without S3_* settings an import job fails and retries instead of silently doing nothing.
+try {
+  const s3 = loadS3Config(process.env);
+  if (s3) configureImportFileStore(createS3ImportFileStore(s3, MAX_CSV_BYTES));
+  else log.warn("S3_ENDPOINT is not set: CSV imports cannot be processed");
+} catch (err) {
+  log.error(
+    { reason: err instanceof Error ? err.message : "invalid" },
+    "storage is misconfigured; refusing to start",
+  );
+  process.exit(1);
+}
+
+// TLS to the database (ADR-020): Supabase hosts are verified; production refuses an unverified remote database.
+try {
+  const tlsProblem = tlsWarning([databaseUrl, bossUrl]);
+  if (tlsProblem) log.warn(tlsProblem);
+  for (const url of [databaseUrl, bossUrl]) pgConfig(url);
+} catch (err) {
+  if (!(err instanceof DbTlsError)) throw err;
+  log.error({ reason: err.message }, "database TLS is misconfigured; refusing to start");
+  process.exit(1);
+}
+
 const db = createWorkerDb({ connectionString: databaseUrl });
 const jobs = await startJobs({
   bossUrl,
+  // The pgboss schema is created by a migration and mp_queue cannot change it (WP-09, Q-105).
+  // With PGBOSS_DATABASE_URL (mp_queue: Supabase, AWS) the schema comes from the migration; locally without it the
+  // migrator fallback URL lets pg-boss create its own.
+  migrate: process.env.NODE_ENV !== "production" && !process.env.PGBOSS_DATABASE_URL,
   db,
   now: () => new Date().toISOString(),
   log,

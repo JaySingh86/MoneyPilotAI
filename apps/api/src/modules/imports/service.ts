@@ -140,6 +140,11 @@ export async function processImport(deps: ImportsDeps, a: Actor, id: string): Pr
     await deps.storage().delete(current.s3Key);
     throw new AppError("payload_too_large", 413, "The file is larger than 10 MB.");
   }
+  // The upload URL signs exactly the declared size, so a different size means the object did not come through it.
+  if (current.sizeBytes !== null && head.sizeBytes !== current.sizeBytes) {
+    await deps.storage().delete(current.s3Key);
+    throw new AppError("validation_failed", 400, "The uploaded file does not match its declared size.");
+  }
   const queued = await inTx(deps, a, async (tx) => {
     await repo.queueForProcessing(tx, a.householdId, id);
     await repo.audit(tx, a.householdId, a.userId, "import.process_requested", id);

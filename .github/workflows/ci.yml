@@ -40,6 +40,21 @@ jobs:
       - name: Contracts drift
         run: pnpm contracts:gen --check
 
+  # WP-32 (ADR-020): the migrations and the RLS suite against the Supabase Postgres image, after bootstrap.sql.
+  supabase-compat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Supabase compatibility
+        run: pnpm test:supabase-compat
+
   # Pixel snapshots and browser axe for the UI kit. Runs in the official Playwright image, pinned
   # to the @playwright/test version in packages/ui/package.json, so the Linux Chromium that made
   # the committed baselines (`pnpm --filter @mp/ui test:visual:update`) is the one checking them.

@@ -40,10 +40,21 @@ export function goToProvider(authUrl: string): void {
   window.location.assign(providerUrl(authUrl));
 }
 
-/** The presigned upload URL: https, except in mock mode. */
+/** Local MinIO (`pnpm dev:live`) is plain http on the loopback interface. Never in a production bundle. */
+const isLoopbackHttp = (url: URL): boolean =>
+  process.env.NODE_ENV !== "production" &&
+  url.protocol === "http:" &&
+  (url.hostname === "localhost" || url.hostname === "127.0.0.1");
+
+/** The presigned upload URL: https, except in mock mode and for loopback http in development (WP-32). */
 export function uploadUrl(url: string): string {
   const parsed = parse(url);
-  if (parsed && (parsed.protocol === "https:" || (MOCK_MODE && /^https?:$/.test(parsed.protocol)))) {
+  if (
+    parsed &&
+    (parsed.protocol === "https:" ||
+      (MOCK_MODE && /^https?:$/.test(parsed.protocol)) ||
+      isLoopbackHttp(parsed))
+  ) {
     return parsed.toString();
   }
   throw new UnsafeUrlError("upload");

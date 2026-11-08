@@ -160,9 +160,10 @@ describe("POST /imports", () => {
 
 describe("POST /imports/:id/process", () => {
   it("queues an uploaded file, tells the worker, and a second call changes nothing", async () => {
-    const created = await newImport();
+    const body = "Date,Description,Amount\n10/01/2026,Rent,-5.00\n";
+    const created = await newImport({ sizeBytes: body.length });
     const id = created.import.id;
-    t.storage.put(keyOf(id), "Date,Description,Amount\n10/01/2026,Rent,-5.00\n");
+    t.storage.put(keyOf(id), body);
     const res = await call("POST", `${base()}/imports/${id}/process`, sam);
     expect(res.statusCode, res.body).toBe(200);
     expect(res.json()).toMatchObject({ id, status: "processing" });
@@ -189,6 +190,23 @@ describe("POST /imports/:id/process", () => {
     expect(((await call("GET", `${base()}/imports/${id}`, sam)).json() as { status: string }).status).toBe(
       "uploaded",
     );
+  });
+
+  it("rejects an object whose size is not the declared size (400) and deletes it", async () => {
+    // The store signs the declared size, so a mismatch means something other than our upload reached the key.
+    for (const [declared, actual] of [
+      [2048, 10],
+      [10, 2048],
+    ] as const) {
+      const created = await newImport({ sizeBytes: declared });
+      const id = created.import.id;
+      t.storage.put(keyOf(id), new Uint8Array(actual));
+      expectProblem(await call("POST", `${base()}/imports/${id}/process`, sam), 400, "validation_failed");
+      expect(t.storage.objects.has(keyOf(id))).toBe(false);
+      expect(((await call("GET", `${base()}/imports/${id}`, sam)).json() as { status: string }).status).toBe(
+        "uploaded",
+      );
+    }
   });
 
   it("cannot reach another household's import", async () => {
@@ -384,7 +402,7 @@ describe("the database guard", () => {
   it("a member cannot mark an import done or write its counts through the API role", async () => {
     // The routes never do; the guard trigger and column grants are tested in packages/db (pnpm test:rls). Here the
     // observable promise: a status can only move forward through the routes.
-    const created = await newImport();
+    const created = await newImport({ sizeBytes: "a,b\n1,2\n".length });
     const id = created.import.id;
     t.storage.put(keyOf(id), "a,b\n1,2\n");
     await call("POST", `${base()}/imports/${id}/process`, sam);

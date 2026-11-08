@@ -4,6 +4,7 @@
 /**
  * @typedef {object} WebEnv
  * @property {string | undefined} [NEXT_PUBLIC_API_URL]
+ * @property {string | undefined} [NEXT_PUBLIC_STORAGE_URL]
  * @property {string | undefined} [NEXT_PUBLIC_COGNITO_USER_POOL_ID]
  * @property {string | undefined} [NEXT_PUBLIC_COGNITO_CLIENT_ID]
  * @property {string | undefined} [NEXT_PUBLIC_COGNITO_REGION]
@@ -11,6 +12,8 @@
  */
 
 const DEFAULT_DEV_API_URL = "http://localhost:4000";
+/** Local MinIO: the browser PUTs a CSV straight to the object store (WP-32). */
+const DEFAULT_DEV_STORAGE_URL = "http://localhost:9000";
 
 /** The API's origin, or null when the URL is missing or not a URL. */
 export function originOf(url) {
@@ -45,7 +48,12 @@ export function cognitoOrigins(env) {
  */
 export function buildCsp({ nonce, dev, env }) {
   const api = originOf(env.NEXT_PUBLIC_API_URL) ?? (dev ? DEFAULT_DEV_API_URL : null);
-  const connect = ["'self'", ...(api ? [api] : []), ...cognitoOrigins(env)];
+  // The object store the presigned CSV upload goes to (Supabase Storage or MinIO), not our API.
+  const configuredStorage = originOf(env.NEXT_PUBLIC_STORAGE_URL);
+  const storage =
+    (configuredStorage && (dev || configuredStorage.startsWith("https://")) ? configuredStorage : null) ??
+    (dev ? DEFAULT_DEV_STORAGE_URL : null);
+  const connect = ["'self'", ...(api ? [api] : []), ...(storage ? [storage] : []), ...cognitoOrigins(env)];
   const script = ["'self'", `'nonce-${nonce}'`, ...(dev ? ["'unsafe-eval'"] : [])];
   return [
     "default-src 'self'",

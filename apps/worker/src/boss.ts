@@ -3,7 +3,7 @@
 // Every handler validates its payload with Zod, scopes the database to one household and is idempotent.
 import { PgBoss, type Job } from "pg-boss";
 import type { Logger } from "@mp/observability";
-import type { WorkerDb } from "@mp/db";
+import { pgConfig, type WorkerDb } from "@mp/db";
 import {
   BILLING_DRAIN_CRON,
   BILLING_DRAIN_QUEUE,
@@ -208,8 +208,18 @@ export interface StartedJobs {
  * Connects pg-boss (it manages its own `pgboss` schema, so the connection needs the right to create it:
  * PGBOSS_DATABASE_URL, Q-105), registers everything and starts working.
  */
-export async function startJobs(options: { bossUrl: string } & JobDeps): Promise<StartedJobs> {
-  const boss = new PgBoss(options.bossUrl);
+export async function startJobs(
+  options: {
+    bossUrl: string;
+    /** false in production: the schema comes from a migration (WP-09, Q-105). */ migrate?: boolean;
+  } & JobDeps,
+): Promise<StartedJobs> {
+  const migrate = options.migrate ?? true;
+  const boss = new PgBoss({
+    ...pgConfig(options.bossUrl),
+    migrate,
+    createSchema: migrate,
+  });
   boss.on("error", (err: unknown) => options.log.error({ err }, "pg-boss error"));
   await boss.start();
   await registerJobs(boss, options);

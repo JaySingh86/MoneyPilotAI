@@ -19,6 +19,7 @@ const ROLE_PASSWORDS = {
   mp_migrator: "mp_local_migrator",
   mp_api: "mp_local_api",
   mp_worker: "mp_local_worker",
+  mp_queue: "mp_local_queue",
 } as const;
 
 declare module "vitest" {
@@ -27,6 +28,8 @@ declare module "vitest" {
     databaseUrl: string;
     /** mp_worker (RLS via app.household_id). */
     workerDatabaseUrl: string;
+    /** mp_queue (owns nothing; reaches only the pgboss schema, WP-09). */
+    queueDatabaseUrl: string;
     /** mp_migrator on the migrated DB. Schema metadata only, never for RLS assertions. */
     migratorDatabaseUrl: string;
     /** mp_migrator URLs for the empty scratch databases. */
@@ -82,6 +85,7 @@ export default async function setup(project: TestProject): Promise<() => Promise
 
   project.provide("databaseUrl", url("mp_api"));
   project.provide("workerDatabaseUrl", url("mp_worker"));
+  project.provide("queueDatabaseUrl", url("mp_queue"));
   // `pnpm test:rls` (project "rls") never receives a migrator URL: its tests connect as app roles only.
   if (project.name !== RLS_PROJECT) {
     project.provide("migratorDatabaseUrl", url("mp_migrator"));

@@ -53,6 +53,33 @@ describe("Content-Security-Policy", () => {
     ]);
   });
 
+  it("adds the object store origin for the CSV upload, and a local MinIO default in development only", () => {
+    const withStorage = buildCsp({
+      nonce: "n",
+      dev: false,
+      env: { ...prodEnv, NEXT_PUBLIC_STORAGE_URL: "https://abc.storage.supabase.co/storage/v1/s3" },
+    });
+    expect(directive(withStorage, "connect-src")).toContain("https://abc.storage.supabase.co");
+    expect(directive(buildCsp({ nonce: "n", dev: true, env: {} }), "connect-src")).toContain(
+      "http://localhost:9000",
+    );
+    expect(directive(csp, "connect-src")).not.toContain("http://localhost:9000");
+  });
+
+  it("outside development only an https object store is allowed", () => {
+    for (const storage of ["http://storage.example.com", "http://localhost:9000", "ftp://x.example.com"]) {
+      const out = buildCsp({ nonce: "n", dev: false, env: { ...prodEnv, NEXT_PUBLIC_STORAGE_URL: storage } });
+      expect(directive(out, "connect-src"), storage).toEqual(directive(csp, "connect-src"));
+    }
+    // In development plain http is fine (local MinIO).
+    const dev = buildCsp({
+      nonce: "n",
+      dev: true,
+      env: { NEXT_PUBLIC_STORAGE_URL: "http://localhost:59000" },
+    });
+    expect(directive(dev, "connect-src")).toContain("http://localhost:59000");
+  });
+
   it("adds the hosted UI domain when Google sign-in is configured", () => {
     expect(cognitoOrigins({ ...prodEnv, NEXT_PUBLIC_COGNITO_OAUTH_DOMAIN: "auth.example.com" })).toContain(
       "https://auth.example.com",

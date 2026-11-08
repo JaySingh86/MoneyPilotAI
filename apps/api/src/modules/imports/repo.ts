@@ -14,6 +14,8 @@ export interface ImportRow {
   filename: string;
   status: "uploaded" | "needs_mapping" | "processing" | "done" | "failed";
   s3Key: string | null;
+  /** The size declared when the import was created; the stored object must match it. */
+  sizeBytes: number | null;
   fingerprint: string | null;
   columns: string[] | null;
   mapping: unknown;
@@ -30,7 +32,7 @@ export interface ImportRow {
   processedAt: string | null;
 }
 
-const COLUMNS = sql`id, filename, status, s3_key, fingerprint, columns, mapping, row_count, added_count, duplicate_count,
+const COLUMNS = sql`id, filename, status, s3_key, size_bytes, fingerprint, columns, mapping, row_count, added_count, duplicate_count,
   rejected_count, detected_count, queued_count, latest_balance_cents, latest_balance_on::text as latest_balance_on, error,
   ${iso("created_at")} as created_at, ${iso("processed_at")} as processed_at`;
 
@@ -40,6 +42,7 @@ function toRow(r: Row): ImportRow {
     filename: str(r.filename),
     status: r.status as ImportRow["status"],
     s3Key: strOrNull(r.s3_key),
+    sizeBytes: numOrNull(r.size_bytes),
     fingerprint: strOrNull(r.fingerprint),
     columns: Array.isArray(r.columns) ? (r.columns as unknown[]).map(String) : null,
     mapping: r.mapping ?? null,

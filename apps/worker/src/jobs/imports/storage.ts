@@ -4,6 +4,11 @@ export interface ImportFileStore {
   /** The stored bytes, or null when the object does not exist. */
   get(key: string): Promise<Uint8Array | null>;
   delete(key: string): Promise<void>;
+  /**
+   * Every object under the prefix, with its last-modified time (epoch ms). Optional: the orphan sweep (WP-32)
+   * does nothing with a store that cannot list.
+   */
+  list?(prefix: string): Promise<{ key: string; lastModifiedMs: number }[]>;
 }
 
 /** Until the S3 adapter is wired: processing fails (and retries) instead of silently doing nothing. */

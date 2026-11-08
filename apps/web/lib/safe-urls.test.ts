@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { UnsafeUrlError, providerUrl, uploadUrl } from "./safe-urls";
 
 describe("provider URLs", () => {
@@ -38,5 +38,24 @@ describe("upload URLs", () => {
     expect(uploadUrl("http://localhost:3100/mock-upload/1")).toContain("mock-upload");
     expect(() => uploadUrl("ftp://x/y")).toThrow(UnsafeUrlError);
     expect(() => uploadUrl("javascript:1")).toThrow(UnsafeUrlError);
+  });
+});
+
+describe("upload URLs outside mock mode (pnpm dev:live)", () => {
+  it("allows plain http only on the loopback interface, for local MinIO", async () => {
+    vi.resetModules();
+    vi.doMock("./config", () => ({ MOCK_MODE: false }));
+    const live = await import("./safe-urls");
+    expect(live.uploadUrl("http://localhost:9000/imports/k.csv?X-Amz-Signature=1")).toContain("9000");
+    expect(live.uploadUrl("http://127.0.0.1:9000/imports/k.csv")).toContain("9000");
+    expect(live.uploadUrl("https://abc.storage.supabase.co/storage/v1/s3/imports/k.csv")).toContain(
+      "supabase",
+    );
+    expect(() => live.uploadUrl("http://storage.example.com/k.csv")).toThrow(live.UnsafeUrlError);
+    // A host that merely starts like a loopback address is not one.
+    expect(() => live.uploadUrl("http://127.0.0.1.evil.com/k.csv")).toThrow(live.UnsafeUrlError);
+    expect(() => live.uploadUrl("http://localhost.evil.com/k.csv")).toThrow(live.UnsafeUrlError);
+    expect(() => live.uploadUrl("http://user@127.0.0.1.evil.com/k.csv")).toThrow(live.UnsafeUrlError);
+    vi.doUnmock("./config");
   });
 });

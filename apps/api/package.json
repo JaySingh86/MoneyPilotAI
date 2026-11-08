@@ -3,16 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "HTTP API: auth, validation, reads/writes under RLS, webhooks (BACKEND_PLAN \u00a78).",
+  "description": "HTTP API: auth, validation, reads/writes under RLS, webhooks (BACKEND_PLAN §8).",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
+    "storage:init": "tsx src/dev/storage-init.ts",
+    "live:smoke": "tsx src/dev/live-smoke.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
     "openapi:print": "tsx src/lib/openapi-print.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1164.0",
+    "@aws-sdk/s3-request-presigner": "^3.1164.0",
     "@fastify/cors": "^11.3.1",
     "@fastify/rate-limit": "^11.2.1",
     "@fastify/swagger": "^9.9.2",
@@ -38,6 +42,7 @@
     "zod": "^4.2.0"
   },
   "devDependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "@testcontainers/postgresql": "^12.2.1",
     "@types/pg": "^8.23.1",
     "pg": "^8.23.1",

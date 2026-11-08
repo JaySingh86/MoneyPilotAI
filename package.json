@@ -12,6 +12,7 @@
     ]
   },
   "scripts": {
+    "dev:live": "node tooling/dev-live.mjs",
     "dev": "turbo run dev --parallel --filter=@mp/api --filter=@mp/worker --filter=@mp/web",
     "build": "turbo run build",
     "lint": "eslint . --max-warnings=0 && pnpm lint:css",
@@ -20,8 +21,12 @@
     "test:engine": "pnpm --filter @mp/engine test",
     "test:rls": "pnpm --filter @mp/db test:rls",
     "depcruise": "depcruise apps packages --config .dependency-cruiser.cjs",
+    "storage:init": "pnpm --filter @mp/api storage:init",
+    "live:smoke": "pnpm --filter @mp/api live:smoke",
     "db:migrate": "pnpm --filter @mp/db migrate",
     "db:seed": "pnpm --filter @mp/db seed",
+    "db:bootstrap:supabase": "pnpm --filter @mp/db bootstrap:supabase",
+    "test:supabase-compat": "pnpm --filter @mp/db test:supabase-compat",
     "contracts:gen": "pnpm --filter @mp/contracts gen",
     "e2e": "pnpm --filter @mp/web e2e",
     "ai:eval": "pnpm --filter @mp/ai eval",

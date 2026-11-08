@@ -1,5 +1,6 @@
 export interface WebEnv {
   NEXT_PUBLIC_API_URL?: string | undefined;
+  NEXT_PUBLIC_STORAGE_URL?: string | undefined;
   NEXT_PUBLIC_COGNITO_USER_POOL_ID?: string | undefined;
   NEXT_PUBLIC_COGNITO_CLIENT_ID?: string | undefined;
   NEXT_PUBLIC_COGNITO_REGION?: string | undefined;

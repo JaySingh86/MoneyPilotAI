@@ -4,6 +4,12 @@ import type { Logger } from "@mp/observability";
 import type { WorkerDb } from "@mp/db";
 import { guardJob } from "../guard";
 import { IMPORTS_PROCESS_QUEUE, IMPORTS_PROCESS_QUEUE_OPTIONS, handleImportsProcess } from "./process";
+import {
+  IMPORTS_ORPHANS_CRON,
+  IMPORTS_ORPHANS_QUEUE,
+  handleImportsOrphans,
+  orphanHoursFromEnv,
+} from "./orphans";
 import { importFileStore } from "./storage";
 import {
   IMPORTS_SWEEP_CRON,
@@ -25,6 +31,7 @@ export async function registerImportJobs(boss: PgBoss, deps: Deps): Promise<void
   await boss.createQueue(IMPORTS_PROCESS_QUEUE, IMPORTS_PROCESS_QUEUE_OPTIONS);
   await boss.createQueue(IMPORTS_SWEEP_QUEUE, { retryLimit: 1, retryDelay: 30 });
   await boss.createQueue(TRANSACTIONS_PURGE_QUEUE, { retryLimit: 3, retryDelay: 60, retryBackoff: true });
+  await boss.createQueue(IMPORTS_ORPHANS_QUEUE, { retryLimit: 1, retryDelay: 60 });
   const options = {
     batchSize: 1,
     ...(deps.pollingIntervalSeconds ? { pollingIntervalSeconds: deps.pollingIntervalSeconds } : {}),
@@ -46,6 +53,18 @@ export async function registerImportJobs(boss: PgBoss, deps: Deps): Promise<void
     );
     deps.log.info({ deleted }, "old transactions purged");
   });
+  await boss.work(IMPORTS_ORPHANS_QUEUE, options, async () => {
+    const result = await guardJob(IMPORTS_ORPHANS_QUEUE, deps.log, () =>
+      handleImportsOrphans({
+        db: deps.db,
+        store: importFileStore(),
+        now: () => Date.parse(deps.now()),
+        maxAgeHours: orphanHoursFromEnv(process.env),
+      }),
+    );
+    deps.log.info(result, "orphaned import files swept");
+  });
+  await boss.schedule(IMPORTS_ORPHANS_QUEUE, IMPORTS_ORPHANS_CRON, null, { tz: "UTC" });
   await boss.schedule(IMPORTS_SWEEP_QUEUE, IMPORTS_SWEEP_CRON, null, { tz: "UTC" });
   await boss.schedule(TRANSACTIONS_PURGE_QUEUE, TRANSACTIONS_PURGE_CRON, null, { tz: "UTC" });
 }
