@@ -152,7 +152,11 @@ interface RuleRow extends Record<string, unknown> {
 }
 
 function toRule(row: RuleRow): ReminderRule {
-  return { offsetsDays: row.offsets_days, channels: row.channels, alsoNotifyPartner: row.also_notify_partner };
+  return {
+    offsetsDays: row.offsets_days,
+    channels: row.channels,
+    alsoNotifyPartner: row.also_notify_partner,
+  };
 }
 
 // Postgres array literals built from validated integers and enum words (drizzle would expand a JS array).
@@ -165,8 +169,13 @@ export async function itemExists(tx: Tx, householdId: string, itemId: string): P
   return res.rows.length > 0;
 }
 
-export async function getRule(tx: Tx, householdId: string, itemId: string | null): Promise<ReminderRule | null> {
-  const res = await tx.execute<RuleRow>(sql`select offsets_days, channels, also_notify_partner from reminder_rules
+export async function getRule(
+  tx: Tx,
+  householdId: string,
+  itemId: string | null,
+): Promise<ReminderRule | null> {
+  const res =
+    await tx.execute<RuleRow>(sql`select offsets_days, channels, also_notify_partner from reminder_rules
     where household_id = ${householdId} and ${itemId === null ? sql`item_id is null` : sql`item_id = ${itemId}`}`);
   const row = res.rows[0];
   return row ? toRule(row) : null;
@@ -181,7 +190,9 @@ export async function upsertRule(
   const offsets = intArray(rule.offsetsDays);
   const channels = textArray(rule.channels);
   const target =
-    itemId === null ? sql`(household_id) where item_id is null` : sql`(household_id, item_id) where item_id is not null`;
+    itemId === null
+      ? sql`(household_id) where item_id is null`
+      : sql`(household_id, item_id) where item_id is not null`;
   const res = await tx.execute<RuleRow>(sql`insert into reminder_rules
       (household_id, item_id, offsets_days, channels, also_notify_partner)
     values (${householdId}, ${itemId}, ${offsets}::int[], ${channels}::text[], ${rule.alsoNotifyPartner})
@@ -194,5 +205,7 @@ export async function upsertRule(
 }
 
 export async function deleteRule(tx: Tx, householdId: string, itemId: string): Promise<void> {
-  await tx.execute(sql`delete from reminder_rules where household_id = ${householdId} and item_id = ${itemId}`);
+  await tx.execute(
+    sql`delete from reminder_rules where household_id = ${householdId} and item_id = ${itemId}`,
+  );
 }

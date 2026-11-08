@@ -147,10 +147,10 @@ describe("reminders.plan", () => {
   it("an item-level rule still applies to a monthly subscription; a yearly one keeps {30,7,0}", async () => {
     const hh = await fx.household();
     const sub = await fx.bill(hh, { scheduledOn: "2026-11-06", category: "subscription", name: "Music" });
-    await fx.query(`insert into reminder_rules (household_id, item_id, offsets_days) values ($1, $2, '{1,0}')`, [
-      hh.id,
-      sub.itemId,
-    ]);
+    await fx.query(
+      `insert into reminder_rules (household_id, item_id, offsets_days) values ($1, $2, '{1,0}')`,
+      [hh.id, sub.itemId],
+    );
     const yearly = await fx.bill(hh, {
       scheduledOn: "2026-12-05",
       category: "subscription",

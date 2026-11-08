@@ -700,7 +700,9 @@ describe("reminder rules (Q-133)", () => {
     const again = await put(jordan, urlDefault(hid), { ...RULE, offsetsDays: [2] });
     expect(again.json()).toMatchObject({ offsetsDays: [2] });
     const rows = await t.admin((c) =>
-      c.query("select count(*)::int as n from reminder_rules where household_id = $1 and item_id is null", [hid]),
+      c.query("select count(*)::int as n from reminder_rules where household_id = $1 and item_id is null", [
+        hid,
+      ]),
     );
     expect(rows.rows[0].n).toBe(1);
   });
@@ -746,7 +748,11 @@ describe("reminder rules (Q-133)", () => {
     expect((await get(sam, urlItem(hid, id))).json()).toBeNull();
     // removing again is fine
     expect((await put(sam, urlItem(hid, id), null)).statusCode).toBe(200);
-    expectProblem(await put(sam, urlItem(hid, id), { ...RULE, offsetsDays: [3, 3] }), 400, "validation_failed");
+    expectProblem(
+      await put(sam, urlItem(hid, id), { ...RULE, offsetsDays: [3, 3] }),
+      400,
+      "validation_failed",
+    );
   });
 
   it("an unknown item is 404", async () => {

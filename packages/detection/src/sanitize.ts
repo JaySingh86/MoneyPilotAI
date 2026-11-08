@@ -27,11 +27,13 @@ export function neutralizeFormula(text: string): string {
 
 /** Replaces a run of 9 or more digits (separators allowed between them, dates excepted) with `****` and the last 4. */
 export function maskLongNumbers(text: string): string {
-  return text.normalize("NFKC").replace(LONG_NUMBER, (run) =>
-    /^\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}$|^\d{4}[/.-]\d{2}[/.-]\d{2}$/.test(run)
-      ? run
-      : `****${run.replace(/\D/g, "").slice(-4)}`,
-  );
+  return text
+    .normalize("NFKC")
+    .replace(LONG_NUMBER, (run) =>
+      /^\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}$|^\d{4}[/.-]\d{2}[/.-]\d{2}$/.test(run)
+        ? run
+        : `****${run.replace(/\D/g, "").slice(-4)}`,
+    );
 }
 
 /**
@@ -39,7 +41,9 @@ export function maskLongNumbers(text: string): string {
  * collapsed, formulas are neutralised, and the length is capped.
  */
 export function cleanText(text: string, max = MAX_TEXT_CHARS): string {
-  const collapsed = maskLongNumbers(stripControl(text.normalize("NFKC"))).replace(/\s+/g, " ").trim();
+  const collapsed = maskLongNumbers(stripControl(text.normalize("NFKC")))
+    .replace(/\s+/g, " ")
+    .trim();
   return neutralizeFormula(collapsed).slice(0, max);
 }
 

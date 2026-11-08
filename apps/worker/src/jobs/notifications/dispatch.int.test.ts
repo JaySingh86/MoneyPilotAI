@@ -225,7 +225,11 @@ describe("notifications.dispatch: crash safety (security review)", () => {
     };
     await dispatchHousehold(deps(email, NOW), hh.id);
     expect(seenDuringSend).toMatchObject({ d_status: "queued", attempts: 1, provider: null });
-    expect(await state(id)).toMatchObject({ status: "sent", d_status: "sent", provider: email.sent[0]?.providerMessageId });
+    expect(await state(id)).toMatchObject({
+      status: "sent",
+      d_status: "sent",
+      provider: email.sent[0]?.providerMessageId,
+    });
   });
 
   it("a crash after the send and before recording does not send a duplicate on the next run", async () => {
@@ -254,7 +258,11 @@ describe("notifications.dispatch: crash safety (security review)", () => {
     const next = await dispatchHousehold(deps(email, at(NOW, LEASE_SECONDS + 1)), hh.id);
     expect(next.sent).toBe(0);
     expect(email.sent).toHaveLength(1);
-    expect(await state(id)).toMatchObject({ status: "failed", d_status: "failed", last_error: "send:unresolved" });
+    expect(await state(id)).toMatchObject({
+      status: "failed",
+      d_status: "failed",
+      last_error: "send:unresolved",
+    });
   });
 
   it("a row whose delivery already has a provider id is marked sent without another send", async () => {

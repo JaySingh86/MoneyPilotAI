@@ -233,11 +233,13 @@ describe("resend: limits, lifetime and replay (review fixes)", () => {
     await api.admin(async (c) => {
       await c.query("begin");
       try {
-        await c.query("select set_config('app.user_id', $1, true), set_config('app.household_id', $2, true)", [
-          a.id,
-          hid,
+        await c.query(
+          "select set_config('app.user_id', $1, true), set_config('app.household_id', $2, true)",
+          [a.id, hid],
+        );
+        const cur = await c.query<{ token_hash: Buffer }>("select token_hash from invites where id = $1", [
+          created.id,
         ]);
-        const cur = await c.query<{ token_hash: Buffer }>("select token_hash from invites where id = $1", [created.id]);
         const far = "2099-01-01T00:00:00Z";
         const noHash = await c.query<{ r: string }>(
           "select app_rotate_invite_token($1, $2, $3, $4, null) as r",
@@ -249,9 +251,10 @@ describe("resend: limits, lifetime and replay (review fixes)", () => {
           [hid, created.id, Buffer.from("y".repeat(32)), far, cur.rows[0]?.token_hash],
         );
         expect(withHash.rows[0]?.r).toBe("ok");
-        const r = await c.query("select expires_at <= created_at + interval '30 days' as capped from invites where id = $1", [
-          created.id,
-        ]);
+        const r = await c.query(
+          "select expires_at <= created_at + interval '30 days' as capped from invites where id = $1",
+          [created.id],
+        );
         expect(r.rows[0]).toEqual({ capped: true });
       } finally {
         await c.query("rollback");

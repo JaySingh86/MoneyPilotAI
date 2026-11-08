@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, defaultOffsets, isMonthlySubscription, reminderDedupeKey, reminderSendAt } from "./schedule";
+import {
+  daysBetween,
+  defaultOffsets,
+  isMonthlySubscription,
+  reminderDedupeKey,
+  reminderSendAt,
+} from "./schedule";
 
 const NY = "America/New_York";
 
