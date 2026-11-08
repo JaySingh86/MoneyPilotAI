@@ -1,4 +1,4 @@
-// Turns an `Authorization: Bearer <Cognito access token>` header into the request's user (ADR-017).
+// Turns an `Authorization: Bearer <Supabase access token>` header into the request's user (ADR-020).
 // Plugged into the request-context plugin as `authenticate`; its AppErrors are raised after rate limiting.
 import type { FastifyRequest } from "fastify";
 import { eq } from "drizzle-orm";
@@ -26,7 +26,7 @@ export function createAuthenticator(deps: AuthenticatorDeps): Authenticator {
     const header = request.headers.authorization;
     if (header === undefined) return null;
     // A route that authenticates its caller itself (Gmail's Pub/Sub push carries a Google OIDC token in this same
-    // header, verified by the webhook) opts out with `config.skipUserAuth`; its token is not a Cognito token.
+    // header, verified by the webhook) opts out with `config.skipUserAuth`; its token is not a user access token.
     if (request.routeOptions?.config?.skipUserAuth === true) return null;
     const match = BEARER.exec(header);
     if (!match?.[1]) throw unauthorized("Send the access token as: Authorization: Bearer <token>.");
@@ -45,7 +45,8 @@ export function createAuthenticator(deps: AuthenticatorDeps): Authenticator {
     const user: AuthenticatedUser = {
       userId: row?.id ?? null,
       authSubject: token.subject,
-      claims: { ...token },
+      // Never the raw access token.
+      claims: { email: token.email, mfaVerifiedAt: token.mfaVerifiedAt, expiresAt: token.expiresAt },
     };
     verifiedTokens.set(user, token);
     return user;

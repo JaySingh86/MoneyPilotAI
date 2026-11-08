@@ -67,13 +67,17 @@ describe("sign-in screens", () => {
     await screen.findByRole("heading", { name: "Sign in" });
   });
 
-  it("says the environment has no sign-in when Cognito isn't configured", async () => {
-    const { createAmplifyAdapter } = await import("../../../lib/auth/amplify-adapter");
-    renderApp(<SignInFlow />, { adapter: createAmplifyAdapter(null) });
+  it("says it can't reach sign-in when the API doesn't answer", async () => {
+    const { createApiAuthAdapter } = await import("../../../lib/auth/api-adapter");
+    const adapter = createApiAuthAdapter({
+      baseUrl: "http://localhost:4000",
+      fetch: async () => new Response(null, { status: 503 }),
+    });
+    renderApp(<SignInFlow />, { adapter, signedIn: false });
     await screen.findByRole("heading", { name: "Sign in" });
     await userEvent.type(screen.getByLabelText("Email"), "a@b.example");
     await userEvent.type(screen.getByLabelText("Password"), "pw");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
-    expect((await screen.findByRole("alert")).textContent).toContain("Sign-in isn’t set up");
+    expect((await screen.findByRole("alert")).textContent).toContain("couldn’t reach the sign-in service");
   });
 });

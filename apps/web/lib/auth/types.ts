@@ -1,11 +1,11 @@
-// The sign-in adapter (ADR-017): our own screens call this; the Cognito implementation uses Amplify
-// Auth, and mock mode swaps in a fake so `pnpm dev` runs without AWS.
+// The sign-in adapter (ADR-020): our own screens call this; the real implementation calls only our API's
+// `/v1/auth/*` routes, and mock mode swaps in a fake so `pnpm dev` runs without a backend.
 
 export interface AuthSession {
-  /** Cognito access token, sent to the API as `Authorization: Bearer` (ADR-017). */
+  /** The access token, kept in memory and sent to the API as `Authorization: Bearer`. */
   accessToken: string;
   email: string | null;
-  /** From the sign-up form; the first `POST /me/bootstrap` needs it (the token has no trusted name). */
+  /** A first name to offer at the first `POST /me/bootstrap`; null when the API already has it (sign-up) or none. */
   firstName: string | null;
 }
 
@@ -16,7 +16,7 @@ export type SignInStep =
   | { step: "totp" }
   /** The email address is not confirmed yet: enter the code we sent. */
   | { step: "confirm_sign_up" }
-  /** Cognito wants a challenge these screens do not handle yet (passkey, MFA setup, new password). */
+  /** A challenge these screens do not handle yet. */
   | { step: "unsupported"; detail: string };
 
 export type AuthErrorCode =
@@ -27,6 +27,8 @@ export type AuthErrorCode =
   | "user_exists"
   | "rate_limited"
   | "not_configured"
+  | "mfa_required"
+  | "no_authenticator"
   | "step_up_unavailable"
   | "network"
   | "unknown";
@@ -58,18 +60,20 @@ export interface TotpSetup {
 }
 
 export interface AuthAdapter {
-  readonly kind: "cognito" | "mock";
+  readonly kind: "api" | "mock";
   /** The current session, refreshing expired tokens. Null when signed out. */
   getSession(): Promise<AuthSession | null>;
   signIn(email: string, password: string): Promise<SignInStep>;
   confirmTotp(code: string): Promise<SignInStep>;
   signUp(input: SignUpInput): Promise<SignInStep>;
+  /** Confirms the address. The real adapter also signs the new account in. */
   confirmSignUp(email: string, code: string): Promise<void>;
   resendSignUpCode(email: string): Promise<void>;
   requestPasswordReset(email: string): Promise<void>;
-  confirmPasswordReset(email: string, code: string, newPassword: string): Promise<void>;
-  /** Federated sign-in; leaves the page. */
-  signInWithGoogle(): Promise<void>;
+  /** Sets the new password and signs in. `mfaCode` is for accounts with an authenticator app (`mfa_required`). */
+  confirmPasswordReset(email: string, code: string, newPassword: string, mfaCode?: string): Promise<void>;
+  /** Federated sign-in; leaves the page and returns to `next` (an app path such as `/invite`). */
+  signInWithGoogle(next?: string): Promise<void>;
   /**
    * Step-up (ADR-018): proves a fresh TOTP code and refreshes the access token, so the next request to a
    * step-up route (leave, export, delete, connect email) carries a recent MFA time. Throws `invalid_code`.
@@ -103,6 +107,10 @@ export function authMessage(error: unknown): string {
         return "Too many tries. Wait a few minutes and try again.";
       case "not_configured":
         return "Sign-in isn’t set up for this environment yet.";
+      case "mfa_required":
+        return "This account uses an authenticator app. Ask for a new email code, then enter it with the app’s code.";
+      case "no_authenticator":
+        return "Set up an authenticator app first, then try again.";
       case "step_up_unavailable":
         return "The 2-step check isn’t available yet in this environment.";
       case "network":

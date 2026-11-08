@@ -63,13 +63,11 @@ const ALLOW = {
       "SES_EVENTS_TOPIC_ARNS",
       "BILLING_PROVIDER",
       "BILLING_WEBHOOK_SECRET",
-      // Auth: Cognito until WP-33 replaces it with the Supabase keys, which only the API holds.
-      "COGNITO_REGION",
-      "COGNITO_USER_POOL_ID",
-      "COGNITO_CLIENT_ID",
+      // Auth (ADR-020): only the API holds the Supabase keys and the Google state-cookie secret.
       "SUPABASE_URL",
       "SUPABASE_PUBLISHABLE_KEY",
       "SUPABASE_SECRET_KEY",
+      "AUTH_COOKIE_SECRET", // API_PUBLIC_URL comes with EMAIL_INTEGRATION
       ...EMAIL_INTEGRATION,
     ],
     prefixes: [],

@@ -1,5 +1,5 @@
-// pnpm --filter @mp/api live:smoke — an end-to-end check of the real-data path on your machine (WP-32), used
-// until Supabase Auth (WP-33) lets you sign in through the web app:
+// pnpm --filter @mp/api live:smoke — a command-line check of the upload and import path against LOCAL services
+// (WP-32). Test tooling: it fakes sign-in, so it lives with the auth test fakes (Q-227):
 //   fake sign-in -> create household -> upload a synthetic CSV to storage -> the worker processes it -> review items.
 //
 // It starts THIS API in-process on API_SMOKE_PORT (default 4010) against the real database (DATABASE_URL), storage
@@ -12,15 +12,15 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { Temporal } from "@js-temporal/polyfill";
 import { createApiDb, tlsMode } from "@mp/db";
-import { createAuthenticator } from "../auth/authenticator";
-import { createCognitoProvider } from "../auth/cognito";
-import { configureRuntime, type ApiRuntime } from "../auth/runtime";
-import { FakeIssuer } from "../auth/testing/fake-issuer";
-import { configureImportStorage } from "../modules/imports";
-import { createS3ImportStorage, loadS3Config } from "../modules/imports/s3-storage";
-import { buildServer } from "../server";
+import { createAuthenticator } from "../authenticator";
+import { createSupabaseProvider } from "../supabase";
+import { configureRuntime, type ApiRuntime } from "../runtime";
+import { FakeSupabase } from "./fake-supabase";
+import { configureImportStorage } from "../../modules/imports";
+import { createS3ImportStorage, loadS3Config } from "../../modules/imports/s3-storage";
+import { buildServer } from "../../server";
 
-const root = resolve(import.meta.dirname, "../../../..");
+const root = resolve(import.meta.dirname, "../../../../..");
 const envFile = resolve(root, ".env.local");
 if (existsSync(envFile)) process.loadEnvFile(envFile);
 
@@ -55,18 +55,15 @@ function syntheticCsv(): string {
 
 /**
  * The ONLY place this script knows how sign-in works: a fake token issuer standing in for the real one.
- * TODO(WP-33 merge): `auth/cognito.ts` and `FakeIssuer` are replaced by `SupabaseAuthProvider` and `FakeSupabase`.
- * Port this function (and nothing else) to build the provider from `FakeSupabase` and mint an access token with
- * an `email` claim and a verified email; `provider` goes to `configureRuntime`/`createAuthenticator` below.
  */
 async function createSmokeAuth(): Promise<{
   provider: ApiRuntime["provider"];
   accessToken(subject: string, email: string): Promise<string>;
 }> {
-  const issuer = await FakeIssuer.create();
+  const issuer = await FakeSupabase.create();
   return {
-    provider: createCognitoProvider(issuer.cognitoConfig()),
-    accessToken: (subject, email) => issuer.accessToken(subject, { claims: { email } }),
+    provider: createSupabaseProvider(issuer.providerConfig()),
+    accessToken: (subject, email) => issuer.accessToken(subject, { email, emailConfirmed: true }),
   };
 }
 

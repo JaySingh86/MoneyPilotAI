@@ -85,6 +85,24 @@ describe("envFor", () => {
     }
   });
 
+  it("api gets the Supabase Auth keys and cookie secret (ADR-020); web and worker never do", () => {
+    const auth = {
+      SUPABASE_URL: "https://ref.supabase.co",
+      SUPABASE_PUBLISHABLE_KEY: "sb_publishable_x",
+      SUPABASE_SECRET_KEY: "sb-secret",
+      AUTH_COOKIE_SECRET: "cookie-secret",
+      API_PUBLIC_URL: "http://localhost:4000",
+    };
+    const api = envFor("api", { ...parent, ...auth });
+    for (const [key, value] of Object.entries(auth)) expect(api[key], key).toBe(value);
+    for (const name of ["web", "worker"] as const) {
+      const env = envFor(name, { ...parent, ...auth });
+      for (const key of ["SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SECRET_KEY", "AUTH_COOKIE_SECRET"]) {
+        expect(env, `${name} ${key}`).not.toHaveProperty(key);
+      }
+    }
+  });
+
   it("nobody gets the admin URL or unrelated variables", () => {
     for (const name of ["web", "api", "worker"] as const) {
       const env = envFor(name, parent);

@@ -134,6 +134,22 @@ module.exports = {
       to: { path: "(^|/)packages/engine/src/testing/" },
     },
     {
+      name: "auth-testing-only-in-tests",
+      comment:
+        "apps/api/src/auth/testing (the fake Supabase issuer and GoTrue) is for tests only: no production " +
+        "module may import it, or a build could ship a verifier that trusts a local key (WP-33).",
+      severity: "error",
+      from: {
+        pathNot: [
+          "\\.test\\.tsx?$",
+          "(^|/)apps/api/src/auth/testing/",
+          // Test helpers that build a test API: files named exactly testing.ts (modules/imports/testing.ts and friends).
+          "(^|/)testing\\.ts$",
+        ],
+      },
+      to: { path: "(^|/)apps/api/src/auth/testing/" },
+    },
+    {
       name: "review-rules-is-pure",
       comment:
         "packages/review-rules must not import apps or other internal packages. It shares the auto-apply policy " +

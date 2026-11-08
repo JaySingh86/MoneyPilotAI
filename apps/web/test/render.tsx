@@ -9,7 +9,7 @@ import type { MockAuthAdapter } from "../mocks/mock-auth-adapter";
 import { initFromLocation, setScenario, state } from "../mocks/state";
 import type { Scenario } from "../mocks/model";
 
-/** Resets the mock API and renders `ui` inside the app's providers with the fake Cognito session. */
+/** Resets the mock API and renders `ui` inside the app's providers with the fake signed-in session. */
 export function renderApp(
   ui: ReactElement,
   options: { scenario?: Scenario; signedIn?: boolean; adapter?: AuthAdapter } = {},

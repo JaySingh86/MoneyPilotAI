@@ -5,18 +5,10 @@ import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 import nextConfig from "../next.config.mjs";
 import { middleware } from "../middleware";
-import {
-  INVITE_HEADERS,
-  STATIC_HEADERS,
-  buildCsp,
-  cognitoOrigins,
-  productionEnvProblems,
-} from "../security.mjs";
+import { INVITE_HEADERS, STATIC_HEADERS, buildCsp, productionEnvProblems } from "../security.mjs";
 
 const prodEnv = {
   NEXT_PUBLIC_API_URL: "https://api.moneypilot.example",
-  NEXT_PUBLIC_COGNITO_USER_POOL_ID: "us-east-1_AbCdEf123",
-  NEXT_PUBLIC_COGNITO_CLIENT_ID: "client-id",
 };
 
 function directive(csp: string, name: string): string[] {
@@ -44,13 +36,8 @@ describe("Content-Security-Policy", () => {
     expect(directive(csp, "script-src")).not.toContain("'unsafe-inline'");
   });
 
-  it("connects only to self, the API and Cognito", () => {
-    expect(directive(csp, "connect-src")).toEqual([
-      "'self'",
-      "https://api.moneypilot.example",
-      "https://cognito-idp.us-east-1.amazonaws.com",
-      "https://cognito-identity.us-east-1.amazonaws.com",
-    ]);
+  it("connects only to self and the API (sign-in goes through the API, never to an auth provider)", () => {
+    expect(directive(csp, "connect-src")).toEqual(["'self'", "https://api.moneypilot.example"]);
   });
 
   it("adds the object store origin for the CSV upload, and a local MinIO default in development only", () => {
@@ -78,12 +65,6 @@ describe("Content-Security-Policy", () => {
       env: { NEXT_PUBLIC_STORAGE_URL: "http://localhost:59000" },
     });
     expect(directive(dev, "connect-src")).toContain("http://localhost:59000");
-  });
-
-  it("adds the hosted UI domain when Google sign-in is configured", () => {
-    expect(cognitoOrigins({ ...prodEnv, NEXT_PUBLIC_COGNITO_OAUTH_DOMAIN: "auth.example.com" })).toContain(
-      "https://auth.example.com",
-    );
   });
 
   it("references no Google origin (the fonts are self-hosted)", () => {
@@ -153,12 +134,8 @@ describe("production environment", () => {
     );
   });
 
-  it("rejects missing Cognito settings", () => {
-    const problems = productionEnvProblems({ NEXT_PUBLIC_API_URL: prodEnv.NEXT_PUBLIC_API_URL });
-    expect(problems).toEqual([
-      "NEXT_PUBLIC_COGNITO_USER_POOL_ID is not set",
-      "NEXT_PUBLIC_COGNITO_CLIENT_ID is not set",
-    ]);
+  it("needs no auth setting in the web app", () => {
+    expect(productionEnvProblems({ NEXT_PUBLIC_API_URL: prodEnv.NEXT_PUBLIC_API_URL })).toEqual([]);
   });
 
   it("stops a production build or server config when the environment is wrong", () => {

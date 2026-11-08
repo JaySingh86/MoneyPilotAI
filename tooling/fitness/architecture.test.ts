@@ -104,6 +104,18 @@ describe("dependency rules (ARCHITECTURE §3)", () => {
     );
   });
 
+  it("rejects production code importing the auth test fakes, and lets test helpers do it", async () => {
+    expect(await violationsIn([`${FIX}/apps/api/src/modules/uses-fake.ts`])).toContain(
+      "auth-testing-only-in-tests",
+    );
+    expect(await violationsIn([`${FIX}/apps/api/src/modules/fake-testing.ts`])).toContain(
+      "auth-testing-only-in-tests",
+    );
+    expect(await violationsIn([`${FIX}/apps/api/src/modules/testing.ts`])).not.toContain(
+      "auth-testing-only-in-tests",
+    );
+  });
+
   it("lets only apps/web/mocks run the engine on the fixture (WP-17), nothing else in apps/web", async () => {
     expect(await violationsIn([`${FIX}/apps/web/mocks`])).toEqual([]);
     expect(await violationsIn([`${FIX}/apps/web/imports-db.ts`])).toContain("web-boundaries");

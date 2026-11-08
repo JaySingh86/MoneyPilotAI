@@ -35,6 +35,8 @@ describe("rate limits (BACKEND_PLAN §8.1)", () => {
     expect(RATE_LIMITS).toEqual({
       overall: { max: 600, timeWindow: "1 minute" },
       authSensitive: { max: 20, timeWindow: "1 minute" },
+      authCredentials: { max: 10, timeWindow: "1 minute" },
+      authSession: { max: 30, timeWindow: "1 minute" },
       compute: { max: 60, timeWindow: "1 minute" },
       imports: { max: 10, timeWindow: "1 minute" },
     });

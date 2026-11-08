@@ -1297,3 +1297,72 @@ Format (newest first):
 - Options considered: (a) add the token to both files (needs a spec change); (b) keep it CSS-only. For now the consistency check treats `--mp-tracking-table-header` as a documented CSS-only variable (`CSS_ONLY` in `packages/ui/src/tokens/build.ts`). The generated `cssVar.tracking.tableHeader` points to it, and there is no raw value in `tokens`.
 - Blocking: no. Nothing was skipped. React Native has no raw table-header tracking value until this is answered.
 - Answer: (tech lead, 2026-10-27; spec commit a9b28d9) `tokens.json` now has a `tracking.tableHeader` token (0.06em), not a full typography token. The consistency check maps it to `--mp-tracking-table-header`, the CSS-only special case is removed, and `tokens.generated.ts` is regenerated.
+
+## Q-220 · WP-33 · Auth routes are mounted at `/v1/auth/*`, not `/auth/*`
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: ADR-020, WP-33, `docs/runbooks/supabase-setup.md` (Redirect URLs listed `http://localhost:4000/auth/callback`)
+- Question: every other route sits under `/v1` and the generated client assumes it, so the auth module uses `/v1/auth/*` and Google's return trip is `/v1/auth/google/callback`. The runbook's Supabase Redirect URL was updated to match. Confirm, or ask for an unversioned `/auth` mount.
+- Options considered: (a) `/v1/auth` (implemented); (b) unversioned `/auth` as a second prefix.
+- Blocking: no.
+- Answer:
+
+## Q-221 · WP-33 · `email_confirmed_at` and MFA factors are not in the Supabase access token
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: ADR-020 ("`/me/bootstrap` ... `email_confirmed_at` set"), `AuthProvider.getUser`
+- Question: Supabase's JWT carries `aal`, `amr`, `email`, `app_metadata` and a user-editable `user_metadata` (with `email_verified`), but not `email_confirmed_at` or the factor list. So `getUser` is now async and bootstrap makes one server-side `GET /auth/v1/user` with the caller's token; `user_metadata` is never trusted. It costs one call per bootstrap and none per request. Acceptable?
+- Options considered: (a) user-record lookup at bootstrap (implemented); (b) trust `user_metadata.email_verified` (rejected: user-editable); (c) a custom access-token hook adding claims (needs Supabase dashboard setup and is a human decision).
+- Blocking: no.
+- Answer:
+
+## Q-222 · WP-33 · Password sign-in returns an aal1 session plus `mfa_required`
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: brief ("returns aal1, or mfa_required with a factor id"), ADR-018 (MFA optional for everyday use)
+- Question: GoTrue issues the aal1 session on a correct password and needs it as the bearer to run the TOTP challenge, so `mfa_required` carries that aal1 session (and sets the cookie). It is a complete everyday session by ADR-018; the UI asks for the code at sign-in, but nothing server-side blocks an enrolled user who skips it. Step-up still needs aal2. Should enrolled accounts be held to aal2 for every route instead?
+- Options considered: (a) as implemented; (b) the API refuses aal1 tokens for accounts with a verified factor (needs a per-request factor lookup or a custom claim).
+- Blocking: no.
+- Answer:
+
+## Q-223 · WP-33 · Password reset for an account with an authenticator wastes the emailed code if `mfaCode` is missing
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: `POST /v1/auth/password-reset/confirm`
+- Question: Supabase needs an aal2 session to change the password of an account with a verified factor, and the recovery code is single use. Without `mfaCode` the API answers 403 `mfa_required` after the code is spent, so the user requests a new code. Better UX would be asking for both up front, but the web cannot know before the code is verified (no enumeration). Accept, or add a separate "update password" route that works from the recovery session after the TOTP step?
+- Options considered: (a) as implemented; (b) `mfa_required` returns the recovery session and a second route sets the password.
+- Blocking: no.
+- Answer:
+
+## Q-224 · WP-33 · Google sign-in is web only; MFA is not forced after Google
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: ADR-020, `GET /v1/auth/google/start|callback`
+- Question: the callback sets the web refresh cookie and redirects, so it serves web only. Mobile would need a deep-link return and the refresh token in a one-time exchange; that is left until the mobile app exists. After Google the session is aal1 even for an enrolled account (same as Q-222).
+- Blocking: no.
+- Answer:
+
+## Q-225 · WP-33 · Local Supabase end-to-end test not run
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: WP-33 acceptance, last box
+- Question: route tests run the real routes and GoTrue client against an in-memory fake Supabase; they do not exercise a real GoTrue. The sign up, confirm, sign in, bootstrap and TOTP step-up flow against `npx supabase start` (Docker, Mailpit for the code) is documented but not run here, because WP-32 owns `packages/db/supabase` and docker config.
+- Blocking: no.
+- Answer:
+
+
+## Q-226 · WP-33 · Sign-up timing can still tell a new address from an existing one
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: `POST /v1/auth/sign-up`
+- Question: the response is identical (202, same body) for new and existing addresses, and the provider's per-address email limit is swallowed. But a new address makes Supabase send an email, which takes longer than the obfuscated answer for an existing one. Padding every sign-up to a fixed minimum duration (for example 800 ms) would hide it at the cost of slower sign-ups; it is not done because the real difference has not been measured against Supabase yet. Pad, or accept?
+- Blocking: no.
+- Answer:
+
+## Q-227 · WP-33 · The `FakeIssuer` alias and Cognito-era token options stay; `live-smoke` and the new depcruise rule
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: `apps/api/src/auth/testing/fake-issuer.ts`, `fake-supabase.ts` (`TokenOptions.claims`), `.dependency-cruiser.cjs` rule `auth-testing-only-in-tests`
+- Question: about fifteen suites on main (and unmerged branches) still pass `claims: { email, mfa_enabled, mfa_verified_at }`, so the alias and that mapping stay until those branches merge; they can then be migrated to `email`, `emailConfirmed`, `totp`, `totpAt` and the alias deleted. WP-32's `apps/api/src/dev/live-smoke.ts` imports the fake; the new rule forbids production code importing `auth/testing/**` (allowed: `*.test.ts`, `testing.ts` helpers, the folder itself), so at merge `live-smoke` either becomes a `testing.ts`-style helper, moves under `auth/testing/`, or gets a dated exemption in the rule. Which?
+- Blocking: no (flagged for the merge).
+- Answer: Answered (tech lead, 2026-11-09): moved to `apps/api/src/auth/testing/live-smoke.ts` (it is test tooling that fakes sign-in) and ported to `FakeSupabase`; no exemption in the rule.
+
+## Q-228 · WP-33 · No unenrol or replace-authenticator route: a lost phone leaves the account stuck at password reset
+- Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
+- Where: `/v1/auth/mfa/*`, `POST /v1/auth/password-reset/confirm`
+- Question: once an account has a verified authenticator there is no way to remove or replace it, and a password reset needs the authenticator code too (the B1 fix). A person who loses their phone can neither reset their password nor reach step-up actions, and nothing in the product recovers them. Unenrolling from an aal2 session is easy (a `DELETE` route), but that does not help someone who has lost the factor. The recovery path is an owner decision, for example: recovery codes shown at enrolment; or a support-assisted reset that removes the factor after an identity check (using the Supabase Admin API from a worker or script, never from the web app); or a delay period with notice to the account's email. Until it is decided, support would remove the factor by hand in the Supabase dashboard.
+- Blocking: no (before real users, yes).
+- Answer:
+

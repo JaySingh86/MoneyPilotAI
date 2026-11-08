@@ -14,10 +14,6 @@ export function middleware(request: NextRequest): NextResponse {
     env: {
       NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
       NEXT_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_STORAGE_URL,
-      NEXT_PUBLIC_COGNITO_USER_POOL_ID: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
-      NEXT_PUBLIC_COGNITO_CLIENT_ID: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
-      NEXT_PUBLIC_COGNITO_REGION: process.env.NEXT_PUBLIC_COGNITO_REGION,
-      NEXT_PUBLIC_COGNITO_OAUTH_DOMAIN: process.env.NEXT_PUBLIC_COGNITO_OAUTH_DOMAIN,
     },
   });
   const headers = new Headers(request.headers);

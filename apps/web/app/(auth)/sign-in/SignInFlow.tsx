@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { useAuth } from "../../../lib/auth/AuthProvider";
 import { FIRST_NAME_MAX } from "../../../lib/auth/bootstrap";
-import { authMessage } from "../../../lib/auth/types";
+import { AuthError, authMessage } from "../../../lib/auth/types";
 import type { SignInStep } from "../../../lib/auth/types";
-import { COGNITO } from "../../../lib/config";
+import { GOOGLE_SIGN_IN } from "../../../lib/config";
 import { recallInviteToken } from "../invite/invite";
 import { FirstNameForm } from "../../../lib/components/FirstNameForm";
 import styles from "../auth.module.css";
@@ -39,9 +39,19 @@ export function SignInFlow({ initialStep = "sign_in", onSignedIn }: SignInFlowPr
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [code, setCode] = useState("");
+  /** Authenticator code for a password reset, asked for only when the account has one. */
+  const [mfaCode, setMfaCode] = useState("");
+  const [needsMfa, setNeedsMfa] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Google sent the person back with a failure (the API redirects to /sign-in?error=oauth).
+    if (new URLSearchParams(window.location.search).get("error") === "oauth") {
+      setError("We couldn’t sign you in with Google. Try again, or use your email and password.");
+    }
+  }, []);
 
   useEffect(() => {
     if (status !== "signed_in") return;
@@ -55,6 +65,8 @@ export function SignInFlow({ initialStep = "sign_in", onSignedIn }: SignInFlowPr
   function go(next: Step, message: string | null = null) {
     setStep(next);
     setCode("");
+    setMfaCode("");
+    setNeedsMfa(false);
     setError(null);
     setNotice(message);
   }
@@ -100,12 +112,26 @@ export function SignInFlow({ initialStep = "sign_in", onSignedIn }: SignInFlowPr
           return finish(await adapter.signUp({ email: email.trim(), password, firstName: firstName.trim() }));
         case "confirm_sign_up":
           await adapter.confirmSignUp(email.trim(), code.trim());
+          // The real adapter signs the new account in: `refresh` picks that up and the effect above redirects.
+          await refresh();
           return go("sign_in", "Your email is confirmed. Sign in to continue.");
         case "forgot":
           await adapter.requestPasswordReset(email.trim());
           return go("reset", "If that address has an account, a code is on its way.");
         case "reset":
-          await adapter.confirmPasswordReset(email.trim(), code.trim(), password);
+          try {
+            await adapter.confirmPasswordReset(
+              email.trim(),
+              code.trim(),
+              password,
+              mfaCode.trim() || undefined,
+            );
+          } catch (failure) {
+            // An account with an authenticator app needs its code as well: ask for it, with a fresh email code.
+            if (failure instanceof AuthError && failure.code === "mfa_required") setNeedsMfa(true);
+            throw failure;
+          }
+          await refresh();
           return go("sign_in", "Your password is changed. Sign in with the new one.");
       }
     });
@@ -117,7 +143,7 @@ export function SignInFlow({ initialStep = "sign_in", onSignedIn }: SignInFlowPr
   // `process.env.NODE_ENV` is inlined by Next: in a production bundle the mock-only branches below are
   // constant `false` and are dropped, strings included (see lib/config.ts and the production-build test).
   const mockAuth = process.env.NODE_ENV !== "production" && adapter.kind === "mock";
-  const googleAvailable = mockAuth || COGNITO?.oauthDomain != null;
+  const googleAvailable = mockAuth || GOOGLE_SIGN_IN;
   const { title, subtitle } = TITLES[step];
   const submitLabel: Record<Step, string> = {
     sign_in: "Sign in",
@@ -181,6 +207,16 @@ export function SignInFlow({ initialStep = "sign_in", onSignedIn }: SignInFlowPr
               required
             />
           )}
+          {step === "reset" && needsMfa && (
+            <TextField
+              label="Authenticator code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value)}
+              required
+            />
+          )}
           <Button type="submit" className={styles.full} disabled={busy}>
             {submitLabel[step]}
           </Button>
@@ -192,7 +228,9 @@ export function SignInFlow({ initialStep = "sign_in", onSignedIn }: SignInFlowPr
                   <Button
                     variant="secondary"
                     className={styles.full}
-                    onClick={() => void run(() => adapter.signInWithGoogle())}
+                    onClick={() =>
+                      void run(() => adapter.signInWithGoogle(recallInviteToken() ? "/invite" : "/overview"))
+                    }
                   >
                     Continue with Google
                   </Button>

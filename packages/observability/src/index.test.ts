@@ -63,3 +63,29 @@ describe("createLogger redaction (CLAUDE.md hard rule 8)", () => {
     expect(out()).toContain("plan.recompute");
   });
 });
+
+describe("auth field names (WP-33)", () => {
+  const AUTH_KEYS = [
+    "refresh_token",
+    "access_token",
+    "id_token",
+    "token_hash",
+    "tokenHash",
+    "newPassword",
+    "mfaCode",
+    "otpauthUri",
+    "secret",
+    "challengeId",
+    "error_description",
+    "refreshToken",
+    "accessToken",
+    "password",
+  ];
+
+  it.each(AUTH_KEYS)("redacts %s at the root, one and two levels deep", (key) => {
+    const { log, out } = capture();
+    log.info({ [key]: "LEAK-root", a: { [key]: "LEAK-one" }, b: { c: { [key]: "LEAK-two" } } }, "auth");
+    expect(out()).not.toContain("LEAK");
+    expect(out()).toContain("[redacted]");
+  });
+});

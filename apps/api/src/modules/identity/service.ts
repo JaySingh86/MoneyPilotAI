@@ -6,6 +6,11 @@ import { recordAudit, type RequestMeta } from "./audit";
 import { isUniqueViolation } from "./db-errors";
 import * as repo from "./repo";
 
+function validSignUpName(name: string | null): string | undefined {
+  const trimmed = name?.trim();
+  return trimmed && trimmed.length <= 80 ? trimmed : undefined;
+}
+
 const DEFAULT_TIMEZONE = "America/New_York";
 
 function toMe(user: repo.UserRow, memberships: repo.MembershipRow[]): Me {
@@ -32,7 +37,7 @@ export class IdentityService {
 
   /**
    * Creates the caller's `users` row on first call and syncs email and MFA from the verified token on
-   * every call (ADR-017). The email comes only from `identity`, which is built from verified claims; the
+   * every call (ADR-017, ADR-020). The email comes only from `identity`, which is built from verified claims; the
    * request body has no email field. Refuses unless the token's `email_verified` claim is true.
    */
   async bootstrap(identity: AuthUser, body: BootstrapBody, meta: RequestMeta): Promise<Me> {
@@ -47,7 +52,10 @@ export class IdentityService {
         let created = false;
         if (user?.deletedAt) throw new AppError("unauthorized", 401, "This account has been deleted.");
         if (!user) {
-          if (body.firstName === undefined) {
+          // The name typed at sign-up travels with the account (Supabase user metadata), so a confirmation
+          // opened on another device still bootstraps. It is free text: the same checks as a body name.
+          const firstName = body.firstName ?? validSignUpName(identity.firstName);
+          if (firstName === undefined) {
             throw new AppError("validation_failed", 400, "Tell us your first name to finish setting up.", {
               fields: [{ in: "body", path: "firstName", message: "Required the first time" }],
             });
@@ -55,7 +63,7 @@ export class IdentityService {
           const inserted = await repo.insertUser(tx, {
             authSubject: identity.subject,
             email,
-            firstName: body.firstName,
+            firstName,
             lastName: body.lastName ?? null,
             timezone: body.timezone ?? DEFAULT_TIMEZONE,
           });

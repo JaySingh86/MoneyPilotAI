@@ -5,10 +5,6 @@
  * @typedef {object} WebEnv
  * @property {string | undefined} [NEXT_PUBLIC_API_URL]
  * @property {string | undefined} [NEXT_PUBLIC_STORAGE_URL]
- * @property {string | undefined} [NEXT_PUBLIC_COGNITO_USER_POOL_ID]
- * @property {string | undefined} [NEXT_PUBLIC_COGNITO_CLIENT_ID]
- * @property {string | undefined} [NEXT_PUBLIC_COGNITO_REGION]
- * @property {string | undefined} [NEXT_PUBLIC_COGNITO_OAUTH_DOMAIN]
  */
 
 const DEFAULT_DEV_API_URL = "http://localhost:4000";
@@ -25,20 +21,6 @@ export function originOf(url) {
   }
 }
 
-/** The Cognito endpoints Amplify Auth talks to, from the pool id and the optional hosted UI domain. */
-export function cognitoOrigins(env) {
-  const poolId = env.NEXT_PUBLIC_COGNITO_USER_POOL_ID;
-  if (!poolId) return [];
-  const region = env.NEXT_PUBLIC_COGNITO_REGION || poolId.split("_")[0];
-  const origins = [
-    `https://cognito-idp.${region}.amazonaws.com`,
-    `https://cognito-identity.${region}.amazonaws.com`,
-  ];
-  const domain = env.NEXT_PUBLIC_COGNITO_OAUTH_DOMAIN;
-  if (domain) origins.push(domain.startsWith("https://") ? domain : `https://${domain}`);
-  return origins;
-}
-
 /**
  * The Content-Security-Policy for one response. `nonce` is generated per request by the middleware.
  * No `unsafe-eval` outside development (React's dev tools need it); styles allow inline because
@@ -53,7 +35,7 @@ export function buildCsp({ nonce, dev, env }) {
   const storage =
     (configuredStorage && (dev || configuredStorage.startsWith("https://")) ? configuredStorage : null) ??
     (dev ? DEFAULT_DEV_STORAGE_URL : null);
-  const connect = ["'self'", ...(api ? [api] : []), ...(storage ? [storage] : []), ...cognitoOrigins(env)];
+  const connect = ["'self'", ...(api ? [api] : []), ...(storage ? [storage] : [])];
   const script = ["'self'", `'nonce-${nonce}'`, ...(dev ? ["'unsafe-eval'"] : [])];
   return [
     "default-src 'self'",
@@ -87,8 +69,8 @@ export const STATIC_HEADERS = [
 export const INVITE_HEADERS = [{ key: "Referrer-Policy", value: "no-referrer" }];
 
 /**
- * Problems that must stop a production build or server: the API must be https and the Cognito pool
- * must be configured, otherwise the app would ship talking to localhost or unable to sign in.
+ * Problems that must stop a production build or server: the API must be https, otherwise the app would
+ * ship talking to localhost. (Sign-in goes through the API, so no auth setting lives in the web app.)
  *
  * @param {WebEnv} env
  * @returns {string[]}
@@ -100,7 +82,5 @@ export function productionEnvProblems(env) {
   else if (originOf(api) === null || new URL(api).protocol !== "https:") {
     problems.push("NEXT_PUBLIC_API_URL must be an https URL");
   }
-  if (!env.NEXT_PUBLIC_COGNITO_USER_POOL_ID) problems.push("NEXT_PUBLIC_COGNITO_USER_POOL_ID is not set");
-  if (!env.NEXT_PUBLIC_COGNITO_CLIENT_ID) problems.push("NEXT_PUBLIC_COGNITO_CLIENT_ID is not set");
   return problems;
 }

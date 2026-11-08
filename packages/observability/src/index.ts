@@ -20,6 +20,17 @@ export const SENSITIVE_KEYS = [
   "set-cookie",
   "code",
   "state",
+  // auth flows (WP-33): provider-style names as well as ours
+  "refresh_token",
+  "access_token",
+  "id_token",
+  "token_hash",
+  "tokenHash",
+  "newPassword",
+  "mfaCode",
+  "otpauthUri",
+  "challengeId",
+  "error_description",
   // people
   "email",
   "emails",

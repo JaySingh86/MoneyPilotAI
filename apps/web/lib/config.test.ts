@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertMockAllowed, resolveCognitoConfig, resolveMockMode } from "./config";
+import { assertMockAllowed, resolveMockMode } from "./config";
 
 describe("mock mode", () => {
   it("is on only when asked for, outside production", () => {
@@ -19,28 +19,5 @@ describe("mock mode", () => {
     expect(() => assertMockAllowed("production", "0")).toThrow();
     expect(() => assertMockAllowed("production", undefined)).not.toThrow();
     expect(() => assertMockAllowed("development", "1")).not.toThrow();
-  });
-});
-
-describe("Cognito config", () => {
-  it("is null until the user pool and client are set", () => {
-    expect(resolveCognitoConfig({})).toBeNull();
-    expect(resolveCognitoConfig({ userPoolId: "us-east-1_abc" })).toBeNull();
-  });
-
-  it("takes the region from the pool id and the optional hosted UI domain", () => {
-    expect(resolveCognitoConfig({ userPoolId: "us-west-2_abc", userPoolClientId: "client" })).toEqual({
-      region: "us-west-2",
-      userPoolId: "us-west-2_abc",
-      userPoolClientId: "client",
-      oauthDomain: null,
-    });
-    expect(
-      resolveCognitoConfig({
-        userPoolId: "us-east-1_a",
-        userPoolClientId: "c",
-        oauthDomain: "auth.example.com",
-      })?.oauthDomain,
-    ).toBe("auth.example.com");
   });
 });

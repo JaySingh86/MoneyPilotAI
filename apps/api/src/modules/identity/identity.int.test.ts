@@ -1,4 +1,4 @@
-// /v1/me over HTTP with a real database and the Cognito verifier against a fake issuer (ADR-017).
+// /v1/me over HTTP with a real database and the Supabase verifier against a fake issuer (ADR-020).
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTestApi, type TestApi } from "../../auth/testing/app";
 import { expectProblem } from "../../lib/testing";
@@ -32,16 +32,17 @@ describe("authentication on every request", () => {
 
   it.each([
     [
-      "wrong issuer",
+      "signed by another key",
       async () =>
-        (
-          await (
-            await import("../../auth/testing/fake-issuer")
-          ).FakeIssuer.create({ userPoolId: "us-east-1_Evil" })
-        ).accessToken("s"),
+        (await (await import("../../auth/testing/fake-supabase")).FakeSupabase.create()).accessToken("s"),
     ],
-    ["wrong client id", () => api.issuer.accessToken("s", { claims: { client_id: "other-client" } })],
-    ["an id token", () => api.issuer.idToken("s")],
+    [
+      "wrong issuer",
+      () => api.issuer.accessToken("s", { claims: { iss: "https://evil.supabase.co/auth/v1" } }),
+    ],
+    ["wrong audience", () => api.issuer.accessToken("s", { claims: { aud: "other" } })],
+    ["the anon role", () => api.issuer.accessToken("s", { claims: { role: "anon" } })],
+    ["an anonymous user", () => api.issuer.accessToken("s", { claims: { is_anonymous: true } })],
     ["expired", () => api.issuer.accessToken("s", { nowSeconds: Math.floor(Date.now() / 1000) - 9000 })],
   ])("%s: 401 on a normal route and on bootstrap", async (_name, makeToken) => {
     const headers = { authorization: `Bearer ${await makeToken()}` };
@@ -54,11 +55,10 @@ describe("authentication on every request", () => {
     const token = `${b64({ alg: "none", kid: api.issuer.kid })}.${b64({
       sub: "x",
       iss: api.issuer.issuer,
-      client_id: api.issuer.clientId,
-      token_use: "access",
+      aud: "authenticated",
+      role: "authenticated",
       exp: Math.floor(Date.now() / 1000) + 600,
       email: "x@example.test",
-      email_verified: true,
     })}.`;
     expectProblem(
       await api.app.inject({ url: "/v1/me", headers: { authorization: `Bearer ${token}` } }),

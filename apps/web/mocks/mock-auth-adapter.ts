@@ -1,4 +1,4 @@
-// A fake Cognito for mock mode (`pnpm dev:mock`) and tests. Dev only: it is loaded through a dynamic
+// A fake sign-in for mock mode (`pnpm dev:mock`) and tests. Dev only: it is loaded through a dynamic
 // import that is dropped from production bundles (lib/config.ts), and it never touches a network.
 //
 // Scripted behaviour so the sign-in screens can be exercised without AWS:
@@ -30,7 +30,7 @@ function writeSignedIn(value: boolean): void {
 }
 
 export interface MockAuthAdapter extends AuthAdapter {
-  /** Simulates Cognito refreshing the tokens in the background. */
+  /** Simulates the session refreshing the tokens in the background. */
   simulateTokenRefresh(): void;
 }
 

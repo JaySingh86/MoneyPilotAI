@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import type { ComponentType, ReactNode } from "react";
 import { AuthProvider } from "../lib/auth/AuthProvider";
 import { StepUpProvider } from "../lib/auth/StepUp";
-import { createAmplifyAdapter } from "../lib/auth/amplify-adapter";
+import { createApiAuthAdapter } from "../lib/auth/api-adapter";
 import type { AuthAdapter } from "../lib/auth/types";
-import { COGNITO, MOCK_MODE } from "../lib/config";
+import { API_BASE_URL, MOCK_MODE } from "../lib/config";
 
 interface Boot {
   adapter: AuthAdapter;
@@ -24,7 +24,7 @@ async function boot(): Promise<Boot> {
     const { auth } = await startMock();
     return { adapter: auth, DevBar: MockBar };
   }
-  return { adapter: createAmplifyAdapter(COGNITO), DevBar: null };
+  return { adapter: createApiAuthAdapter({ baseUrl: API_BASE_URL }), DevBar: null };
 }
 
 export function Providers({ children }: { children: ReactNode }) {

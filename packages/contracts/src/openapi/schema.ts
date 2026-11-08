@@ -4143,6 +4143,764 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/auth/sign-up": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create an account; a confirmation email is sent
+     * @description Always 202, including for an address that already has an account.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["SignUpBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AuthAccepted"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/confirm-email": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Confirm the email address with the emailed code or link token, and sign in */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["ConfirmEmailBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AuthSignedIn"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/resend-confirmation": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Send the confirmation email again
+     * @description Always 202.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AuthEmailBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AuthAccepted"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/sign-in": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Sign in with email and password
+     * @description `mfa_required` carries an aal1 session: call `/auth/mfa/verify` with the authenticator code to reach aal2.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["SignInBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["SignInResponse"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/refresh": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Exchange the refresh token for a new session
+     * @description Web: reads the httpOnly cookie (send `X-MP-Client: web`; the Origin must be the web app). Mobile: send `refreshToken` in the body.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["RefreshBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AuthSignedIn"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/sign-out": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * End the session
+     * @description Revokes the session and clears the cookie. Send the access token, or (web) just the cookie. Always 204.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/password-reset/request": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Email a password reset code and link
+     * @description Always 202.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AuthEmailBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        202: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AuthAccepted"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/password-reset/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Set a new password with the emailed code or link token, and sign in */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PasswordResetBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AuthSignedIn"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/mfa/totp/enrol": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start authenticator-app enrolment
+     * @description Returns the otpauth URI and the secret, once. The factor counts only after `/auth/mfa/verify` with a code.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["MfaEnrolResponse"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/mfa/challenge": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Open an MFA challenge
+     * @description Optional: `/auth/mfa/verify` opens one itself when `challengeId` is not sent.
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["MfaChallengeBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["MfaChallengeResponse"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/mfa/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Verify an authenticator code (completes enrolment, or step-up to aal2)
+     * @description Returns a new aal2 session whose `totp` proof is fresh (step-up lasts 10 minutes).
+     */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["MfaVerifyBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AuthSignedIn"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/google/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Redirect to Google sign-in
+     * @description Browser navigation. `next` is an allowlisted web path to return to.
+     */
+    get: {
+      parameters: {
+        query?: {
+          next?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/auth/google/callback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Google return trip: exchange the code, set the session cookie, redirect to the web app
+     * @description Never puts a token in the redirect URL: the web app calls `/auth/refresh` to get its access token.
+     */
+    get: {
+      parameters: {
+        query?: {
+          code?: string;
+          error?: string;
+          error_code?: string;
+          error_description?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/households/{hid}/email-connections": {
     parameters: {
       query?: never;
@@ -4545,6 +5303,94 @@ export interface components {
         | "already_member"
         | "in_other_household"
         | "deleting";
+    };
+    AuthSessionInput: {
+      /** @description Send as Authorization: Bearer. Keep it in memory only. */
+      accessToken: string;
+      /** Format: date-time */
+      expiresAt: string;
+      /**
+       * @description aal2: a TOTP code was verified in this session.
+       * @enum {string}
+       */
+      aal: "aal1" | "aal2";
+      /** @description Only for `X-MP-Client: mobile`. Web gets an httpOnly cookie instead. */
+      refreshToken?: string;
+    };
+    AuthSignedInInput: {
+      /** @constant */
+      status: "signed_in";
+      session: components["schemas"]["AuthSessionInput"];
+    };
+    SignUpBodyInput: {
+      firstName: string;
+      email: string;
+      password: string;
+    };
+    AuthAcceptedInput: {
+      /** @constant */
+      status: "accepted";
+    };
+    ConfirmEmailBodyInput: {
+      email?: string;
+      code?: string;
+      tokenHash?: string;
+    };
+    AuthEmailBodyInput: {
+      email: string;
+    };
+    SignInBodyInput: {
+      email: string;
+      password: string;
+    };
+    SignInResponseInput:
+      | components["schemas"]["AuthSignedInInput"]
+      | {
+          /** @constant */
+          status: "mfa_required";
+          /** Format: uuid */
+          factorId: string;
+          session: components["schemas"]["AuthSessionInput"];
+        }
+      | {
+          /** @constant */
+          status: "confirm_email";
+        };
+    RefreshBodyInput: {
+      refreshToken?: string;
+    } | null;
+    PasswordResetBodyInput: {
+      email?: string;
+      code?: string;
+      tokenHash?: string;
+      newPassword: string;
+      /** @description Needed when the account has an authenticator app. */
+      mfaCode?: string;
+    };
+    MfaEnrolResponseInput: {
+      /** Format: uuid */
+      factorId: string;
+      /** @description otpauth:// URI for the QR code. Shown once. */
+      otpauthUri: string;
+      /** @description The same secret for manual entry. Shown once. */
+      secret: string;
+    };
+    MfaChallengeBodyInput: {
+      /** Format: uuid */
+      factorId?: string;
+    } | null;
+    MfaChallengeResponseInput: {
+      /** Format: uuid */
+      factorId: string;
+      /** Format: uuid */
+      challengeId: string;
+    };
+    MfaVerifyBodyInput: {
+      /** Format: uuid */
+      factorId?: string;
+      /** Format: uuid */
+      challengeId?: string;
+      code: string;
     };
     MembershipInput: {
       /** Format: uuid */
@@ -6579,6 +7425,99 @@ export interface components {
         | "already_member"
         | "in_other_household"
         | "deleting";
+    };
+    AuthSession: {
+      /** @description Send as Authorization: Bearer. Keep it in memory only. */
+      accessToken: string;
+      /** Format: date-time */
+      expiresAt: string;
+      /**
+       * @description aal2: a TOTP code was verified in this session.
+       * @enum {string}
+       */
+      aal: "aal1" | "aal2";
+      /** @description Only for `X-MP-Client: mobile`. Web gets an httpOnly cookie instead. */
+      refreshToken?: string;
+    };
+    AuthSignedIn: {
+      /** @constant */
+      status: "signed_in";
+      session: components["schemas"]["AuthSession"];
+    };
+    SignUpBody: {
+      firstName: string;
+      /** Format: email */
+      email: string;
+      password: string;
+    };
+    AuthAccepted: {
+      /** @constant */
+      status: "accepted";
+    };
+    ConfirmEmailBody: {
+      /** Format: email */
+      email?: string;
+      code?: string;
+      tokenHash?: string;
+    };
+    AuthEmailBody: {
+      /** Format: email */
+      email: string;
+    };
+    SignInBody: {
+      /** Format: email */
+      email: string;
+      password: string;
+    };
+    SignInResponse:
+      | components["schemas"]["AuthSignedIn"]
+      | {
+          /** @constant */
+          status: "mfa_required";
+          /** Format: uuid */
+          factorId: string;
+          session: components["schemas"]["AuthSession"];
+        }
+      | {
+          /** @constant */
+          status: "confirm_email";
+        };
+    RefreshBody: {
+      refreshToken?: string;
+    } | null;
+    PasswordResetBody: {
+      /** Format: email */
+      email?: string;
+      code?: string;
+      tokenHash?: string;
+      newPassword: string;
+      /** @description Needed when the account has an authenticator app. */
+      mfaCode?: string;
+    };
+    MfaEnrolResponse: {
+      /** Format: uuid */
+      factorId: string;
+      /** @description otpauth:// URI for the QR code. Shown once. */
+      otpauthUri: string;
+      /** @description The same secret for manual entry. Shown once. */
+      secret: string;
+    };
+    MfaChallengeBody: {
+      /** Format: uuid */
+      factorId?: string;
+    } | null;
+    MfaChallengeResponse: {
+      /** Format: uuid */
+      factorId: string;
+      /** Format: uuid */
+      challengeId: string;
+    };
+    MfaVerifyBody: {
+      /** Format: uuid */
+      factorId?: string;
+      /** Format: uuid */
+      challengeId?: string;
+      code: string;
     };
     Membership: {
       /** Format: uuid */

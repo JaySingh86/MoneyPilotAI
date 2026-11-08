@@ -5,8 +5,8 @@ import pg from "pg";
 import { inject } from "vitest";
 import { createApiDb, type ApiDb } from "@mp/db";
 import { createAuthenticator } from "../../auth/authenticator";
-import { createCognitoProvider } from "../../auth/cognito";
-import { FakeIssuer, type TokenOptions } from "../../auth/testing/fake-issuer";
+import { createSupabaseProvider } from "../../auth/supabase";
+import { FakeSupabase, type TokenOptions } from "../../auth/testing/fake-supabase";
 import type { ApiRuntime } from "../../auth/runtime";
 import { buildServer, type ApiServer } from "../../server";
 import { createHouseholdsModule } from "../households";
@@ -73,9 +73,9 @@ export interface ImportsTestApi {
 export async function createImportsTestApi(
   options: { importsLimit?: { max: number; timeWindow: string } } = {},
 ): Promise<ImportsTestApi> {
-  const issuer = await FakeIssuer.create();
+  const issuer = await FakeSupabase.create();
   const db = createApiDb({ connectionString: inject("apiDatabaseUrl"), max: 4 });
-  const provider = createCognitoProvider(issuer.cognitoConfig());
+  const provider = createSupabaseProvider(issuer.providerConfig());
   const rt: ApiRuntime = { db, provider, inviteSender: { send: async () => undefined } };
   const storage = new MemoryImportStorage();
   const queue = new RecordingQueue();

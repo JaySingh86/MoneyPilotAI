@@ -1,8 +1,10 @@
 import { createProviderFromEnv } from "@mp/billing";
 import { createLogger } from "@mp/observability";
 import { createAuthenticator } from "./auth/authenticator";
-import { AuthConfigError, loadCognitoConfig } from "./auth/config";
-import { createCognitoProvider } from "./auth/cognito";
+import { AuthConfigError, loadSupabaseAuthConfig } from "./auth/config";
+import { createGoTrueClient } from "./auth/gotrue";
+import { createSupabaseProvider } from "./auth/supabase";
+import { configureAuthRuntime } from "./modules/auth/runtime";
 import { createEmailSender, createInviteSender, type InviteSenderPort } from "@mp/notify";
 import { configureRuntime } from "./auth/runtime";
 import { loadEmailConfig } from "./modules/email";
@@ -37,22 +39,36 @@ if (tlsProblem) log.warn(tlsProblem);
 const pool = createSharedDb({ connectionString: databaseUrl });
 const db = pool.db;
 
-// Cognito (ADR-017). In production a missing or inconsistent setting stops the API at startup. Elsewhere,
-// without a user pool (local dev before WP-09) every token is refused and only anonymous routes such as
-// /health answer; there is no development bypass.
+// Supabase Auth (ADR-020). In production a missing or inconsistent setting stops the API at startup. Elsewhere,
+// without a project (local dev before the Supabase setup) every token is refused and only anonymous routes such
+// as /health answer; there is no development bypass.
 let provider: AuthProvider;
 try {
-  const cognito = loadCognitoConfig(process.env);
-  if (cognito) {
-    provider = createCognitoProvider(cognito);
+  const supabase = loadSupabaseAuthConfig(process.env);
+  if (supabase) {
+    const gotrue = createGoTrueClient({
+      url: supabase.url,
+      publishableKey: supabase.publishableKey,
+      secretKey: supabase.secretKey,
+    });
+    provider = createSupabaseProvider({ url: supabase.url, gotrue });
+    configureAuthRuntime({
+      gotrue,
+      config: {
+        webOrigin: supabase.webOrigin,
+        apiPublicUrl: supabase.apiPublicUrl,
+        cookieSecure: supabase.cookieSecure,
+        cookieSecret: supabase.cookieSecret,
+      },
+    });
   } else {
-    log.warn("COGNITO_* is not configured: every access token will be refused");
+    log.warn("SUPABASE_* is not configured: every access token will be refused");
     const notConfigured = () => unauthorized("Sign-in is not configured on this server.");
     provider = {
       verifyToken: async () => {
         throw notConfigured();
       },
-      getUser: () => {
+      getUser: async () => {
         throw notConfigured();
       },
       requireStepUp: () => {

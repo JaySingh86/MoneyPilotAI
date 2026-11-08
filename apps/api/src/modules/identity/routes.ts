@@ -25,7 +25,7 @@ export function identityRoutes(source: RuntimeSource): FastifyPluginAsyncZod {
       },
       async (request) => {
         requireUser(request);
-        const identity = source().provider.getUser(verifiedTokenOf(request));
+        const identity = await source().provider.getUser(verifiedTokenOf(request));
         return service().bootstrap(identity, request.body ?? {}, requestMeta(request));
       },
     );

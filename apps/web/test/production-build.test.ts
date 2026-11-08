@@ -34,8 +34,6 @@ function files(dir: string): string[] {
 
 const prodEnv = {
   NEXT_PUBLIC_API_URL: "https://api.moneypilot.example",
-  NEXT_PUBLIC_COGNITO_USER_POOL_ID: "us-east-1_AbCdEf123",
-  NEXT_PUBLIC_COGNITO_CLIENT_ID: "client-id-for-the-build-test",
 };
 
 function build(extra: Record<string, string | undefined>) {
@@ -73,16 +71,13 @@ describe("production build", () => {
     );
   });
 
-  it("refuses to build without an https API URL or the Cognito settings", () => {
+  it("refuses to build without an https API URL", () => {
     expect(failure({ ...prodEnv, NEXT_PUBLIC_API_URL: undefined, NEXT_PUBLIC_MP_MOCK: undefined })).toMatch(
       /NEXT_PUBLIC_API_URL is not set/,
     );
     expect(
       failure({ ...prodEnv, NEXT_PUBLIC_API_URL: "http://api.example.com", NEXT_PUBLIC_MP_MOCK: undefined }),
     ).toMatch(/must be an https URL/);
-    expect(
-      failure({ ...prodEnv, NEXT_PUBLIC_COGNITO_USER_POOL_ID: undefined, NEXT_PUBLIC_MP_MOCK: undefined }),
-    ).toMatch(/NEXT_PUBLIC_COGNITO_USER_POOL_ID is not set/);
   });
 
   it("ships no mock code, mock sign-in text, mock API or engine", () => {

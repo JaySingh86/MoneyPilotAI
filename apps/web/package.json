@@ -6,7 +6,6 @@
   "description": "Next.js web app. UI only; numbers come from the API (ARCHITECTURE §2).",
   "scripts": {
     "dev": "NEXT_PUBLIC_MP_MOCK=1 next dev --port 3100",
-    "dev:cognito": "next dev --port 3100",
     "dev:live": "next dev --port ${WEB_PORT:-3100}",
     "build": "next build",
     "start": "next start --port 3100",
@@ -22,7 +21,6 @@
     "@mp/format": "workspace:^",
     "@mp/ui": "workspace:^",
     "@tanstack/react-query": "^5",
-    "aws-amplify": "^6",
     "lucide-react": "^1.62.0",
     "next": "^15.1.0",
     "react": "^19.0.0",

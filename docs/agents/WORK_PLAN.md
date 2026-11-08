@@ -50,7 +50,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-30 | P1 · Mobile app (React Native CLI) | P1 | WP-08, WP-04 | L | — | todo |
 | WP-31 | P1 · Bank adapter (Plaid) in staging | P1 | WP-16 | M | G2 | todo |
 | WP-32 | Supabase database + storage, live local stack (ADR-020) | R | WP-03, WP-16 | M | G2 | done (real Supabase project, pooler TLS and Storage S3 size enforcement verified by the owner's runbook; Q-210/Q-211 open) |
-| WP-33 | Supabase Auth through the API (ADR-020) | R | WP-05, WP-17 | M | G1 | in-progress (wp-builder, wp/33-supabase-auth) |
+| WP-33 | Supabase Auth through the API (ADR-020) | R | WP-05, WP-17 | M | G1 | done (owner G1 sign-off pending: Q-222/Q-223/Q-224/Q-228 and the real-Supabase check, runbook §10; Q-225 open) |
 
 **Human gates:**
 - **G1:** schema, RLS and auth review, before features build on them.
@@ -368,6 +368,7 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
   - [ ] The retention purge follows the schedule table.
   - [ ] Account deletion anonymizes `ip` and `user_agent` on that user's household-less audit events, which otherwise live 2 years (WP-03 G1 re-review).
   - [ ] The retention purge nulls `extracted_items.message_meta` and `evidence` after 13 months and expires `queued` review items after the configured age; soft-deleted items and goals are hard-deleted after the retention period (WP-06 Q-055).
+  - [ ] Account deletion removes the Supabase user from the worker via the Admin API (`DELETE /auth/v1/admin/users/:id`) with the secret key (ADR-020; replaces Cognito `AdminDeleteUser`). The web and API never hold that call.
   - [ ] The purge covers `calc_snapshots` older than 90 days that no `ai_texts` row or proposal references, through a SECURITY DEFINER function (Q-104).
   - [ ] Deletion and retention cover `subscriptions` and `billing_events` (cascade from households; processed events and `webhook_events` purged at 13 months, Q-154).
   - [ ] The retention purge deletes `email_messages` metadata older than 13 months, and deletes revoked `email_connections` rows (masked address and address hash) 30 days after `revoked_at` (WP-21 S6).
@@ -418,9 +419,9 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
 - **Owns:** `apps/api/src/auth/**`, `apps/api/src/modules/auth/**` (new), `apps/web/lib/auth/**`, `apps/web/app/(auth)/**`, auth contracts in `packages/contracts`.
 - **Read first:** ADR-018, ADR-020, ADR-017 (what it replaces); WP-05 (`/me/bootstrap`, `app_sync_auth_user`); WP-23 step-up (`stepUp`, `setUpTotp`, Q-176).
 - **Acceptance:**
-  - [ ] `SupabaseAuthProvider` implements the adapter: JWKS verification (issuer, audience, expiry, skew), claims mapping (`sub`, `email`, `email_confirmed_at`), and step-up from `aal2` plus a `totp` `amr` entry at most 10 minutes old. Tests run against a local fake JWKS.
-  - [ ] API `/auth/*` routes proxy Supabase Auth: sign up, confirm email, sign in, refresh, sign out, password reset, MFA enrol/verify/challenge, and Google start/callback. Strict rate limits. Passwords and tokens are never logged. Zod contracts.
-  - [ ] The web `AuthAdapter` calls only our API. The refresh token goes in an httpOnly, Secure, SameSite=Lax cookie set by the API; the access token is held in memory. The Amplify adapter and Cognito code paths are removed. The mock adapter stays.
-  - [ ] The API refuses to start in production without the Supabase auth config. The Cognito config checks are removed.
+  - [x] `SupabaseAuthProvider` implements the adapter: JWKS verification (issuer, audience, expiry, skew), claims mapping (`sub`, `email`, `email_confirmed_at`), and step-up from `aal2` plus a `totp` `amr` entry at most 10 minutes old. Tests run against a local fake JWKS. (`apps/api/src/auth/supabase.test.ts`)
+  - [x] API `/auth/*` routes proxy Supabase Auth: sign up, confirm email, sign in, refresh, sign out, password reset, MFA enrol/verify/challenge, and Google start/callback. Strict rate limits. Passwords and tokens are never logged. Zod contracts. (`apps/api/src/modules/auth/auth.int.test.ts`, 27 tests; routes are `/v1/auth/*`, Q-220)
+  - [x] The web `AuthAdapter` calls only our API. The refresh token goes in an httpOnly, Secure, SameSite=Lax cookie set by the API; the access token is held in memory. The Amplify adapter and Cognito code paths are removed. The mock adapter stays. (`apps/web/lib/auth/api-adapter.test.ts`, 16 tests; not exercised in a real browser against Supabase)
+  - [x] The API refuses to start in production without the Supabase auth config. The Cognito config checks are removed. (`apps/api/src/auth/config.test.ts`)
   - [ ] An e2e test against local Supabase (CLI) covers: sign up → confirm → sign in → bootstrap → household created; and TOTP enrol → step-up action.
 - **Gate:** G1 (auth review).

@@ -15,6 +15,13 @@ export const RATE_LIMITS = {
   overall: { max: 600, timeWindow: "1 minute" },
   /** Auth-sensitive endpoints (invites, email connect, step-up flows): 20 per minute, shared by all of them. */
   authSensitive: { max: 20, timeWindow: "1 minute" },
+  /**
+   * Credential and code endpoints (sign-up, sign-in, confirm, resend, reset, MFA verify; WP-33): 10 per minute
+   * per client IP, shared. Anonymous callers are keyed by IP; Supabase adds its own per-account limits.
+   */
+  authCredentials: { max: 10, timeWindow: "1 minute" },
+  /** Session upkeep and redirects (refresh, sign-out, MFA challenge and enrol, Google start and callback): 30 per minute, shared. */
+  authSession: { max: 30, timeWindow: "1 minute" },
   /** Engine calculations (plan, what-if, calendar): 60 per minute per user, shared (WP-12). */
   compute: { max: 60, timeWindow: "1 minute" },
   /** CSV import calls (create, process, mapping): 10 per minute per user, shared (WP-16). */
@@ -27,6 +34,8 @@ export const RATE_LIMITS = {
  */
 export const RATE_LIMIT_GROUPS = {
   authSensitive: RATE_LIMITS.authSensitive,
+  authCredentials: RATE_LIMITS.authCredentials,
+  authSession: RATE_LIMITS.authSession,
   compute: RATE_LIMITS.compute,
   imports: RATE_LIMITS.imports,
 } as const;

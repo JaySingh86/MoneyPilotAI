@@ -9,7 +9,7 @@ import type { ApiContext } from "@mp/db";
 export interface AuthenticatedUser {
   /** `users.id`; null until `POST /v1/me/bootstrap` creates the row. */
   readonly userId: string | null;
-  /** Verified auth-provider subject (Cognito `sub`). */
+  /** Verified auth-provider subject (Supabase `sub`). */
   readonly authSubject: string;
   /** Verified token claims the auth layer wants to keep, e.g. for step-up checks. */
   readonly claims?: Readonly<Record<string, unknown>>;
@@ -25,7 +25,7 @@ export type Authenticator = (request: FastifyRequest) => Promise<AuthenticatedUs
 declare module "fastify" {
   interface FastifyContextConfig {
     /**
-     * The route authenticates its caller itself (a webhook with a provider token in `Authorization`), so the Cognito
+     * The route authenticates its caller itself (a webhook with a provider token in `Authorization`), so the user-token
      * check is skipped: such a header must not be taken for a user's access token.
      */
     skipUserAuth?: boolean;

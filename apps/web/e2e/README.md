@@ -1,8 +1,8 @@
 # Web end-to-end, accessibility and visual tests
 
 Playwright runs against `next dev` in **mock mode**: MSW answers the API from the golden fixture
-(`design/fixtures/rivera-household.json`, through the engine) and a fake Cognito session is signed
-in. No AWS and no network.
+(`design/fixtures/rivera-household.json`, through the engine) and a fake signed-in session is used
+(the mock adapter). No backend and no network.
 
 | Spec             | What it checks                                                                                                                                      |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |

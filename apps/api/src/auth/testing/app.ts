@@ -1,5 +1,5 @@
-// A full API for integration tests: the real identity and households modules, the real Cognito
-// verifier against a fake issuer, and the real database as mp_api. Test-only.
+// A full API for integration tests: the real identity and households modules, the real Supabase
+// verifier against a fake Supabase (JWKS and GoTrue REST), and the real database as mp_api. Test-only.
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { inject } from "vitest";
@@ -15,9 +15,9 @@ import { createItemsModule } from "../../modules/items";
 import { createPlanningModule } from "../../modules/planning";
 import { tasksSummaryBadges } from "../../modules/tasks/badges";
 import { createAuthenticator } from "../authenticator";
-import { createCognitoProvider } from "../cognito";
+import { createSupabaseProvider } from "../supabase";
 import type { ApiRuntime, InviteSender } from "../runtime";
-import { FakeIssuer, type TokenOptions } from "./fake-issuer";
+import { FakeSupabase, type TokenOptions } from "./fake-supabase";
 
 export interface SentInvite {
   to: string;
@@ -30,7 +30,7 @@ export interface SentInvite {
 export interface TestApi {
   app: ApiServer;
   db: ApiDb;
-  issuer: FakeIssuer;
+  issuer: FakeSupabase;
   sent: SentInvite[];
   /** Makes invite delivery fail, once. */
   failNextInvite(): void;
@@ -66,9 +66,9 @@ export interface TestApiOptions {
 
 export async function createTestApi(options: TestApiOptions = {}): Promise<TestApi> {
   const now = options.now ?? (() => "2026-10-27T16:00:00Z");
-  const issuer = await FakeIssuer.create();
+  const issuer = await FakeSupabase.create();
   const db = createApiDb({ connectionString: inject("apiDatabaseUrl"), max: 4 });
-  const provider = createCognitoProvider(issuer.cognitoConfig());
+  const provider = createSupabaseProvider(issuer.providerConfig());
   const sent: SentInvite[] = [];
   let failNext = false;
   const inviteSender: InviteSender = {

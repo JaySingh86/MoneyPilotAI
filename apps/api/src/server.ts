@@ -18,6 +18,7 @@ import {
   IDEMPOTENT_REPLAYED_HEADER,
   IF_MATCH_HEADER,
   REQUEST_ID_HEADER,
+  AUTH_CLIENT_HEADER,
 } from "@mp/contracts";
 import { modules as registeredModules } from "./modules";
 import { API_PREFIX, type ApiModule } from "./lib/module";
@@ -101,11 +102,18 @@ export function buildServer(options: ServerOptions = {}): ApiServer {
     void reply.header("x-content-type-options", "nosniff");
   });
   void app.register(cors, {
-    // Cookies on the OAuth start (WP-21) need credentialed requests from the one allowed web origin.
+    // Credentialed requests from the one allowed web origin: the email OAuth start cookie (WP-21) and the httpOnly
+    // refresh cookie on /v1/auth (WP-33). Origins are an exact list, never reflected.
     credentials: true,
     origin: options.corsOrigins && options.corsOrigins.length > 0 ? [...options.corsOrigins] : false,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["authorization", "content-type", IDEMPOTENCY_KEY_HEADER, IF_MATCH_HEADER],
+    allowedHeaders: [
+      "authorization",
+      "content-type",
+      IDEMPOTENCY_KEY_HEADER,
+      IF_MATCH_HEADER,
+      AUTH_CLIENT_HEADER,
+    ],
     exposedHeaders: [
       REQUEST_ID_HEADER,
       "etag",

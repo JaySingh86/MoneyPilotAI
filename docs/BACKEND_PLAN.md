@@ -738,14 +738,16 @@ Extra rules:
 
 ## 6. Authentication, households and permissions
 
+> **Superseded by ADR-020 (Supabase Auth through the API).** The Cognito, Amplify and `aws-jwt-verify` text elsewhere in this plan describes ADR-017, which ADR-020 replaces. This section is current.
+
 **Sign-up and sign-in:**
-1. AWS Cognito handles email + password or passkey, Sign in with Google, and TOTP MFA (ADR-017). Web and mobile use Amplify Auth with our own screens.
-2. The API verifies the Cognito access token with `aws-jwt-verify`. It checks the issuer, client id, `token_use = access` and expiry, with a 60 s clock skew. A pre-token-generation trigger adds `email`, `email_verified` and `mfa_enabled` claims.
-3. On the first request, `POST /v1/me/bootstrap` upserts the `users` row from the verified claims; there are no auth webhooks. Email and MFA changes sync on bootstrap through `app_sync_auth_user`, and only when `email_verified` is true.
+1. Supabase Auth handles email + password, Sign in with Google and TOTP MFA (ADR-020). Web and mobile never call Supabase: they call our API's `/v1/auth/*` routes (sign-up, confirm email, sign-in, refresh, sign-out, password reset, MFA enrol/challenge/verify, Google start/callback). The API talks to Supabase Auth (GoTrue REST) server-side; the publishable and secret keys exist only in the API environment.
+2. The API verifies the Supabase access token on every request against Supabase's asymmetric JWKS (`<SUPABASE_URL>/auth/v1/.well-known/jwks.json`, ES256, RS256 or EdDSA): issuer `<SUPABASE_URL>/auth/v1`, audience `authenticated`, expiry, 60 s skew. The token carries `sub`, `email`, `aal` and `amr`; it does not carry `email_confirmed_at` or the MFA factors, so bootstrap reads those from the Supabase user record (the user-editable `user_metadata` is never trusted).
+3. On the first request, `POST /v1/me/bootstrap` upserts the `users` row from the verified claims; there are no auth webhooks. Email and MFA changes sync on bootstrap through `app_sync_auth_user`, and only when the user record's `email_confirmed_at` is set.
 
 **MFA policy:**
 - Encouraged at signup.
-- **Required before connecting an email account, exporting data, deleting the household, or leaving it** (step-up). The API requires the `mfa_verified_at` claim (ADR-018): the time this session last completed a second-factor challenge, at most 10 min old. `mfa_enabled` (enrolled) and `auth_time` alone never satisfy step-up. MFA stays optional for everyday use; federated (Google) sign-ins must complete our TOTP challenge to get `mfa_verified_at`.
+- **Required before connecting an email account, exporting data, deleting the household, or leaving it** (step-up). The API requires a token with `aal = aal2` and an `amr` entry with method `totp` whose timestamp is at most 10 min old (ADR-018 principle, ADR-020). An enrolled factor and a password or Google sign-in (aal1) alone never satisfy step-up. MFA stays optional for everyday use. Enrolling a second authenticator needs aal2 once one is verified, and only the account's verified factor can be challenged.
 
 **Household creation:**
 - Creates the `households` row and a `household_members` row (creator → `partnerA`, `is_creator = true`) in one transaction.
@@ -771,7 +773,7 @@ Extra rules:
   - Their audit history stays with the household.
   - If they were the last member, use delete instead.
 
-**Sessions on mobile:** the mobile app is a React Native CLI app without Expo (ADR-016). It uses Amplify Auth with `@aws-amplify/react-native`, which supports bare React Native (ADR-017). Tokens live in the iOS Keychain / Android Keystore via `react-native-keychain`. The API stays the same.
+**Sessions:** web gets the refresh token as an httpOnly, SameSite=Lax cookie scoped to `/v1/auth` (`__Secure-` prefixed and Secure outside localhost) and the access token in the response body, held in memory; cookie-authenticated calls need `X-MP-Client: web` and a matching `Origin` (CSRF). The mobile app (React Native CLI, ADR-016) sends `X-MP-Client: mobile` (refused when an `Origin` is present), gets the refresh token in the response body, and keeps it in the iOS Keychain / Android Keystore via `react-native-keychain`. The API contract is the same for both.
 
 ---
 
@@ -1070,7 +1072,7 @@ email.cleanup(message)            → discard text/attachments from memory/S3 te
 | **Export** | `POST /households/:id/exports` requires step-up MFA. A job builds a ZIP of CSV + JSON for each entity, plus the activity log, encrypted in S3. The download link (presigned) expires in 24 h and is emailed. Audit event recorded. |
 | **Leave household** | Revoke the member’s email connections and reassign their items (§6). Membership `left_at` is set. |
 | **Delete household** | Requires step-up MFA and typing the household name. Sets `deletion_scheduled_for = now + 7 days` and notifies the other member, who can cancel. When it runs: revoke all email tokens, cancel billing, delete S3 objects, then delete the household (cascades). Audit events keep only a tombstone (`household_id`, action, time) for 1 year. Backups age out within 35 days (stated in the privacy policy). |
-| **Account deletion** | Leave or delete the household, then delete the Cognito user (`AdminDeleteUser`, from the worker) and anonymize `users`. |
+| **Account deletion** | Leave or delete the household, then the worker deletes the Supabase user via the Admin API (`DELETE /auth/v1/admin/users/:id`) with the secret key, and anonymizes `users`. |
 
 **Retention schedule** (enforced by nightly `retention.purge`):
 
@@ -1108,7 +1110,7 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 ## 8. API
 
 ### 8.1 Conventions
-- **Base URL:** `https://api.<domain>/v1`, JSON over HTTP. **Auth:** `Authorization: Bearer <Cognito access token>`.
+- **Base URL:** `https://api.<domain>/v1`, JSON over HTTP. **Auth:** `Authorization: Bearer <Supabase access token>` (superseded by ADR-020: Cognito became Supabase Auth; sessions come from `/v1/auth/*`, see §6).
 - **Money:** integer cents (`amountCents`). **Dates:** `YYYY-MM-DD`. **Timestamps:** ISO 8601 UTC. **IDs:** UUID.
 - **Pagination:** cursor-based (`?limit=50&cursor=…`) → `{ data: [...], nextCursor }`.
 - **Writes** accept `Idempotency-Key` (required on POSTs that create things). Repeats within 24 h return the stored response.

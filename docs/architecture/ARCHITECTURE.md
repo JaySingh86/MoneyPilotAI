@@ -11,7 +11,7 @@ flowchart TB
   A([Partner A<br/>household creator])
   B([Partner B<br/>invited partner])
   MP[[MoneyPilot<br/>household planning assistant]]
-  CL[AWS Cognito<br/>sign-in, MFA]
+  CL[Supabase Auth<br/>sign-in, MFA<br/>via our API only<br/>superseded by ADR-020: was Cognito]
   GM[Gmail API<br/>+ Google Pub/Sub]
   MS[Microsoft Graph<br/>Outlook / M365]
   IN[Any mailbox<br/>forwarding to household address]
@@ -326,7 +326,7 @@ flowchart TB
   WRKS --> RDS
   APIS --> NAT
   WRKS --> NAT
-  NAT --> EXT[Cognito · Google · Microsoft · Anthropic · Billing]
+  NAT --> EXT[Supabase Auth, ADR-020 supersedes Cognito · Google · Microsoft · Anthropic · Billing]
 ```
 
 - **Environments:** `local` (docker compose + fakes), `dev`, `staging`, `prod`. Each is a separate CDK stack and a separate AWS account (via Organizations).

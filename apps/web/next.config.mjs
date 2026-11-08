@@ -15,7 +15,7 @@ function assertMockOnlyInDevelopment(phase) {
   }
 }
 
-/** A production build or server must know its API (https) and its Cognito pool. */
+/** A production build or server must know its API (https). */
 function assertProductionEnv(phase) {
   if (phase !== PHASE_PRODUCTION_BUILD && phase !== PHASE_PRODUCTION_SERVER) return;
   // `next typegen` (the typecheck script) loads the config like a build but emits no bundle.

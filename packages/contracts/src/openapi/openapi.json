@@ -80,6 +80,189 @@
         "required": ["type", "title", "status", "code"],
         "description": "RFC 9457 problem details"
       },
+      "AuthSessionInput": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Send as Authorization: Bearer. Keep it in memory only."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "aal": {
+            "type": "string",
+            "enum": ["aal1", "aal2"],
+            "description": "aal2: a TOTP code was verified in this session."
+          },
+          "refreshToken": {
+            "description": "Only for `X-MP-Client: mobile`. Web gets an httpOnly cookie instead.",
+            "type": "string"
+          }
+        },
+        "required": ["accessToken", "expiresAt", "aal"]
+      },
+      "AuthSignedInInput": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "const": "signed_in" },
+          "session": { "$ref": "#/components/schemas/AuthSessionInput" }
+        },
+        "required": ["status", "session"]
+      },
+      "SignUpBodyInput": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "email": { "type": "string" },
+          "password": { "type": "string", "minLength": 8, "maxLength": 72 }
+        },
+        "required": ["firstName", "email", "password"],
+        "additionalProperties": false
+      },
+      "AuthAcceptedInput": {
+        "type": "object",
+        "properties": { "status": { "type": "string", "const": "accepted" } },
+        "required": ["status"]
+      },
+      "ConfirmEmailBodyInput": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "code": { "type": "string", "pattern": "^\\d{6,8}$" },
+          "tokenHash": { "type": "string", "minLength": 8, "maxLength": 512, "pattern": "^[A-Za-z0-9_-]+$" }
+        },
+        "additionalProperties": false
+      },
+      "AuthEmailBodyInput": {
+        "type": "object",
+        "properties": { "email": { "type": "string" } },
+        "required": ["email"],
+        "additionalProperties": false
+      },
+      "SignInBodyInput": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "password": { "type": "string", "minLength": 1, "maxLength": 72 }
+        },
+        "required": ["email", "password"],
+        "additionalProperties": false
+      },
+      "SignInResponseInput": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/AuthSignedInInput" },
+          {
+            "type": "object",
+            "properties": {
+              "status": { "type": "string", "const": "mfa_required" },
+              "factorId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "session": { "$ref": "#/components/schemas/AuthSessionInput" }
+            },
+            "required": ["status", "factorId", "session"]
+          },
+          {
+            "type": "object",
+            "properties": { "status": { "type": "string", "const": "confirm_email" } },
+            "required": ["status"]
+          }
+        ]
+      },
+      "RefreshBodyInput": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": { "refreshToken": { "type": "string", "minLength": 1, "maxLength": 512 } },
+            "additionalProperties": false
+          },
+          { "type": "null" }
+        ]
+      },
+      "PasswordResetBodyInput": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string" },
+          "code": { "type": "string", "pattern": "^\\d{6,8}$" },
+          "tokenHash": { "type": "string", "minLength": 8, "maxLength": 512, "pattern": "^[A-Za-z0-9_-]+$" },
+          "newPassword": { "type": "string", "minLength": 8, "maxLength": 72 },
+          "mfaCode": {
+            "description": "Needed when the account has an authenticator app.",
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          }
+        },
+        "required": ["newPassword"],
+        "additionalProperties": false
+      },
+      "MfaEnrolResponseInput": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "otpauthUri": { "type": "string", "description": "otpauth:// URI for the QR code. Shown once." },
+          "secret": { "type": "string", "description": "The same secret for manual entry. Shown once." }
+        },
+        "required": ["factorId", "otpauthUri", "secret"]
+      },
+      "MfaChallengeBodyInput": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "factorId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              }
+            },
+            "additionalProperties": false
+          },
+          { "type": "null" }
+        ]
+      },
+      "MfaChallengeResponseInput": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": ["factorId", "challengeId"]
+      },
+      "MfaVerifyBodyInput": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "code": { "type": "string", "pattern": "^\\d{6}$" }
+        },
+        "required": ["code"],
+        "additionalProperties": false
+      },
       "MembershipInput": {
         "type": "object",
         "properties": {
@@ -5219,6 +5402,223 @@
         "required": ["type", "title", "status", "code"],
         "additionalProperties": false,
         "description": "RFC 9457 problem details"
+      },
+      "AuthSession": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Send as Authorization: Bearer. Keep it in memory only."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "aal": {
+            "type": "string",
+            "enum": ["aal1", "aal2"],
+            "description": "aal2: a TOTP code was verified in this session."
+          },
+          "refreshToken": {
+            "description": "Only for `X-MP-Client: mobile`. Web gets an httpOnly cookie instead.",
+            "type": "string"
+          }
+        },
+        "required": ["accessToken", "expiresAt", "aal"],
+        "additionalProperties": false
+      },
+      "AuthSignedIn": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "const": "signed_in" },
+          "session": { "$ref": "#/components/schemas/AuthSession" }
+        },
+        "required": ["status", "session"],
+        "additionalProperties": false
+      },
+      "SignUpBody": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string", "minLength": 1, "maxLength": 80 },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": { "type": "string", "minLength": 8, "maxLength": 72 }
+        },
+        "required": ["firstName", "email", "password"],
+        "additionalProperties": false
+      },
+      "AuthAccepted": {
+        "type": "object",
+        "properties": { "status": { "type": "string", "const": "accepted" } },
+        "required": ["status"],
+        "additionalProperties": false
+      },
+      "ConfirmEmailBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "code": { "type": "string", "pattern": "^\\d{6,8}$" },
+          "tokenHash": { "type": "string", "minLength": 8, "maxLength": 512, "pattern": "^[A-Za-z0-9_-]+$" }
+        },
+        "additionalProperties": false
+      },
+      "AuthEmailBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          }
+        },
+        "required": ["email"],
+        "additionalProperties": false
+      },
+      "SignInBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": { "type": "string", "minLength": 1, "maxLength": 72 }
+        },
+        "required": ["email", "password"],
+        "additionalProperties": false
+      },
+      "SignInResponse": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/AuthSignedIn" },
+          {
+            "type": "object",
+            "properties": {
+              "status": { "type": "string", "const": "mfa_required" },
+              "factorId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "session": { "$ref": "#/components/schemas/AuthSession" }
+            },
+            "required": ["status", "factorId", "session"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": { "status": { "type": "string", "const": "confirm_email" } },
+            "required": ["status"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "RefreshBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": { "refreshToken": { "type": "string", "minLength": 1, "maxLength": 512 } },
+            "additionalProperties": false
+          },
+          { "type": "null" }
+        ]
+      },
+      "PasswordResetBody": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "code": { "type": "string", "pattern": "^\\d{6,8}$" },
+          "tokenHash": { "type": "string", "minLength": 8, "maxLength": 512, "pattern": "^[A-Za-z0-9_-]+$" },
+          "newPassword": { "type": "string", "minLength": 8, "maxLength": 72 },
+          "mfaCode": {
+            "description": "Needed when the account has an authenticator app.",
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          }
+        },
+        "required": ["newPassword"],
+        "additionalProperties": false
+      },
+      "MfaEnrolResponse": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "otpauthUri": { "type": "string", "description": "otpauth:// URI for the QR code. Shown once." },
+          "secret": { "type": "string", "description": "The same secret for manual entry. Shown once." }
+        },
+        "required": ["factorId", "otpauthUri", "secret"],
+        "additionalProperties": false
+      },
+      "MfaChallengeBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "factorId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              }
+            },
+            "additionalProperties": false
+          },
+          { "type": "null" }
+        ]
+      },
+      "MfaChallengeResponse": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": ["factorId", "challengeId"],
+        "additionalProperties": false
+      },
+      "MfaVerifyBody": {
+        "type": "object",
+        "properties": {
+          "factorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "challengeId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "code": { "type": "string", "pattern": "^\\d{6}$" }
+        },
+        "required": ["code"],
+        "additionalProperties": false
       },
       "Membership": {
         "type": "object",
@@ -13753,6 +14153,414 @@
               "application/json": { "schema": { "$ref": "#/components/schemas/ItemReminderRule" } }
             }
           },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/sign-up": {
+      "post": {
+        "summary": "Create an account; a confirmation email is sent",
+        "tags": ["auth"],
+        "description": "Always 202, including for an address that already has an account.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignUpBodyInput" } } }
+        },
+        "security": [],
+        "responses": {
+          "202": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthAccepted" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/confirm-email": {
+      "post": {
+        "summary": "Confirm the email address with the emailed code or link token, and sign in",
+        "tags": ["auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ConfirmEmailBodyInput" } }
+          }
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthSignedIn" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/resend-confirmation": {
+      "post": {
+        "summary": "Send the confirmation email again",
+        "tags": ["auth"],
+        "description": "Always 202.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AuthEmailBodyInput" } }
+          }
+        },
+        "security": [],
+        "responses": {
+          "202": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthAccepted" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/sign-in": {
+      "post": {
+        "summary": "Sign in with email and password",
+        "tags": ["auth"],
+        "description": "`mfa_required` carries an aal1 session: call `/auth/mfa/verify` with the authenticator code to reach aal2.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignInBodyInput" } } }
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignInResponse" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "summary": "Exchange the refresh token for a new session",
+        "tags": ["auth"],
+        "description": "Web: reads the httpOnly cookie (send `X-MP-Client: web`; the Origin must be the web app). Mobile: send `refreshToken` in the body.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RefreshBodyInput" } } }
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthSignedIn" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/sign-out": {
+      "post": {
+        "summary": "End the session",
+        "tags": ["auth"],
+        "description": "Revokes the session and clears the cookie. Send the access token, or (web) just the cookie. Always 204.",
+        "security": [],
+        "responses": {
+          "204": { "description": "Default Response" },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password-reset/request": {
+      "post": {
+        "summary": "Email a password reset code and link",
+        "tags": ["auth"],
+        "description": "Always 202.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AuthEmailBodyInput" } }
+          }
+        },
+        "security": [],
+        "responses": {
+          "202": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthAccepted" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/password-reset/confirm": {
+      "post": {
+        "summary": "Set a new password with the emailed code or link token, and sign in",
+        "tags": ["auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PasswordResetBodyInput" } }
+          }
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthSignedIn" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/mfa/totp/enrol": {
+      "post": {
+        "summary": "Start authenticator-app enrolment",
+        "tags": ["auth"],
+        "description": "Returns the otpauth URI and the secret, once. The factor counts only after `/auth/mfa/verify` with a code.",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/MfaEnrolResponse" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/mfa/challenge": {
+      "post": {
+        "summary": "Open an MFA challenge",
+        "tags": ["auth"],
+        "description": "Optional: `/auth/mfa/verify` opens one itself when `challengeId` is not sent.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/MfaChallengeBodyInput" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/MfaChallengeResponse" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/mfa/verify": {
+      "post": {
+        "summary": "Verify an authenticator code (completes enrolment, or step-up to aal2)",
+        "tags": ["auth"],
+        "description": "Returns a new aal2 session whose `totp` proof is fresh (step-up lasts 10 minutes).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/MfaVerifyBodyInput" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthSignedIn" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/google/start": {
+      "get": {
+        "summary": "Redirect to Google sign-in",
+        "tags": ["auth"],
+        "description": "Browser navigation. `next` is an allowlisted web path to return to.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "maxLength": 512 },
+            "in": "query",
+            "name": "next",
+            "required": false
+          }
+        ],
+        "security": [],
+        "responses": {
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/google/callback": {
+      "get": {
+        "summary": "Google return trip: exchange the code, set the session cookie, redirect to the web app",
+        "tags": ["auth"],
+        "description": "Never puts a token in the redirect URL: the web app calls `/auth/refresh` to get its access token.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1, "maxLength": 512 },
+            "in": "query",
+            "name": "code",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "maxLength": 200 },
+            "in": "query",
+            "name": "error",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "maxLength": 200 },
+            "in": "query",
+            "name": "error_code",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "maxLength": 1000 },
+            "in": "query",
+            "name": "error_description",
+            "required": false
+          }
+        ],
+        "security": [],
+        "responses": {
           "4XX": {
             "description": "Client error (RFC 9457 problem details)",
             "content": {
