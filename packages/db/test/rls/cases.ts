@@ -205,4 +205,20 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
     update: (t) =>
       sql`update notification_deliveries set status = 'failed' where household_id = ${t.householdId}`,
   },
+  // ===== WP-21: email connections and message metadata =====
+  {
+    table: "email_connections",
+    insert: (t) => sql`insert into email_connections
+        (household_id, user_id, provider, address_masked, address_hash, scopes, token_ciphertext, token_dek_wrapped, token_key_id)
+      values (${t.householdId}, ${t.actorUserId ?? t.someUserId}, 'gmail', 'att•••@gmail.com', ${randomBytes(32)},
+        array['x'], ${randomBytes(8)}, ${randomBytes(8)}, 'local:probe')`,
+    update: (t) => sql`update email_connections set status = 'paused' where household_id = ${t.householdId}`,
+  },
+  {
+    table: "email_messages",
+    insert: (t) => sql`insert into email_messages
+        (household_id, channel, provider_message_id, received_at, from_domain, stage)
+      values (${t.householdId}, 'gmail', ${`probe-${randomUUID()}`}, now(), 'probe.example', 'discovered')`,
+    update: (t) => sql`update email_messages set stage = 'failed' where household_id = ${t.householdId}`,
+  },
 ];

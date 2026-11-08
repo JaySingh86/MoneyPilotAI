@@ -70,12 +70,30 @@ module.exports = {
       name: "only-worker-touches-secrets",
       comment:
         "Only apps/worker may import email connectors and token decryption (BACKEND_PLAN §2.1). " +
-        "apps/api may import packages/crypto/src/encrypt.ts only, to seal tokens at the OAuth callback.",
+        "apps/api may import packages/crypto/src/encrypt.ts only, to seal tokens at the OAuth callback, and " +
+        "packages/email/src/oauth/index.ts only (OAuth consent and code exchange, revoke, PKCE, address hash; WP-21), " +
+        "plus the fakes in testing/. Reading a mailbox (refresh, listChanges, fetchRaw) stays out of the API.",
       severity: "error",
       from: { path: ["(^|/)apps/(?!worker/)", "(^|/)packages/(?!email/|crypto/)"] },
       to: {
         path: ["(^|/)packages/crypto/", "(^|/)packages/email/"],
-        pathNot: "(^|/)packages/crypto/src/encrypt\\.ts$",
+        pathNot: [
+          "(^|/)packages/crypto/src/encrypt\\.ts$",
+          "(^|/)packages/email/src/oauth/index\\.ts$",
+          "(^|/)packages/email/testing/",
+        ],
+      },
+    },
+    {
+      name: "api-no-decrypt-reachable",
+      comment:
+        "Hard rule 7: only apps/worker decrypts a token. Nothing apps/api imports, directly or through any chain of " +
+        "imports (dynamic import() included), may reach crypto code that can decrypt or unwrap a key.",
+      severity: "error",
+      from: { path: "(^|/)apps/api/", pathNot: "\\.test\\.tsx?$" },
+      to: {
+        path: "(^|/)packages/crypto/src/(open|aead-decrypt|local|kms|config|index)\\.ts$",
+        reachable: true,
       },
     },
     {

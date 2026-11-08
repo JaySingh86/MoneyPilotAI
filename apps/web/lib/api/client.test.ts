@@ -36,6 +36,14 @@ describe("authorized fetch", () => {
     for (const call of fetchMock.mock.calls) expect(call[0].headers.get("authorization")).toBeNull();
   });
 
+  it("sends cookies only to the API origin (email-connect nonce, Q-198)", async () => {
+    const fetchMock = stubFetch();
+    await authorized(new Request(`${API}/v1/email-connections/gmail/start`), token, API);
+    await authorized(new Request("https://evil.example/v1/me"), token, API);
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ credentials: "include" });
+    expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({ credentials: "omit" });
+  });
+
   it("refuses to follow redirects", async () => {
     const fetchMock = stubFetch();
     await authorized(new Request(`${API}/v1/me`), token, API);

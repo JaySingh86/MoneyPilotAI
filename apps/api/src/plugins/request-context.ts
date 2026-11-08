@@ -22,6 +22,16 @@ export interface AuthenticatedUser {
  */
 export type Authenticator = (request: FastifyRequest) => Promise<AuthenticatedUser | null>;
 
+declare module "fastify" {
+  interface FastifyContextConfig {
+    /**
+     * The route authenticates its caller itself (a webhook with a provider token in `Authorization`), so the Cognito
+     * check is skipped: such a header must not be taken for a user's access token.
+     */
+    skipUserAuth?: boolean;
+  }
+}
+
 export interface RequestContext {
   readonly requestId: string;
   user: AuthenticatedUser | null;

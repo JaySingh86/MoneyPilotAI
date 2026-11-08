@@ -38,7 +38,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-18 | Web: Bills, Renewals, Goals, Tasks | 3 | WP-10, WP-08 (WP-12, WP-13 for live data) | L | — | done |
 | WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | done |
 | WP-20 | Forwarding channel (SES inbound) | 4 | WP-19, WP-09 | M | G2 | todo |
-| WP-21 | Gmail + Outlook connectors, token crypto | 4 | WP-05, WP-19, WP-09 | L | G2 | in-progress (wp-builder, wp/21-email-connectors; fakes only until WP-09 and G2) |
+| WP-21 | Gmail + Outlook connectors, token crypto | 4 | WP-05, WP-19, WP-09 | L | G2 | done (against fakes; real Google/Microsoft is the owner's G2 step; Q-190 blocks deploy) |
 | WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | todo |
 | WP-23 | Web: Email & imports, Members & privacy, setup flow, review UI | 4 | WP-10, WP-14, WP-21 | L | — | done (WP-21/WP-24/WP-20 endpoints still mocked) |
 | WP-24 | Privacy ops: export, leave, delete, retention, activity | 4 | WP-05, WP-21 | M | G2 | todo |
@@ -209,6 +209,7 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
 - **Acceptance:**
   - [ ] `cdk synth` is clean; `cdk diff` is reviewed by a human.
   - [ ] The api task role cannot `kms:Decrypt` with the token key (IAM policy test / cdk-nag).
+  - [ ] Token key IAM (WP-21 S7): the API role gets `kms:GenerateDataKey` only and the worker role `kms:Decrypt` only; neither gets `kms:Encrypt` or `kms:ReEncrypt*`; the key policy requires the encryption context `purpose = email_connection_token`; an infra test (synth assertions) covers all four.
   - [ ] cdk-nag passes, with justified suppressions only.
   - [ ] The pre-token-generation trigger emits `email`, `email_verified`, `mfa_enabled` and `mfa_verified_at` (ADR-018); federated sign-ins must pass our TOTP challenge before `mfa_verified_at` is set.
   - [ ] Account linking (if any) links two identities only when both have a verified email (Q-083); the pool forbids unverified email attribute updates.
@@ -324,16 +325,17 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
 - **Gate:** G2.
 
 ## WP-21 · Gmail + Outlook connectors, token crypto
-- **Owns:** `packages/crypto/**`, `packages/email/src/providers/**`, `apps/api/src/modules/email/**` (connect, disconnect), `apps/worker/src/jobs/email/{discover,backfill,watch}/**`, migrations for `email_connections`, `email_messages`.
+- **Owns:** `packages/crypto/**`, `packages/email/src/{providers,oauth}/**`, `apps/api/src/modules/email/**` (connect, disconnect), `apps/worker/src/jobs/email/{discover,backfill,watch}/**`, migrations for `email_connections`, `email_messages`.
 - **Read first:** BACKEND_PLAN §5.3 (column grants), §7.8.1, §7.8.3, §10; ADR-009.
 - **Acceptance:**
-  - [ ] OAuth uses PKCE + a server-side `state`, and step-up MFA is enforced.
-  - [ ] Tokens are envelope-encrypted, and only the worker role can read the ciphertext columns (test with the `mp_api` role).
-  - [ ] Watch and subscription renewal runs daily; expiry within 24 h raises an alert.
-  - [ ] Disconnect revokes at the provider, stops the watch, deletes the token and writes an audit event.
-  - [ ] Against fake providers: backfill resumes after interruption; duplicate pushes create no duplicate messages.
-  - [ ] WP-05's leave hook revokes the leaver's email connections (`LeaveHooks.revokeEmailConnections`) and the household summary reports the real connection status.
-  - [ ] `start` takes `{ returnTo: "/imports" | "/setup" }` (an enum, never a URL); the callback redirects to `{returnTo}?connected=<provider>` or `?connect_error=<code>`; connections list `{ id, provider, ownerUserId, maskedAddress, status, lastCheckedAt, backfillMonths, matchedCount, usedCount }` (Q-173).
+  - [x] OAuth uses PKCE + a server-side `state`, and step-up MFA is enforced. (email.int.test.ts)
+  - [x] Tokens are envelope-encrypted, and only the worker role can read the ciphertext columns (test with the `mp_api` role). (crypto tests; wp21.test.ts RLS)
+  - [x] Watch and subscription renewal runs daily; expiry within 24 h raises an alert. (connectors.int.test.ts)
+  - [x] Disconnect revokes at the provider, stops the watch, deletes the token and writes an audit event. (fakes; Microsoft cannot revoke remotely, Q-191)
+  - [x] Against fake providers: backfill resumes after interruption; duplicate pushes create no duplicate messages. (connectors.int.test.ts)
+  - [x] WP-05's leave hook revokes the leaver's email connections (`LeaveHooks.revokeEmailConnections`) and the household summary reports the real connection status. (email.int.test.ts)
+  - [x] `start` takes `{ returnTo: "/imports" | "/setup" }` (an enum, never a URL); the callback redirects to `{returnTo}?connected=<provider>` or `?connect_error=<code>`; connections list `{ id, provider, ownerUserId, maskedAddress, status, lastCheckedAt, backfillMonths, matchedCount, usedCount }` (Q-173), wrapped as `{ data, nextCursor: null }`. (email.int.test.ts; apps/web/test/email-connections-contract.test.ts)
+- **Notes:** a disconnect is two steps: the API marks the connection `revoked` at once (it cannot read the token), and the worker's `email.revoke` job finishes it on the next sweep (within about a minute): stops the watch, revokes at the provider, deletes the token. So there is a short lag between Disconnect and the token being gone, and a stuck revoke keeps the token and alerts. Outlook cannot be revoked remotely (Q-191). The callback is bound to the starting browser by a cookie (web must send credentials, Q-198). Review questions: Q-190 to Q-199.
 - **Gate:** G2 before any real inbox, including staff test accounts.
 
 ## WP-22 · Email processing pipeline
@@ -368,6 +370,8 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
   - [ ] The retention purge nulls `extracted_items.message_meta` and `evidence` after 13 months and expires `queued` review items after the configured age; soft-deleted items and goals are hard-deleted after the retention period (WP-06 Q-055).
   - [ ] The purge covers `calc_snapshots` older than 90 days that no `ai_texts` row or proposal references, through a SECURITY DEFINER function (Q-104).
   - [ ] Deletion and retention cover `subscriptions` and `billing_events` (cascade from households; processed events and `webhook_events` purged at 13 months, Q-154).
+  - [ ] The retention purge deletes `email_messages` metadata older than 13 months, and deletes revoked `email_connections` rows (masked address and address hash) 30 days after `revoked_at` (WP-21 S6).
+  - [ ] Household deletion runs `email.revoke` for every connection and waits until every token is gone (`token_ciphertext` null) before the cascade delete; a connection whose revoke is stuck blocks and alerts instead of dropping the row (WP-21 S6).
   - [ ] The retention purge deletes `notifications` older than 90 days (deliveries cascade) and `send_quota_events` older than 2 days (WP-15 security review).
   - [ ] `GET /households/:hid/activity?limit=` returns `{ id, action, actorName, at }` with server-written action text; `GET/PUT …/sharing` for the three per-member switches; `POST …/members/:uid/reminders { about: "connect_email" | "two_step" }`, at most one per member and topic per day (Q-177).
 - **Gate:** G2.

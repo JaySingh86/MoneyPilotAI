@@ -12,6 +12,7 @@ import { itemsModule } from "./items";
 import { planningModule } from "./planning";
 import { reviewModule } from "./review";
 import { notifyModules } from "./notify";
+import { emailModules } from "./email";
 
 export const modules: readonly ApiModule[] = [
   // Append new modules below this line, one per line.
@@ -23,4 +24,5 @@ export const modules: readonly ApiModule[] = [
   ...billingModules, // WP-25: billing, billing webhook
   importsModule, // WP-16: CSV import
   ...notifyModules, // WP-15: notifications, preferences, SES events webhook
+  ...emailModules, // WP-21: email connections, OAuth callback, Gmail and Graph push webhooks
 ];

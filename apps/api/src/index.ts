@@ -5,6 +5,7 @@ import { AuthConfigError, loadCognitoConfig } from "./auth/config";
 import { createCognitoProvider } from "./auth/cognito";
 import { createEmailSender, createInviteSender, type InviteSenderPort } from "@mp/notify";
 import { configureRuntime } from "./auth/runtime";
+import { loadEmailConfig } from "./modules/email";
 import { createDbSendQuota } from "./modules/notify";
 import { unauthorized, type AuthProvider } from "./auth/provider";
 import { createSharedDb, installShutdown } from "./lib/db-pool";
@@ -62,6 +63,18 @@ try {
   log.error(
     { reason: err instanceof Error ? err.message : "invalid" },
     "billing is misconfigured; refusing to start",
+  );
+  process.exit(1);
+}
+
+// Email connections (WP-21): off without provider settings; a partly configured provider, a missing secret or an
+// unusable key provider stops the API here instead of failing on the first connect.
+try {
+  loadEmailConfig(process.env);
+} catch (err) {
+  log.error(
+    { reason: err instanceof Error ? err.message : "invalid" },
+    "email connections are misconfigured; refusing to start",
   );
   process.exit(1);
 }

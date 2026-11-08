@@ -96,7 +96,13 @@ export function buildServer(options: ServerOptions = {}): ApiServer {
     ...(options.now ? { now: options.now } : {}),
   });
   void app.register(requestLogging);
+  // Every response says "do not sniff": the Graph validation handshake echoes a caller-supplied token as text/plain.
+  app.addHook("onSend", async (_request, reply) => {
+    void reply.header("x-content-type-options", "nosniff");
+  });
   void app.register(cors, {
+    // Cookies on the OAuth start (WP-21) need credentialed requests from the one allowed web origin.
+    credentials: true,
     origin: options.corsOrigins && options.corsOrigins.length > 0 ? [...options.corsOrigins] : false,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["authorization", "content-type", IDEMPOTENCY_KEY_HEADER, IF_MATCH_HEADER],

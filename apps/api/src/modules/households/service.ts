@@ -18,6 +18,7 @@ import { SendQuotaExceededError } from "@mp/notify";
 import { createLogger } from "@mp/observability";
 import { assertVersion } from "../../lib/if-match";
 import type { InviteSender } from "../../auth/runtime";
+import { countActiveEmailConnections } from "../email";
 import { recordAudit, type RequestMeta } from "../identity/audit";
 import { isUniqueViolation, pgErrorOf, INSUFFICIENT_PRIVILEGE } from "../identity/db-errors";
 import * as repo from "./repo";
@@ -306,8 +307,7 @@ export class HouseholdService {
         // The review queue count is stubbed until WP-14; tasks and proposals come from WP-13.
         badges: { reviewQueue: 0, tasksDue: counts.tasksDue, proposalsPending: counts.proposalsPending },
         entitlements: entitlementsForPlan(household.plan), // WP-25: the feature map from @mp/billing
-        // Stubbed until WP-21 (email connections).
-        connections: { emailConnections: 0 },
+        connections: { emailConnections: await countActiveEmailConnections(tx, householdId) }, // WP-21
       };
     });
   }

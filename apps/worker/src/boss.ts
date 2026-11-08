@@ -14,6 +14,7 @@ import {
 } from "./jobs/billing/sync";
 import type { EmailSender } from "@mp/notify";
 import { guardJob } from "./jobs/guard";
+import { registerEmailJobs } from "./jobs/email/discover/register";
 import { registerImportJobs } from "./jobs/imports/register";
 import {
   NOTIFICATIONS_DISPATCH_QUEUE,
@@ -61,6 +62,11 @@ export interface JobDeps {
    */
   email?: EmailSender;
   appUrl?: string;
+  /**
+   * Email connectors (WP-21): the providers and key provider. Default: built from the environment, and left off
+   * when no mailbox provider is configured. Tests pass fakes (or `null` to turn the connectors off).
+   */
+  emailConnectors?: Parameters<typeof registerEmailJobs>[1]["connectors"];
   /** How often idle workers look for jobs. Default: pg-boss's own (2 s). Tests lower it. */
   pollingIntervalSeconds?: number;
 }
@@ -180,6 +186,14 @@ export async function registerJobs(boss: PgBoss, deps: JobDeps): Promise<void> {
   // Nightly at 02:00 UTC; the sweep fans out one materialize job per household (Q-051).
   await boss.schedule(OCCURRENCES_SWEEP_QUEUE, OCCURRENCES_SWEEP_CRON, null, { tz: "UTC" });
   await registerImportJobs(boss, deps); // WP-16: imports.process, imports.sweep, transactions.purge
+  // WP-21: email.discover, email.backfill, email.watch, email.revoke and their sweeps.
+  await registerEmailJobs(boss, {
+    db: deps.db,
+    now: deps.now,
+    log: deps.log,
+    ...(deps.pollingIntervalSeconds ? { pollingIntervalSeconds: deps.pollingIntervalSeconds } : {}),
+    ...(deps.emailConnectors !== undefined ? { connectors: deps.emailConnectors } : {}),
+  });
   await boss.schedule(REMINDERS_SWEEP_QUEUE, REMINDERS_SWEEP_CRON, null, { tz: "UTC" });
   await boss.schedule(PROPOSALS_EXPIRE_SWEEP_QUEUE, PROPOSALS_EXPIRE_SWEEP_CRON, null, { tz: "UTC" });
   if (mail) await boss.schedule(NOTIFICATIONS_SWEEP_QUEUE, NOTIFICATIONS_SWEEP_CRON, null, { tz: "UTC" });

@@ -6,4 +6,5 @@ export * from "./match/index.js";
 export * from "./mime/index.js";
 export * from "./pdf/index.js";
 export * from "./prefilter/index.js";
+export * from "./providers/index.js";
 export * from "./redact/index.js";

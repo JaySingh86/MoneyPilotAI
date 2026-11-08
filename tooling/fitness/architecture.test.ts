@@ -79,6 +79,19 @@ describe("dependency rules (ARCHITECTURE §3)", () => {
     expect(await violationsIn([`${FIX}/apps/api/imports-encrypt.ts`])).toEqual([]);
   });
 
+  it("rejects apps/api reaching decrypting code through a chain of imports, even a dynamic import()", async () => {
+    expect(await violationsIn([`${FIX}/apps/api/reaches-decrypt-through-a-chain.ts`])).toContain(
+      "api-no-decrypt-reachable",
+    );
+  });
+
+  it("lets apps/api use the OAuth entry point of packages/email but not the mailbox readers", async () => {
+    expect(await violationsIn([`${FIX}/apps/api/imports-oauth-entry.ts`])).toEqual([]);
+    expect(await violationsIn([`${FIX}/apps/api/imports-email-reader.ts`])).toContain(
+      "only-worker-touches-secrets",
+    );
+  });
+
   it("rejects apps/api decrypting tokens or using the extraction route", async () => {
     const rules = await violationsIn([`${FIX}/apps/api/imports-decrypt-and-extract.ts`]);
     expect(rules).toContain("only-worker-touches-secrets");

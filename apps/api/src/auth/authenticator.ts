@@ -25,6 +25,9 @@ export function createAuthenticator(deps: AuthenticatorDeps): Authenticator {
   return async (request: FastifyRequest): Promise<AuthenticatedUser | null> => {
     const header = request.headers.authorization;
     if (header === undefined) return null;
+    // A route that authenticates its caller itself (Gmail's Pub/Sub push carries a Google OIDC token in this same
+    // header, verified by the webhook) opts out with `config.skipUserAuth`; its token is not a Cognito token.
+    if (request.routeOptions?.config?.skipUserAuth === true) return null;
     const match = BEARER.exec(header);
     if (!match?.[1]) throw unauthorized("Send the access token as: Authorization: Bearer <token>.");
 

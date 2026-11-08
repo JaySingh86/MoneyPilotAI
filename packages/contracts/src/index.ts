@@ -13,3 +13,4 @@ export * from "./tasks";
 export * from "./billing";
 export * from "./imports";
 export * from "./notify";
+export * from "./email";

@@ -2,6 +2,7 @@ import { createWorkerDb } from "@mp/db";
 import { createEmailSender, type EmailSender } from "@mp/notify";
 import { createLogger } from "@mp/observability";
 import { startJobs } from "./boss";
+import { loadEmailJobDeps } from "./jobs/email/discover/register";
 import { StartupCheckError, checkBossConnection } from "./startup-checks";
 
 const log = createLogger("worker");
@@ -35,8 +36,29 @@ try {
   process.exit(1);
 }
 
+// Email connectors (WP-21): off without provider settings; a partly configured provider, a missing secret or an
+// unusable key provider stops the worker here instead of failing on the first job.
+let emailConnectors: ReturnType<typeof loadEmailJobDeps>;
+try {
+  emailConnectors = loadEmailJobDeps(process.env);
+} catch (err) {
+  log.error(
+    { reason: err instanceof Error ? err.message : "invalid" },
+    "email connectors are misconfigured; refusing to start",
+  );
+  process.exit(1);
+}
+
 const db = createWorkerDb({ connectionString: databaseUrl });
-const jobs = await startJobs({ bossUrl, db, now: () => new Date().toISOString(), log, email, appUrl });
+const jobs = await startJobs({
+  bossUrl,
+  db,
+  now: () => new Date().toISOString(),
+  log,
+  email,
+  appUrl,
+  emailConnectors,
+});
 log.info("worker started");
 
 let stopping: Promise<void> | null = null;

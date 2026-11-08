@@ -54,6 +54,68 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-199 · WP-21 · A second connect of a mailbox that is already connected does not revoke the new grant
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: WP-21 review item 7 (S4); `apps/api/src/modules/email/service.ts` (`callback`)
+- Question: When the callback fails after the code exchange, the new grant is revoked at the provider, except for `already_connected` (unique violation). Google revokes the whole grant for that app and person when any of its tokens is revoked, so revoking the duplicate would end the connection that works and show "reconnect". I left that one case alone and told the person it is already connected. Should it revoke anyway?
+- Options considered: (a) as built; (b) revoke always, accept that the first connection then needs reconnecting.
+- Blocking: no.
+
+## Q-198 · WP-21 · The callback cookie needs credentialed requests from the web app (WP-23 change)
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: WP-21 review item 4 (S1); `apps/web/lib/api/imports-hooks.ts` (`useConnect`), `apps/api/src/server.ts` (CORS)
+- Question: `start` now sets an HttpOnly, SameSite=Lax cookie that the callback must send back (login CSRF defence). The web app calls `start` with `fetch` from another origin (`localhost:3100` to `localhost:4000`), and a browser keeps a `Set-Cookie` from such a response only when the request uses `credentials: "include"`. The API now sends `Access-Control-Allow-Credentials: true` for the allowed web origin, but the web call is not changed here (not WP-21's path). Until WP-23 adds `credentials: "include"` to the `start` request, every connect ends in `connect_error=invalid_state`. Who makes that one-line change?
+- Blocking: yes for connecting a real mailbox through the web app; no for the API and worker work.
+
+## Q-197 · WP-21 · The per-minute email sweep visits every household
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: `apps/worker/src/jobs/email/discover/sweep.ts`; BACKEND_PLAN §9
+- Question: `email.sweep` lists every household each minute (like `imports.sweep`) because the API cannot enqueue (Q-105). Fine for the pilot; at scale it should become a query for households that have an email connection needing work (a definer function that returns ids, like `app_list_households_with_due_notifications`). Add that before the pilot grows?
+- Blocking: no.
+
+## Q-196 · WP-21 · `extracted_items.message_id` still has no foreign key to `email_messages`
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: Q-120; migration `202611091300_wp21_email-connections.sql`
+- Question: `email_messages` now exists, but I did not add the tenant-safe foreign key from `extracted_items`, because existing tests and seeds store arbitrary ids there. WP-22 should add it (`(message_id, household_id) references email_messages(id, household_id) on delete set null (message_id)`) once its tests use real messages. Confirm.
+- Blocking: no.
+
+## Q-195 · WP-21 · `email_messages.stage` has an extra value, `discovered`
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: BACKEND_PLAN §5.2 (`email_messages.stage`); WP-22
+- Question: The spec's stage list has no state for "passed the prefilter, not processed yet". Discover stores those as `discovered`, and WP-22 reads them. Add it to BACKEND_PLAN §5.2?
+- Blocking: no.
+
+## Q-194 · WP-21 · Outlook mailbox address comes from an unverified id token, with `openid email` scopes added
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: BACKEND_PLAN §7.8.1 (Outlook scopes `Mail.Read offline_access`); `packages/email/src/providers/graph.ts`
+- Question: Graph's `/me` needs `User.Read`, so the address is read from the id token the token endpoint returns (scopes `openid email` added). The id token's signature is not verified; the address is a display label (masked, hashed to match pushes), never an identity or an authorization. Is the extra scope acceptable on the Microsoft consent screen, or should the app ask for `User.Read` instead?
+- Blocking: no.
+
+## Q-193 · WP-21 · The Gmail redirect URI is under `/v1`
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: runbook `docs/runbooks/supabase-setup.md` §5; BACKEND_PLAN §8.2
+- Question: All API routes are mounted under `/v1`, so the redirect URI is `http://localhost:4000/v1/email-connections/gmail/callback`, not the path the runbook assumes (no `/v1`). Update the runbook and the Google console entry, or mount this one route unprefixed? I kept `/v1`.
+- Blocking: no.
+
+## Q-192 · WP-21 · Are Gmail and Outlook connections Free or Plus?
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: Q-044 (entitlement map); `packages/billing/src/features.ts`
+- Question: Q-044 left email connections open. Connecting is not gated today. Gate `start` with `requireEntitlement` on Free?
+- Blocking: no.
+
+## Q-191 · WP-21 · Outlook disconnect copy: Microsoft tokens cannot be revoked remotely
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: WP-21 acceptance "Disconnect revokes at the provider"; DESIGN_SPEC Email & imports (Disconnect dialog)
+- Question: Graph has no per-token revoke call (revoking sessions needs a write scope we do not ask for). On disconnect we delete the subscription and the token and record `revokedAtProvider: false`. For Outlook, the Disconnect dialog should also say "To fully remove access, also remove MoneyPilot at account.microsoft.com." Please provide or approve that copy (WP-23 owns the dialog). Gmail revokes at Google.
+- Blocking: no.
+
+## Q-190 · WP-21 · `TOKEN_MASTER_KEY` cannot be worker-only with a local key (blocks G2)
+- Asked by: wp-builder, wp/21-email-connectors · 2026-11-09
+- Where: WP-21 coordinator note (ADR-020); BACKEND_PLAN §10; `packages/crypto`
+- Question: The API seals the refresh token at the callback, so with the local provider both processes need the same `TOKEN_MASTER_KEY` (on one machine, locally). The API's seal-only entry no longer contains decrypt code, but with a shared local key the API process could in principle read the key and decrypt. Real KMS separates the two by IAM (API: GenerateDataKey only; worker: Decrypt only). The local key is accepted only when `NODE_ENV` is `development` or `test`. Accept for the local, real-data phase only, or have the worker perform the code exchange so the master key stays worker-only?
+- Options considered: (a) as built; (b) the API stores the code and verifier and the worker exchanges and seals (the redirect then cannot report an exchange error).
+- Blocking: yes for G2 (any real inbox beyond the owner's own test mailbox on their own machine).
+
 ## Q-201 · WP-23 · "What MoneyPilot reads" bullet 5 and the Disconnect dialog disagree about what is kept
 - Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-09
 - Where: canvas "Web · Email & imports" ("What MoneyPilot reads", bullet 5: "You choose whether to keep what we found"); the Disconnect dialog on Email & imports and Members & privacy ("What we already found stays in your plan"); BACKEND_PLAN §6 (disconnect)

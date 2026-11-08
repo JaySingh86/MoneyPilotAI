@@ -1,6 +1,7 @@
 import { defineModule } from "../../lib/module";
 import { runtime, type RuntimeSource } from "../../auth/runtime";
 import { householdRoutes } from "./routes";
+import { combineLeaveHooks, emailLeaveHooks } from "../email";
 import { itemsLeaveHooks } from "../items/leave-hooks";
 import { tasksSummaryBadges } from "../tasks/badges";
 import type { LeaveHooks, SummaryBadges } from "./service";
@@ -8,7 +9,7 @@ import type { LeaveHooks, SummaryBadges } from "./service";
 /** `/v1/households` and `/v1/invites`: households, summary, invites, leave. */
 export function createHouseholdsModule(
   source: RuntimeSource = runtime,
-  hooks: LeaveHooks = itemsLeaveHooks,
+  hooks: LeaveHooks = combineLeaveHooks(itemsLeaveHooks, emailLeaveHooks), // WP-21 added the email revocation
   badges: SummaryBadges = tasksSummaryBadges(),
 ) {
   return defineModule({ name: "households", routes: householdRoutes(source, hooks, badges) });

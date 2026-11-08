@@ -30,11 +30,13 @@ export async function authorized(
   getToken: TokenProvider,
   baseUrl: string = API_BASE_URL,
 ): Promise<Response> {
-  if (new URL(request.url).origin === new URL(baseUrl).origin) {
+  const toApi = new URL(request.url).origin === new URL(baseUrl).origin;
+  if (toApi) {
     const token = await getToken();
     if (token) request.headers.set("authorization", `Bearer ${token}`);
   }
-  return fetch(request, { redirect: "error" });
+  // Cookies go only to our API (the email-connect browser nonce, Q-198; auth session cookies), never elsewhere.
+  return fetch(request, { redirect: "error", credentials: toApi ? "include" : "omit" });
 }
 
 export function createClient(getToken: TokenProvider, baseUrl: string = API_BASE_URL): ApiClient {

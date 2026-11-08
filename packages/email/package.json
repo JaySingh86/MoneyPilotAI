@@ -6,6 +6,9 @@
   "description": "Gmail/Graph/forwarding adapters, MIME to text, prefilter, redaction, matcher. Core built in WP-19; providers in WP-21.",
   "exports": {
     ".": "./src/index.ts",
+    "./providers": "./src/providers/index.ts",
+    "./oauth": "./src/oauth/index.ts",
+    "./prefilter": "./src/prefilter/index.ts",
     "./testing": "./testing/index.ts"
   },
   "scripts": {

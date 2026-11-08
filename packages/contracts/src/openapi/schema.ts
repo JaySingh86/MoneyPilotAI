@@ -4143,6 +4143,347 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/households/{hid}/email-connections": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Connected mailboxes of the household (masked; no tokens) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["EmailConnectionList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/email-connections/{provider}/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Start connecting a mailbox: returns the provider's consent URL (step-up MFA) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          provider: components["schemas"]["EmailProviderIdInput"];
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["StartEmailConnectionBodyInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["EmailAuthUrl"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/email-connections/{provider}/callback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** OAuth redirect target: stores the sealed token, then redirects to the web app */
+    get: {
+      parameters: {
+        query?: {
+          code?: string;
+          state?: string;
+          error?: string;
+          error_description?: string;
+        };
+        header?: never;
+        path: {
+          provider: components["schemas"]["EmailProviderIdInput"];
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Redirect to {returnTo}?connected=<provider> or ?connect_error=<code> */
+        302: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/email-connections/{id}/pause": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Pause checking this mailbox (owner only) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["EmailConnection"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/email-connections/{id}/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Resume checking this mailbox (owner only) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["EmailConnection"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/email-connections/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Disconnect: revoke at the provider, stop the watch and delete the token (owner only) */
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Disconnected */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -6142,6 +6483,45 @@ export interface components {
       alsoNotifyPartner: boolean;
     };
     ItemReminderRuleInput: components["schemas"]["ReminderRuleInput"] | null;
+    /** @enum {string} */
+    EmailProviderIdInput: "gmail" | "outlook";
+    /** @enum {string} */
+    EmailReturnToInput: "/imports" | "/setup";
+    /** @enum {string} */
+    EmailConnectErrorInput:
+      | "access_denied"
+      | "invalid_state"
+      | "exchange_failed"
+      | "scope_missing"
+      | "already_connected"
+      | "no_household"
+      | "unavailable";
+    StartEmailConnectionBodyInput: {
+      returnTo: components["schemas"]["EmailReturnToInput"];
+    };
+    EmailAuthUrlInput: {
+      /** Format: uri */
+      authUrl: string;
+    };
+    /** @enum {string} */
+    EmailConnectionStatusInput: "connected" | "paused" | "error";
+    EmailConnectionInput: {
+      /** Format: uuid */
+      id: string;
+      provider: components["schemas"]["EmailProviderIdInput"];
+      /** Format: uuid */
+      ownerUserId: string;
+      maskedAddress: string;
+      status: components["schemas"]["EmailConnectionStatusInput"];
+      lastCheckedAt: string | null;
+      backfillMonths: number;
+      matchedCount: number;
+      usedCount: number;
+    };
+    EmailConnectionListInput: {
+      data: components["schemas"]["EmailConnectionInput"][];
+      nextCursor: string | null;
+    };
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -8137,6 +8517,45 @@ export interface components {
       alsoNotifyPartner: boolean;
     };
     ItemReminderRule: components["schemas"]["ReminderRule"] | null;
+    /** @enum {string} */
+    EmailProviderId: "gmail" | "outlook";
+    /** @enum {string} */
+    EmailReturnTo: "/imports" | "/setup";
+    /** @enum {string} */
+    EmailConnectError:
+      | "access_denied"
+      | "invalid_state"
+      | "exchange_failed"
+      | "scope_missing"
+      | "already_connected"
+      | "no_household"
+      | "unavailable";
+    StartEmailConnectionBody: {
+      returnTo: components["schemas"]["EmailReturnTo"];
+    };
+    EmailAuthUrl: {
+      /** Format: uri */
+      authUrl: string;
+    };
+    /** @enum {string} */
+    EmailConnectionStatus: "connected" | "paused" | "error";
+    EmailConnection: {
+      /** Format: uuid */
+      id: string;
+      provider: components["schemas"]["EmailProviderId"];
+      /** Format: uuid */
+      ownerUserId: string;
+      maskedAddress: string;
+      status: components["schemas"]["EmailConnectionStatus"];
+      lastCheckedAt: string | null;
+      backfillMonths: number;
+      matchedCount: number;
+      usedCount: number;
+    };
+    EmailConnectionList: {
+      data: components["schemas"]["EmailConnection"][];
+      nextCursor: string | null;
+    };
   };
   responses: never;
   parameters: never;

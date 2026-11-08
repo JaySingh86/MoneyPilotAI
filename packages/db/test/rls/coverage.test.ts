@@ -100,6 +100,10 @@ describe("RLS posture of every table", () => {
       // WP-15: the dispatch fan-out (ids only) and the SES event webhook.
       app_list_households_with_due_notifications: ["mp_worker"],
       app_record_delivery_event: ["mp_api"],
+      // WP-21: the OAuth callback (state, no sign-in) and the verified provider pushes.
+      app_email_oauth_consume: ["mp_api"],
+      app_email_push_gmail: ["mp_api"],
+      app_email_push_graph: ["mp_api"],
     };
     const res = await apiClient.query<{ proname: string; roles: string[] }>(`
       select p.proname,

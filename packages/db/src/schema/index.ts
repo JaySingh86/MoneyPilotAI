@@ -20,3 +20,4 @@ export {
   reminderRules,
   sendQuotaEvents,
 } from "./notify";
+export { emailConnections, emailMessages, emailOauthStates } from "./email";

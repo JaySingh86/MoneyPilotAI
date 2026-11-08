@@ -5070,6 +5070,82 @@
       "ItemReminderRuleInput": {
         "anyOf": [{ "$ref": "#/components/schemas/ReminderRuleInput" }, { "type": "null" }]
       },
+      "EmailProviderIdInput": { "type": "string", "enum": ["gmail", "outlook"] },
+      "EmailReturnToInput": { "type": "string", "enum": ["/imports", "/setup"] },
+      "EmailConnectErrorInput": {
+        "type": "string",
+        "enum": [
+          "access_denied",
+          "invalid_state",
+          "exchange_failed",
+          "scope_missing",
+          "already_connected",
+          "no_household",
+          "unavailable"
+        ]
+      },
+      "StartEmailConnectionBodyInput": {
+        "type": "object",
+        "properties": { "returnTo": { "$ref": "#/components/schemas/EmailReturnToInput" } },
+        "required": ["returnTo"],
+        "additionalProperties": false
+      },
+      "EmailAuthUrlInput": {
+        "type": "object",
+        "properties": { "authUrl": { "type": "string", "format": "uri" } },
+        "required": ["authUrl"]
+      },
+      "EmailConnectionStatusInput": { "type": "string", "enum": ["connected", "paused", "error"] },
+      "EmailConnectionInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "provider": { "$ref": "#/components/schemas/EmailProviderIdInput" },
+          "ownerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "maskedAddress": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/EmailConnectionStatusInput" },
+          "lastCheckedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "backfillMonths": { "type": "integer", "minimum": 1, "maximum": 24 },
+          "matchedCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "usedCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": [
+          "id",
+          "provider",
+          "ownerUserId",
+          "maskedAddress",
+          "status",
+          "lastCheckedAt",
+          "backfillMonths",
+          "matchedCount",
+          "usedCount"
+        ]
+      },
+      "EmailConnectionListInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/EmailConnectionInput" } },
+          "nextCursor": { "type": ["string", "null"] }
+        },
+        "required": ["data", "nextCursor"]
+      },
       "ProblemField": {
         "type": "object",
         "properties": {
@@ -10273,7 +10349,86 @@
         "required": ["offsetsDays", "channels", "alsoNotifyPartner"],
         "additionalProperties": false
       },
-      "ItemReminderRule": { "anyOf": [{ "$ref": "#/components/schemas/ReminderRule" }, { "type": "null" }] }
+      "ItemReminderRule": { "anyOf": [{ "$ref": "#/components/schemas/ReminderRule" }, { "type": "null" }] },
+      "EmailProviderId": { "type": "string", "enum": ["gmail", "outlook"] },
+      "EmailReturnTo": { "type": "string", "enum": ["/imports", "/setup"] },
+      "EmailConnectError": {
+        "type": "string",
+        "enum": [
+          "access_denied",
+          "invalid_state",
+          "exchange_failed",
+          "scope_missing",
+          "already_connected",
+          "no_household",
+          "unavailable"
+        ]
+      },
+      "StartEmailConnectionBody": {
+        "type": "object",
+        "properties": { "returnTo": { "$ref": "#/components/schemas/EmailReturnTo" } },
+        "required": ["returnTo"],
+        "additionalProperties": false
+      },
+      "EmailAuthUrl": {
+        "type": "object",
+        "properties": { "authUrl": { "type": "string", "format": "uri" } },
+        "required": ["authUrl"],
+        "additionalProperties": false
+      },
+      "EmailConnectionStatus": { "type": "string", "enum": ["connected", "paused", "error"] },
+      "EmailConnection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "provider": { "$ref": "#/components/schemas/EmailProviderId" },
+          "ownerUserId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "maskedAddress": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/EmailConnectionStatus" },
+          "lastCheckedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "backfillMonths": { "type": "integer", "minimum": 1, "maximum": 24 },
+          "matchedCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "usedCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": [
+          "id",
+          "provider",
+          "ownerUserId",
+          "maskedAddress",
+          "status",
+          "lastCheckedAt",
+          "backfillMonths",
+          "matchedCount",
+          "usedCount"
+        ],
+        "additionalProperties": false
+      },
+      "EmailConnectionList": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/EmailConnection" } },
+          "nextCursor": { "type": ["string", "null"] }
+        },
+        "required": ["data", "nextCursor"],
+        "additionalProperties": false
+      }
     }
   },
   "paths": {
@@ -13598,6 +13753,245 @@
               "application/json": { "schema": { "$ref": "#/components/schemas/ItemReminderRule" } }
             }
           },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/email-connections": {
+      "get": {
+        "summary": "Connected mailboxes of the household (masked; no tokens)",
+        "tags": ["email"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/EmailConnectionList" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/email-connections/{provider}/start": {
+      "post": {
+        "summary": "Start connecting a mailbox: returns the provider's consent URL (step-up MFA)",
+        "tags": ["email"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/StartEmailConnectionBodyInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": { "$ref": "#/components/schemas/EmailProviderIdInput" },
+            "in": "path",
+            "name": "provider",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EmailAuthUrl" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/email-connections/{provider}/callback": {
+      "get": {
+        "summary": "OAuth redirect target: stores the sealed token, then redirects to the web app",
+        "tags": ["email"],
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1, "maxLength": 2048 },
+            "in": "query",
+            "name": "code",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "minLength": 1, "maxLength": 512 },
+            "in": "query",
+            "name": "state",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "maxLength": 200 },
+            "in": "query",
+            "name": "error",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "maxLength": 1000 },
+            "in": "query",
+            "name": "error_description",
+            "required": false
+          },
+          {
+            "schema": { "$ref": "#/components/schemas/EmailProviderIdInput" },
+            "in": "path",
+            "name": "provider",
+            "required": true
+          }
+        ],
+        "security": [],
+        "responses": {
+          "302": { "description": "Redirect to {returnTo}?connected=<provider> or ?connect_error=<code>" },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/email-connections/{id}/pause": {
+      "post": {
+        "summary": "Pause checking this mailbox (owner only)",
+        "tags": ["email"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/EmailConnection" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/email-connections/{id}/resume": {
+      "post": {
+        "summary": "Resume checking this mailbox (owner only)",
+        "tags": ["email"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/EmailConnection" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/email-connections/{id}": {
+      "delete": {
+        "summary": "Disconnect: revoke at the provider, stop the watch and delete the token (owner only)",
+        "tags": ["email"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": { "description": "Disconnected" },
           "4XX": {
             "description": "Client error (RFC 9457 problem details)",
             "content": {
