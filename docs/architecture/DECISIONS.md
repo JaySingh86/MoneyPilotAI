@@ -19,14 +19,15 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 | 009 | Email capture: metadata prefilter, one structured extraction, evidence validation, no bodies stored | Accepted |
 | 010 | AI provider and per-route model config | Accepted (default model); per-route changes Proposed |
 | 011 | Auth through an adapter (Clerk proposed) | Superseded by 017 |
-| 012 | Hosting on AWS with CDK; web on Vercel | Proposed |
+| 012 | Hosting on AWS with CDK; web on Vercel | Superseded for data, auth and storage by 020; compute hosting still open |
 | 013 | Billing through an adapter (merchant of record proposed) | Proposed |
 | 014 | Agent-driven delivery: work packages, path ownership, CI as the contract | Accepted |
 | 015 | Timestamped SQL migrations, expand/contract | Accepted |
 | 016 | Mobile app on the React Native CLI (no Expo) | Accepted |
-| 017 | Auth on AWS Cognito behind the adapter | Accepted (step-up amended by 018) |
-| 018 | Step-up requires proof that MFA was used | Accepted |
-| 019 | Web tokens in Amplify's default browser storage, protected by CSP | Accepted |
+| 017 | Auth on AWS Cognito behind the adapter | Superseded by 020 |
+| 018 | Step-up requires proof that MFA was used | Accepted (principle kept by 020: Supabase `aal2` plus a recent TOTP `amr` entry) |
+| 019 | Web tokens in Amplify's default browser storage, protected by CSP | Superseded by 020 |
+| 020 | Supabase for Postgres, Auth and Storage, reached only through our API; local hosting for the real-data phase | Accepted |
 
 ---
 
@@ -155,4 +156,24 @@ To change a decision, add a new ADR that supersedes the old one. Don’t edit an
 **Context:** the WP-17 security review noted that Amplify keeps Cognito tokens in localStorage, where any successful XSS could read them. Moving them to cookies the page can read gives no real protection, and httpOnly cookies would need a backend-for-frontend that this project doesn't have yet.
 **Decision:** keep Amplify's default storage. Mitigate with a strict nonce-based CSP and the standard security headers, no `dangerouslySetInnerHTML`, React text rendering for all user and engine strings, self-hosted fonts, an API client that sends the token only to the API origin, and short token lifetimes (access and ID tokens ≤ 60 min) set in WP-09.
 **Consequences:** XSS prevention is the primary defence, so any new HTML sink or third-party script needs a security review. Revisit (a BFF with httpOnly cookies) if the app ever embeds third-party scripts.
+
+## ADR-020 Supabase for Postgres, Auth and Storage, reached only through our API (supersedes ADR-017 and ADR-019; amends ADR-012)
+**Context:** the owner wants to test the product end to end with real data (sign up, connect Gmail, upload a bank CSV, see the dashboard) before any AWS account exists. Owner decision, 2026-11-09.
+**Decision:**
+- **Database:** a Supabase Postgres project in a US region. Our own roles stay: `mp_migrator` owns the schema objects; `mp_api`, `mp_worker` and `mp_queue` log in. None has BYPASSRLS. A one-time bootstrap script, run as `postgres`, creates them. Forced RLS (ADR-003) and every migration stay as they are. The Supabase Data API (PostgREST) is turned off, and `anon`/`authenticated` get no grants on our tables.
+- **Auth:** Supabase Auth (email + password, Sign in with Google, TOTP MFA), behind the existing adapter (`apps/api/src/auth/provider.ts`).
+  - **Clients never call Supabase directly.** Web and mobile call our API's `/auth/*` routes (sign up, confirm, sign in, refresh, sign out, password reset, MFA enrol/verify, Google start/callback). The API talks to Supabase Auth server-side. The publishable and secret keys live only in the API's environment.
+  - The API verifies the Supabase **access token** on every request with Supabase's asymmetric JWKS. It checks issuer, audience `authenticated`, expiry and a 60 s skew.
+  - Step-up (ADR-018 principle): requires `aal = aal2` and a `totp` entry in `amr` at most 10 minutes old.
+  - `/me/bootstrap` keeps creating the `users` row from verified claims (`email_confirmed_at` set).
+- **Storage:** a private Supabase Storage bucket for CSV uploads, reached by the API and worker through the S3-compatible endpoint, behind the WP-16 storage interface. No client gets storage keys.
+- **Hosting (real-data phase):** api, worker and web run on the owner's machine against the Supabase project. Compute hosting is decided later (ADR-012 stays open for compute).
+- **OAuth token encryption (ADR-009):** envelope encryption keeps its `KeyProvider` interface. Locally, the master key comes from a worker-only environment variable. A managed KMS is required before any shared or deployed environment.
+
+**Consequences:**
+- Cognito, Amplify, the CDK user pool and its trigger Lambdas are parked (WP-09 branch). The web and mobile auth adapters now call our API.
+- The API handles passwords in transit. It never logs them (hard rule 8), and auth routes have strict rate limits.
+- Tokens are held by the client app. The web keeps the refresh token in an httpOnly cookie set by the API, and the access token in memory.
+- Tests keep using vanilla Postgres (Testcontainers) and a fake JWKS issuer. A compatibility test runs the migrations and RLS suite against the Supabase Postgres image.
+- Agents never receive the project's database password or secret key. The owner keeps them in `.env.local`.
 

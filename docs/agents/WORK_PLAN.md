@@ -26,7 +26,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-06 | Items, schedules, renewals, occurrences | 2 | WP-03, WP-02, WP-08 | L | G1 | done (G1 approved) |
 | WP-07 | Engine rules complete (flags, estimates, what-if, shortfall, goals, renewals, averages, calendar) | 2 | WP-02 | L | — | done |
 | WP-08 | API platform + contracts (server, errors, idempotency, OpenAPI, client gen) | 2 | WP-01 | M | — | done |
-| WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | in-progress (wp-builder, wp/09-infra; synth only until H-01) |
+| WP-09 | Infrastructure (CDK: dev + staging) | 2 | WP-01, H-01 | L | G2 | blocked (parked by ADR-020: data, auth and storage on Supabase; compute hosting undecided. Branch wp/09-infra keeps the CDK work; its pg-boss queue-role migration moves to WP-32) |
 | WP-10 | UI kit (web components per DESIGN_SPEC §4) | 2 | WP-04 | L | — | done |
 | WP-11 | AI package + eval harness | 2 | WP-01 | M | G3 | done (G3 open: live eval pending) |
 | WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | done |
@@ -49,6 +49,8 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-29 | P1 · Realtime invalidation (SSE) | P1 | WP-12 | S | — | todo |
 | WP-30 | P1 · Mobile app (React Native CLI) | P1 | WP-08, WP-04 | L | — | todo |
 | WP-31 | P1 · Bank adapter (Plaid) in staging | P1 | WP-16 | M | G2 | todo |
+| WP-32 | Supabase database + storage, live local stack (ADR-020) | R | WP-03, WP-16 | M | G2 | in-progress (wp-builder, wp/32-supabase-data) |
+| WP-33 | Supabase Auth through the API (ADR-020) | R | WP-05, WP-17 | M | G1 | in-progress (wp-builder, wp/33-supabase-auth) |
 
 **Human gates:**
 - **G1:** schema, RLS and auth review, before features build on them.
@@ -89,6 +91,16 @@ flowchart LR
 Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the generated client with **MSW mocks fed by the golden fixture**.
 
 ---
+
+## Real-data track (ADR-020, owner decision 2026-11-09)
+Build and test in the order a household meets the product, on the owner's machine, against a real Supabase project and real data:
+1. **Sign up / sign in:** WP-33 (Supabase Auth through our API), then the existing sign-in screens (WP-17) in live mode.
+2. **Household setup:** WP-23 setup flow against the live API.
+3. **Email:** WP-21 Gmail connection (a Google Cloud project in Testing mode, with the owner as a test user), then WP-22 extraction (needs an Anthropic API key). Connecting the owner's own inbox is the owner's G2 call.
+4. **Bank statement:** WP-16 CSV import with WP-32 storage (Supabase Storage).
+5. **Dashboard:** Overview, Calendar, Bills, Renewals, Goals and Tasks (WP-17, WP-18) on the live data.
+
+Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode is `pnpm dev:live` against `.env.local`.
 
 ## H-01 · Human setup (not an agent task)
 - Make the decisions in BACKEND_PLAN §17: hosting, auth, billing, product name/domain, AI model policy.
@@ -382,3 +394,25 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 - **WP-29 Realtime:** Postgres LISTEN/NOTIFY → SSE `/events`; web query invalidation.
 - **WP-30 Mobile:** React Native CLI app (no Expo; ADR-016) with the mobile screens from the canvas, using the same client, format and token packages; React Navigation, `react-native-keychain` for tokens, FCM push via `@react-native-firebase/messaging`; native builds and store releases through Fastlane.
 - **WP-31 Bank adapter:** Plaid in staging behind a flag; compare recurring streams with our detection; report the cost per household. Gate G2.
+
+## WP-32 · Supabase database + storage, live local stack
+- **Owns:** `docker/**` (Supabase bootstrap), `packages/db/src/cli/**`, `packages/db/supabase/**`, new compatibility tests under `packages/db/test/**`, the storage adapters behind the WP-16 interface (`apps/api/src/modules/imports/storage.ts` adapters, worker storage), `.env.example`, root `dev:live` scripts, `docs/runbooks/supabase-setup.md`.
+- **Read first:** ADR-003, ADR-015, ADR-020; BACKEND_PLAN §5.3; WP-16 Q-143/Q-144; WP-09 branch commit `d807f1c` (pg-boss `mp_queue` role).
+- **Acceptance:**
+  - [ ] A bootstrap SQL script, run once as `postgres` on Supabase, creates `mp_migrator`, `mp_api`, `mp_worker` and `mp_queue` (no BYPASSRLS), and grants schema rights so `pnpm db:migrate` runs as `mp_migrator`. It revokes `anon`/`authenticated` access to our objects. It is idempotent.
+  - [ ] Every migration and the whole `pnpm test:rls` suite pass on the Supabase Postgres image, with extensions handled the way Supabase installs them.
+  - [ ] Connections use TLS and work through the Supavisor session pooler with role-qualified user names. pg-boss runs as `mp_queue` (salvaged from WP-09).
+  - [ ] An S3 storage adapter works against Supabase Storage's S3 endpoint and against local MinIO: presigned upload with a size cap, or upload through the API if presigning isn't supported. A private bucket. Covered by an integration test against MinIO.
+  - [ ] `pnpm dev:live` runs api, worker and web (not mock mode) against `.env.local`. A CSV uploaded in the browser is stored, processed by the worker, and shows up in the review queue.
+  - [ ] `docs/runbooks/supabase-setup.md` lists every owner step and command.
+
+## WP-33 · Supabase Auth through the API
+- **Owns:** `apps/api/src/auth/**`, `apps/api/src/modules/auth/**` (new), `apps/web/lib/auth/**`, `apps/web/app/(auth)/**`, auth contracts in `packages/contracts`.
+- **Read first:** ADR-018, ADR-020, ADR-017 (what it replaces); WP-05 (`/me/bootstrap`, `app_sync_auth_user`); WP-23 step-up (`stepUp`, `setUpTotp`, Q-176).
+- **Acceptance:**
+  - [ ] `SupabaseAuthProvider` implements the adapter: JWKS verification (issuer, audience, expiry, skew), claims mapping (`sub`, `email`, `email_confirmed_at`), and step-up from `aal2` plus a `totp` `amr` entry at most 10 minutes old. Tests run against a local fake JWKS.
+  - [ ] API `/auth/*` routes proxy Supabase Auth: sign up, confirm email, sign in, refresh, sign out, password reset, MFA enrol/verify/challenge, and Google start/callback. Strict rate limits. Passwords and tokens are never logged. Zod contracts.
+  - [ ] The web `AuthAdapter` calls only our API. The refresh token goes in an httpOnly, Secure, SameSite=Lax cookie set by the API; the access token is held in memory. The Amplify adapter and Cognito code paths are removed. The mock adapter stays.
+  - [ ] The API refuses to start in production without the Supabase auth config. The Cognito config checks are removed.
+  - [ ] An e2e test against local Supabase (CLI) covers: sign up → confirm → sign in → bootstrap → household created; and TOTP enrol → step-up action.
+- **Gate:** G1 (auth review).
