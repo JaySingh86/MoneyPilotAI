@@ -41,7 +41,7 @@ This is separate from Sign in with Google. It's our API reading bills from your 
 1. In the same Google Cloud project, open **APIs & Services → Library** and enable the **Gmail API**.
 2. On the consent screen, add the scope `https://www.googleapis.com/auth/gmail.readonly`. It is a restricted scope. Testing mode allows it for your listed test users without Google's review. That review is only needed before real customers.
 3. Create a second **OAuth client ID** of type *Web application*:
-   - **Authorized redirect URI:** `http://localhost:4000/email-connections/gmail/callback` (WP-21 confirms the exact path).
+   - **Authorized redirect URI:** `http://localhost:4000/v1/email-connections/gmail/callback`.
 4. Put its client ID and secret in `.env.local` as `GOOGLE_GMAIL_CLIENT_ID` and `GOOGLE_GMAIL_CLIENT_SECRET`.
 5. Connecting your own inbox is your G2 decision as owner. Only your listed test users can connect while the app is in Testing mode.
 6. Reading bills needs an Anthropic API key (`ANTHROPIC_API_KEY`) for the extraction step (WP-22).
@@ -93,7 +93,11 @@ S3_BUCKET_IMPORTS=imports
 GOOGLE_GMAIL_CLIENT_ID=...
 GOOGLE_GMAIL_CLIENT_SECRET=...
 ANTHROPIC_API_KEY=...
-TOKEN_MASTER_KEY=...   # worker only; 32 random bytes, base64 (WP-21 says how to generate)
+TOKEN_MASTER_KEY=...   # api + worker (local dev only): openssl rand -base64 32. Production uses KMS instead (KMS_TOKEN_KEY_ID)
+EMAIL_ADDRESS_HASH_KEY=...   # openssl rand -base64 32 (same value in api and worker)
+EMAIL_WEBHOOK_SECRET=...     # openssl rand -base64 32
+EMAIL_POLL_MINUTES=15        # Gmail is polled locally (no Pub/Sub push without a public URL)
+API_PUBLIC_URL=http://localhost:4000
 
 # Web
 NEXT_PUBLIC_API_URL=http://localhost:4000
