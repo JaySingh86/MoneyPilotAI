@@ -7,6 +7,7 @@
 import { AuthError } from "../lib/auth/types";
 import type { AuthAdapter, AuthSession, SignInStep } from "../lib/auth/types";
 import { MOCK_USER } from "./identity";
+import { wp23 } from "./wp23-data";
 
 const STORAGE_KEY = "mp.mock.auth";
 const GOOD_CODE = "123456";
@@ -85,6 +86,21 @@ export function createMockAuthAdapter(options: { signedIn?: boolean } = {}): Moc
     },
     async signInWithGoogle() {
       finish();
+    },
+    async stepUp(code) {
+      requireCode(code);
+      // A fresh MFA time: the mock API stops answering 403 `mfa_required` (`?mfa=required` scenario).
+      wp23.requireStepUp = false;
+    },
+    async setUpTotp() {
+      return {
+        sharedSecret: "JBSWY3DPEHPK3PXP",
+        setupUri: "otpauth://totp/MoneyPilot:sam?secret=JBSWY3DPEHPK3PXP&issuer=MoneyPilot",
+        async confirm(code: string) {
+          requireCode(code);
+          wp23.mfa.sam = true;
+        },
+      };
     },
     async signOut() {
       signedIn = false;

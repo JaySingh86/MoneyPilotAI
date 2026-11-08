@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
 import { openApp, waitForCalendar, waitForOverview } from "./helpers";
 import { waitForList } from "./lists-helpers";
+import { waitForHousehold, waitForImports } from "./wp23-helpers";
 
 test.describe("security headers", () => {
   test("every page has the CSP with a fresh nonce, HSTS and the rest", async ({ page }) => {
@@ -25,6 +26,11 @@ test.describe("security headers", () => {
     }
     expect(nonces[0]).toBeTruthy();
     expect(nonces[0]).not.toBe(nonces[1]);
+  });
+
+  test("the invite page sends no Referer, since its link carries a token", async ({ page }) => {
+    const response = await page.goto("/invite?devbar=0");
+    expect(response?.headers()["referrer-policy"]).toBe("no-referrer");
   });
 
   test("the app runs under the policy: no CSP violations, no requests to other origins", async ({ page }) => {
@@ -68,8 +74,9 @@ async function boxes(locator: Locator): Promise<Array<{ label: string; width: nu
 
 /** Buttons, links, selects and text inputs; a checkbox is measured through its label row. */
 async function controls(page: Page) {
+  // A switch is drawn 32 px tall with a 44 px hit area (its ::after, DESIGN_SPEC §4); it is checked on its own below.
   const selector = [
-    "button",
+    "button:not([role=switch])",
     "a[href]",
     "select",
     "input:not([type=checkbox]):not([type=radio]):not([type=hidden])",
@@ -85,6 +92,16 @@ test.describe("touch screens (pointer: coarse)", () => {
     ["Overview", "/overview", waitForOverview],
     ["Calendar", "/calendar", waitForCalendar],
     ["Tasks", "/tasks", (page: Page) => waitForList(page, "tasks")],
+    ["Members & privacy", "/settings/household", waitForHousehold],
+    ["Email & imports", "/imports", waitForImports],
+    [
+      "Household setup",
+      "/setup",
+      async (page: Page) => {
+        await page.getByRole("heading", { name: "Add what comes in and goes out" }).waitFor();
+        await page.getByText("rivera-7k2@in.moneypilot.app").waitFor();
+      },
+    ],
   ] as const) {
     test(`${name}: every control is at least 44 px`, async ({ page }) => {
       await openApp(page, path);
@@ -94,6 +111,16 @@ test.describe("touch screens (pointer: coarse)", () => {
       expect(small).toEqual([]);
     });
   }
+
+  test("switches keep their 44 px hit area", async ({ page }) => {
+    await openApp(page, "/settings/household");
+    await waitForHousehold(page);
+    const hits = await page
+      .getByRole("switch")
+      .evaluateAll((els) => els.map((el) => getComputedStyle(el, "::after").height));
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => h === "44px")).toBe(true);
+  });
 
   test("the drawer's controls too", async ({ page }) => {
     await openApp(page, "/overview");

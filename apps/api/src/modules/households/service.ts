@@ -15,6 +15,7 @@ import {
 import { entitlementsForPlan } from "@mp/billing";
 import { notifyInviteAccepted, type ApiDb, type ApiContext, type Tx } from "@mp/db";
 import { SendQuotaExceededError } from "@mp/notify";
+import { createLogger } from "@mp/observability";
 import { assertVersion } from "../../lib/if-match";
 import type { InviteSender } from "../../auth/runtime";
 import { recordAudit, type RequestMeta } from "../identity/audit";
@@ -63,6 +64,8 @@ export const zeroBadges: SummaryBadges = {
 
 /** Invites one user may create per rolling 24 hours (BACKEND_PLAN §6). */
 export const DAILY_INVITE_LIMIT = 5;
+
+const log = createLogger("households");
 
 const ALREADY_IN_HOUSEHOLD = "You already belong to a household. Leave it first.";
 const ONE_ACTIVE_INDEX = "household_members_one_active_uq";
@@ -115,6 +118,7 @@ function toInvite(row: repo.InviteRow): Invite {
   return {
     id: row.id,
     email: row.email,
+    firstName: row.firstName,
     expiresAt: row.expiresAt.toISOString(),
     createdAt: row.createdAt.toISOString(),
   };
@@ -122,17 +126,21 @@ function toInvite(row: repo.InviteRow): Invite {
 
 const notFound = () => new AppError("not_found", 404, "Household not found.");
 
-/** The reasons `app_accept_invite` raises (errcode 42501, message = reason) mapped to problems. */
+/** The reasons `app_accept_invite` raises (errcode 42501, message = reason) mapped to problems with a stable `reason`. */
 function inviteProblem(reason: string, maskedEmail?: string | null): AppError {
   switch (reason) {
     case "invite_not_found":
       return new AppError("not_found", 404, "This invitation was not found.");
     case "invite_expired":
-      return new AppError("conflict", 409, "This invitation has expired. Ask for a new one.");
+      return new AppError("conflict", 409, "This invitation has expired. Ask for a new one.", {
+        reason: "expired",
+      });
     case "invite_revoked":
-      return new AppError("conflict", 409, "This invitation was cancelled. Ask for a new one.");
+      return new AppError("conflict", 409, "This invitation was cancelled. Ask for a new one.", {
+        reason: "revoked",
+      });
     case "invite_accepted":
-      return new AppError("conflict", 409, "This invitation was already used.");
+      return new AppError("conflict", 409, "This invitation was already used.", { reason: "used" });
     case "invite_mismatch":
       return new AppError(
         "forbidden",
@@ -140,13 +148,18 @@ function inviteProblem(reason: string, maskedEmail?: string | null): AppError {
         maskedEmail
           ? `This invitation was sent to ${maskedEmail}. Sign in with that email address to accept it.`
           : "This invitation was sent to a different email address. Sign in with that address to accept it.",
+        { reason: "wrong_email" },
       );
     case "invite_already_member":
-      return new AppError("conflict", 409, "You are already in this household.");
+      return new AppError("conflict", 409, "You are already in this household.", {
+        reason: "already_member",
+      });
     case "invite_household_full":
-      return new AppError("conflict", 409, "This household already has two adults.");
+      return new AppError("conflict", 409, "This household already has two adults.", { reason: "full" });
     case "invite_household_deleting":
-      return new AppError("conflict", 409, "This household is scheduled for deletion.");
+      return new AppError("conflict", 409, "This household is scheduled for deletion.", {
+        reason: "deleting",
+      });
     default:
       return new AppError("forbidden", 403, "This invitation cannot be accepted.");
   }
@@ -287,6 +300,7 @@ export class HouseholdService {
           colorRole: m.colorRole,
           isCreator: m.isCreator,
           joinedAt: m.joinedAt.toISOString(),
+          mfaEnabled: m.mfaEnabled,
         })),
         openInvite: open ? toInvite(open) : null,
         // The review queue count is stubbed until WP-14; tasks and proposals come from WP-13.
@@ -304,6 +318,7 @@ export class HouseholdService {
     caller: CallerContext,
     householdId: string,
     rawEmail: string,
+    firstName: string | undefined,
     meta: RequestMeta,
   ): Promise<Invite> {
     const email = rawEmail.trim().toLowerCase();
@@ -340,6 +355,7 @@ export class HouseholdService {
         id: randomUUID(),
         householdId,
         email,
+        firstName: firstName ?? null,
         tokenHash: repo.hashInviteToken(token),
         invitedBy: caller.userId,
       });
@@ -361,6 +377,7 @@ export class HouseholdService {
         token,
         householdName: escapeHtml(created.householdName),
         inviterFirstName: escapeHtml(created.inviterFirstName),
+        ...(created.invite.firstName ? { inviteeFirstName: escapeHtml(created.invite.firstName) } : {}),
         expiresAt: created.invite.expiresAt,
         invitedByUserId: caller.userId,
       });
@@ -383,6 +400,103 @@ export class HouseholdService {
       });
     }
     return toInvite(created.invite);
+  }
+
+  /**
+   * "Resend": a new token on the same open invite, in one transaction, then the email (which counts against the
+   * sender's per-user quota). If the send is refused or fails, the previous token is restored so the link the
+   * partner already has keeps working.
+   */
+  async resendInvite(
+    caller: CallerContext,
+    householdId: string,
+    inviteId: string,
+    meta: RequestMeta,
+  ): Promise<Invite> {
+    const token = randomBytes(32).toString("base64url");
+    const newHash = repo.hashInviteToken(token);
+    const rotated = await this.db.withHouseholdTx(this.ctx(caller, householdId), async (tx) => {
+      const household = await repo.getHousehold(tx, householdId);
+      if (!household) throw notFound();
+      if (household.deletionScheduledFor) {
+        throw new AppError("conflict", 409, "This household is scheduled for deletion.");
+      }
+      await repo.lockInvites(tx, householdId);
+      const current = await repo.findOpenInviteById(tx, householdId, inviteId);
+      if (current === "missing") throw new AppError("not_found", 404, "Invitation not found.");
+      if (current === "closed") {
+        throw new AppError(
+          "conflict",
+          409,
+          "This invitation is no longer pending. Send a new invitation instead.",
+        );
+      }
+      // Refuse before changing anything: the per-user daily cap, then the sender's own quota (read-only check).
+      if ((await repo.countRecentInvitesBy(tx, caller.userId)) >= DAILY_INVITE_LIMIT) {
+        throw new AppError(
+          "rate_limited",
+          429,
+          "You have sent the most invitations allowed today. Try again tomorrow.",
+          { headers: { "retry-after": "3600" } },
+        );
+      }
+      if (this.inviteSender.canSend && !(await this.inviteSender.canSend(caller.userId))) {
+        throw new AppError(
+          "rate_limited",
+          429,
+          "You have sent too many invitations today. Try again tomorrow.",
+        );
+      }
+      const outcome = await repo.rotateInviteToken(tx, householdId, inviteId, newHash);
+      if (outcome !== "ok") throw new AppError("conflict", 409, "This invitation is no longer pending.");
+      const invite = await repo.getInvite(tx, householdId, inviteId);
+      if (!invite) throw new AppError("not_found", 404, "Invitation not found.");
+      await recordAudit(tx, {
+        householdId,
+        actorUserId: caller.userId,
+        action: "invite.resent",
+        entityType: "invite",
+        entityId: inviteId,
+        meta,
+      });
+      const inviterFirstName = (await repo.findUserFirstName(tx, caller.userId)) ?? "A partner";
+      return { invite, previous: current.secrets, householdName: household.name, inviterFirstName };
+    });
+
+    try {
+      await this.inviteSender.send({
+        to: rotated.invite.email,
+        token,
+        householdName: escapeHtml(rotated.householdName),
+        inviterFirstName: escapeHtml(rotated.inviterFirstName),
+        ...(rotated.invite.firstName ? { inviteeFirstName: escapeHtml(rotated.invite.firstName) } : {}),
+        expiresAt: rotated.invite.expiresAt,
+        invitedByUserId: caller.userId,
+      });
+    } catch (err) {
+      await this.db
+        .withHouseholdTx(this.ctx(caller, householdId), (tx) =>
+          repo.rotateInviteToken(tx, householdId, inviteId, rotated.previous.tokenHash, {
+            expiresAt: rotated.previous.expiresAt,
+            expect: newHash,
+          }),
+        )
+        .catch(() => {
+          // The invite keeps its new token that nobody received; Resend again fixes it. No token, email or name here.
+          log.warn({ inviteId }, "resend rollback failed after a failed send");
+        });
+      if (err instanceof SendQuotaExceededError) {
+        throw new AppError(
+          "rate_limited",
+          429,
+          "You have sent too many invitations today. Try again tomorrow.",
+        );
+      }
+      throw new AppError("internal_error", 502, "We could not send the invitation email. Try again.", {
+        cause: err,
+      });
+    }
+    return toInvite(rotated.invite);
   }
 
   async revokeInvite(
@@ -431,14 +545,14 @@ export class HouseholdService {
           break;
       }
       if (await repo.hasActiveMembership(tx, caller.userId)) {
-        throw new AppError("conflict", 409, ALREADY_IN_HOUSEHOLD);
+        throw new AppError("conflict", 409, ALREADY_IN_HOUSEHOLD, { reason: "in_other_household" });
       }
       let householdId: string;
       try {
         householdId = await repo.acceptInvite(tx, tokenHash);
       } catch (err) {
         if (isUniqueViolation(err, ONE_ACTIVE_INDEX))
-          throw new AppError("conflict", 409, ALREADY_IN_HOUSEHOLD);
+          throw new AppError("conflict", 409, ALREADY_IN_HOUSEHOLD, { reason: "in_other_household" });
         const pg = pgErrorOf(err);
         if (pg?.code === INSUFFICIENT_PRIVILEGE && pg.message?.startsWith("invite_")) {
           throw inviteProblem(pg.message);

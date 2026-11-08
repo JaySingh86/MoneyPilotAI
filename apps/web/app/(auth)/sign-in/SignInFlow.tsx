@@ -9,6 +9,7 @@ import { FIRST_NAME_MAX } from "../../../lib/auth/bootstrap";
 import { authMessage } from "../../../lib/auth/types";
 import type { SignInStep } from "../../../lib/auth/types";
 import { COGNITO } from "../../../lib/config";
+import { recallInviteToken } from "../invite/invite";
 import { FirstNameForm } from "../../../lib/components/FirstNameForm";
 import styles from "../auth.module.css";
 
@@ -23,10 +24,17 @@ const TITLES: Record<Step, { title: string; subtitle?: string }> = {
   reset: { title: "Choose a new password", subtitle: "Enter the code we emailed you." },
 };
 
-export function SignInFlow() {
+export interface SignInFlowProps {
+  /** Which screen to open on (the invite page offers "Create account" and "Sign in" separately). */
+  initialStep?: "sign_in" | "sign_up";
+  /** Called once the person is signed in, instead of going to the Overview (the invite page accepts the invite). */
+  onSignedIn?: () => void;
+}
+
+export function SignInFlow({ initialStep = "sign_in", onSignedIn }: SignInFlowProps = {}) {
   const { adapter, status, refresh } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState<Step>("sign_in");
+  const [step, setStep] = useState<Step>(initialStep);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -36,8 +44,11 @@ export function SignInFlow() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "signed_in") router.replace("/overview");
-  }, [status, router]);
+    if (status !== "signed_in") return;
+    if (onSignedIn) onSignedIn();
+    // A pending invite (the person left for Google and came back to /sign-in) goes back to the invitation.
+    else router.replace(recallInviteToken() ? "/invite" : "/overview");
+  }, [status, router, onSignedIn]);
 
   if (status === "needs_name") return <FirstNameForm />;
 

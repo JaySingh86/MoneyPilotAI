@@ -40,7 +40,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-20 | Forwarding channel (SES inbound) | 4 | WP-19, WP-09 | M | G2 | todo |
 | WP-21 | Gmail + Outlook connectors, token crypto | 4 | WP-05, WP-19, WP-09 | L | G2 | in-progress (wp-builder, wp/21-email-connectors; fakes only until WP-09 and G2) |
 | WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | todo |
-| WP-23 | Web: Email & imports, Members & privacy, setup flow, review UI | 4 | WP-10, WP-14, WP-21 | L | — | in-progress (wp-builder, wp/23-web-imports-settings) |
+| WP-23 | Web: Email & imports, Members & privacy, setup flow, review UI | 4 | WP-10, WP-14, WP-21 | L | — | done (WP-21/WP-24/WP-20 endpoints still mocked) |
 | WP-24 | Privacy ops: export, leave, delete, retention, activity | 4 | WP-05, WP-21 | M | G2 | todo |
 | WP-25 | Billing + entitlements | 4 | WP-05, WP-08 | M | — | done (real provider pending H-01) |
 | WP-26 | Hardening: security, observability, E2E, load | 4 | WP-12…WP-25 | L | G4 | todo |
@@ -214,6 +214,7 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
   - [ ] Account linking (if any) links two identities only when both have a verified email (Q-083); the pool forbids unverified email attribute updates.
   - [ ] The API exits at startup in production when `COGNITO_*` is missing or inconsistent.
   - [ ] A dedicated `mp_queue` database role (no BYPASSRLS, no access to `public` tables) owns pg-boss; the `pgboss` schema is created by a migration step and pg-boss runs with `migrate: false` in production (Q-105). The API may enqueue only through a narrow SECURITY DEFINER function for allowlisted queues with a household uuid, never raw INSERT on `pgboss.job`.
+  - [ ] Real `AuthAdapter.stepUp` (Cognito TOTP challenge) replaces the WP-23 stub (Q-176).
 - **Gate:** G2 (human applies to AWS).
 
 ## WP-10 · UI kit
@@ -319,6 +320,7 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
   - [ ] Mail from a member’s verified address is processed; mail from unknown senders is `quarantined` and the household is notified.
   - [ ] A Gmail forwarding-confirmation email surfaces the code in-app; no link is ever fetched.
   - [ ] Rotating the address stops acceptance on the old one after 24 h.
+  - [ ] `GET /households/:hid/forwarding-address` returns the current address for Members & privacy and setup (Q-177).
 - **Gate:** G2.
 
 ## WP-21 · Gmail + Outlook connectors, token crypto
@@ -331,6 +333,7 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
   - [ ] Disconnect revokes at the provider, stops the watch, deletes the token and writes an audit event.
   - [ ] Against fake providers: backfill resumes after interruption; duplicate pushes create no duplicate messages.
   - [ ] WP-05's leave hook revokes the leaver's email connections (`LeaveHooks.revokeEmailConnections`) and the household summary reports the real connection status.
+  - [ ] `start` takes `{ returnTo: "/imports" | "/setup" }` (an enum, never a URL); the callback redirects to `{returnTo}?connected=<provider>` or `?connect_error=<code>`; connections list `{ id, provider, ownerUserId, maskedAddress, status, lastCheckedAt, backfillMonths, matchedCount, usedCount }` (Q-173).
 - **Gate:** G2 before any real inbox, including staff test accounts.
 
 ## WP-22 · Email processing pipeline
@@ -366,6 +369,7 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
   - [ ] The purge covers `calc_snapshots` older than 90 days that no `ai_texts` row or proposal references, through a SECURITY DEFINER function (Q-104).
   - [ ] Deletion and retention cover `subscriptions` and `billing_events` (cascade from households; processed events and `webhook_events` purged at 13 months, Q-154).
   - [ ] The retention purge deletes `notifications` older than 90 days (deliveries cascade) and `send_quota_events` older than 2 days (WP-15 security review).
+  - [ ] `GET /households/:hid/activity?limit=` returns `{ id, action, actorName, at }` with server-written action text; `GET/PUT …/sharing` for the three per-member switches; `POST …/members/:uid/reminders { about: "connect_email" | "two_step" }`, at most one per member and topic per day (Q-177).
 - **Gate:** G2.
 
 ## WP-25 · Billing + entitlements

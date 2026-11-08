@@ -81,6 +81,7 @@ export const invites = pgTable(
       .notNull()
       .references(() => households.id, { onDelete: "cascade" }),
     email: citext("email").notNull(),
+    firstName: text("first_name"),
     tokenHash: bytea("token_hash").notNull().unique(),
     invitedBy: uuid("invited_by")
       .notNull()

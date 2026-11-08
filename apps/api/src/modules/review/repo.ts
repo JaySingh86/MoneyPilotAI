@@ -310,3 +310,20 @@ export async function audit(
   await tx.execute(sql`insert into audit_events (household_id, actor_user_id, actor_type, action, entity_type, entity_id)
     values (${householdId}, ${userId}, 'user', ${action}, ${entityType}, ${entityId})`);
 }
+
+// ===== Automation stats (Q-172) =====
+/** Active, live items by how they were found (a `bank` item is in neither group, Q-172). `null` when the household is not visible to the caller (RLS). */
+export async function automationCounts(
+  tx: Tx,
+  householdId: string,
+): Promise<{ automated: number; hand: number } | null> {
+  const res = await tx.execute(sql`select
+      count(*) filter (where i.source in ('email','csv'))::int as automated,
+      count(*) filter (where i.source = 'manual')::int as hand
+    from households h
+    left join recurring_items i on i.household_id = h.id and i.status = 'active' and i.deleted_at is null
+    where h.id = ${householdId}
+    group by h.id`);
+  const row = res.rows[0] as Row | undefined;
+  return row ? { automated: Number(row.automated), hand: Number(row.hand) } : null;
+}

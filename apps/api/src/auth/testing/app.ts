@@ -24,6 +24,7 @@ export interface SentInvite {
   token: string;
   householdName: string;
   inviterFirstName: string;
+  inviteeFirstName?: string;
 }
 
 export interface TestApi {
@@ -81,6 +82,7 @@ export async function createTestApi(options: TestApiOptions = {}): Promise<TestA
         token: invite.token,
         householdName: invite.householdName,
         inviterFirstName: invite.inviterFirstName,
+        ...(invite.inviteeFirstName ? { inviteeFirstName: invite.inviteeFirstName } : {}),
       });
     },
   };

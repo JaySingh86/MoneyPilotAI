@@ -1,0 +1,185 @@
+/* Members & privacy layout, DESIGN_SPEC §5.1. Components come from @mp/ui; this only places them. */
+
+.body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--mp-space-5);
+}
+
+.main {
+  display: flex;
+  flex: 2 1 560px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-4);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldLabel {
+  font: var(--mp-type-small);
+  font-weight: 600;
+  color: var(--mp-text-secondary);
+}
+
+.planRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1_5);
+}
+
+.planLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+  min-height: 44px;
+  padding: 0 var(--mp-space-3);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-bg-subtle);
+}
+
+.hint {
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.hintInline {
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: var(--mp-type-small);
+  font-weight: 600;
+  color: var(--mp-brand-default);
+}
+
+.memberRow,
+.dataRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-3) 0;
+  border-bottom: 1px solid var(--mp-border-divider);
+}
+
+.memberRow:last-child,
+.dataRow:last-child {
+  border-bottom: 0;
+}
+
+.rowFull {
+  flex-basis: 100%;
+}
+
+.memberText {
+  display: flex;
+  flex: 1 1 200px;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.memberName {
+  font: var(--mp-type-body);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.you {
+  font-weight: 400;
+  color: var(--mp-text-muted);
+}
+
+.memberMeta {
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.note {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.inviteForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+}
+
+.activityRow {
+  display: flex;
+  flex-direction: column;
+  padding: var(--mp-space-2_5) 0;
+  border-bottom: 1px solid var(--mp-border-divider);
+}
+
+.activityAction {
+  font: var(--mp-type-small);
+  font-weight: 600;
+}
+
+.promises {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-5_5);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-brand-strong);
+  color: var(--mp-text-inverse);
+}
+
+.promisesTitle {
+  margin: 0;
+  font: var(--mp-type-heading-2);
+  letter-spacing: var(--mp-tracking-heading);
+}
+
+.promisesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  margin: 0;
+  padding-left: var(--mp-space-4);
+  font: var(--mp-type-small);
+  color: var(--mp-brand-on-strong-subtle);
+}
+
+.footer {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+.setupKey {
+  padding: var(--mp-space-1) var(--mp-space-2);
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-bg-canvas);
+  font: var(--mp-type-small);
+  overflow-wrap: anywhere;
+}

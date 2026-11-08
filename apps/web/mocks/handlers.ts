@@ -8,6 +8,8 @@ import { listsHandlers } from "./lists-handlers";
 import { taskBadge as tasksDueBadge } from "./lists-model";
 import { buildCalendar, buildPlan } from "./model";
 import { state } from "./state";
+import { reviewQueueCount, withWp23Overrides } from "./wp23-data";
+import { wp23Handlers } from "./wp23-handlers";
 import type { FaultTarget } from "./state";
 
 const API = `${API_BASE_URL}/v1`;
@@ -27,6 +29,7 @@ async function serve(target: FaultTarget, body: () => unknown): Promise<Response
 
 export const handlers = [
   ...listsHandlers, // WP-18: items, renewals, goals, tasks
+  ...wp23Handlers,
   http.post(`${API}/me/bootstrap`, () => {
     state.bootstrapCalls += 1;
     return HttpResponse.json(ME);
@@ -35,7 +38,7 @@ export const handlers = [
   http.get(`${API}/households/:hid/summary`, ({ params }) => {
     if (params.hid !== HOUSEHOLD_ID) return problem(404, "not_found", "Household not found.");
     return serve("summary", () =>
-      summary(tasksDueBadge(state.scenario), state.scenario === "empty" ? 0 : 4, 50000),
+      withWp23Overrides(summary(tasksDueBadge(state.scenario), reviewQueueCount(state.scenario), 50000)),
     );
   }),
   http.get(`${API}/households/:hid/plan`, ({ params }) => {

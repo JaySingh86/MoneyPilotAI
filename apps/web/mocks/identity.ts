@@ -68,6 +68,7 @@ export function summary(tasksDue: number, reviewQueue: number, cushionCents: num
         colorRole: "partnerA",
         isCreator: true,
         joinedAt: CREATED_AT,
+        mfaEnabled: true,
       },
       {
         userId: JORDAN_ID,
@@ -76,6 +77,7 @@ export function summary(tasksDue: number, reviewQueue: number, cushionCents: num
         colorRole: "partnerB",
         isCreator: false,
         joinedAt: CREATED_AT,
+        mfaEnabled: false,
       },
     ],
     openInvite: null,

@@ -1,0 +1,101 @@
+/* CSV step: file picker and the detected items (canvas "Mobile · Household setup", CSV panel). */
+
+.pick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--mp-space-3);
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.hint {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.found {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-1);
+}
+
+.foundHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-2);
+  padding: var(--mp-space-2_5) 0 var(--mp-space-1);
+}
+
+.foundTitle {
+  margin: 0;
+  font: var(--mp-type-title);
+}
+
+.foundCount {
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3);
+  min-height: 52px;
+  border-bottom: 1px solid var(--mp-border-divider);
+  cursor: pointer;
+}
+
+.check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--mp-brand-default);
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowName {
+  font: var(--mp-type-body);
+  font-weight: 500;
+}
+
+.rowMeta {
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.rowNote {
+  font: var(--mp-type-small);
+  font-weight: 500;
+  color: var(--mp-attention-text);
+}
+
+.mapping {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+}

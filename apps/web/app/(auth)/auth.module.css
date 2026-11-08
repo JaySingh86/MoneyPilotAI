@@ -84,3 +84,12 @@
   font: var(--mp-type-caption);
   color: var(--mp-text-muted);
 }
+
+.linkText {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: var(--mp-type-body);
+  font-weight: 600;
+  color: var(--mp-brand-default);
+}

@@ -1,0 +1,54 @@
+/* Confirm dialog for destructive actions (DESIGN_SPEC §4 "Button: destructive"): a centered native modal. */
+
+.dialog {
+  width: min(480px, calc(100vw - 2 * var(--mp-space-4)));
+  box-sizing: border-box;
+  padding: var(--mp-space-5_5);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-bg-surface);
+  box-shadow: var(--mp-shadow-overlay);
+  color: var(--mp-text-primary);
+}
+
+.dialog:not([open]) {
+  display: none;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-4);
+}
+
+.title {
+  margin: 0;
+  font: var(--mp-type-heading-2);
+  letter-spacing: var(--mp-tracking-heading);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  margin: 0;
+  font: var(--mp-type-body);
+  color: var(--mp-text-secondary);
+}
+
+.error {
+  margin: 0;
+  padding: var(--mp-space-3);
+  border: 1px solid var(--mp-attention-border);
+  border-radius: var(--mp-radius-lg);
+  background: var(--mp-attention-surface);
+  font: var(--mp-type-small);
+  color: var(--mp-attention-text);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--mp-space-2_5);
+}

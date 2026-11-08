@@ -130,6 +130,7 @@ export interface MemberRow {
   colorRole: "partnerA" | "partnerB";
   isCreator: boolean;
   joinedAt: Date;
+  mfaEnabled: boolean;
 }
 
 /** Active members (left_at is null), creator first. */
@@ -142,7 +143,9 @@ export async function listActiveMembers(tx: Tx, householdId: string): Promise<Me
     color_role: "partnerA" | "partnerB";
     is_creator: boolean;
     joined_at: Date;
-  }>(sql`select m.user_id, u.first_name, u.last_name, u.email::text as email, m.color_role, m.is_creator, m.joined_at
+    mfa_enabled: boolean;
+  }>(sql`select m.user_id, u.first_name, u.last_name, u.email::text as email, m.color_role, m.is_creator, m.joined_at,
+                u.mfa_enabled
            from household_members m join users u on u.id = m.user_id
           where m.household_id = ${householdId} and m.left_at is null
           order by m.color_role`);
@@ -154,6 +157,7 @@ export async function listActiveMembers(tx: Tx, householdId: string): Promise<Me
     colorRole: r.color_role,
     isCreator: r.is_creator,
     joinedAt: toDate(r.joined_at),
+    mfaEnabled: r.mfa_enabled,
   }));
 }
 
@@ -172,6 +176,7 @@ export function hashInviteToken(token: string): Buffer {
 export interface InviteRow {
   id: string;
   email: string;
+  firstName: string | null;
   expiresAt: Date;
   createdAt: Date;
 }
@@ -179,6 +184,7 @@ export interface InviteRow {
 type InviteSql = {
   id: string;
   email: string;
+  first_name: string | null;
   expires_at: Date;
   created_at: Date;
 };
@@ -186,6 +192,7 @@ type InviteSql = {
 const toInvite = (r: InviteSql): InviteRow => ({
   id: r.id,
   email: r.email,
+  firstName: r.first_name,
   expiresAt: toDate(r.expires_at),
   createdAt: toDate(r.created_at),
 });
@@ -204,7 +211,7 @@ export async function revokeExpiredInvites(tx: Tx, householdId: string): Promise
 /** The pending invite, if any: not accepted, not revoked, not expired. */
 export async function findOpenInvite(tx: Tx, householdId: string): Promise<InviteRow | undefined> {
   const res =
-    await tx.execute<InviteSql>(sql`select id, email::text as email, expires_at, created_at from invites
+    await tx.execute<InviteSql>(sql`select id, email::text as email, first_name, expires_at, created_at from invites
     where household_id = ${householdId} and accepted_at is null and revoked_at is null and expires_at > now()
     order by created_at desc limit 1`);
   return res.rows[0] ? toInvite(res.rows[0]) : undefined;
@@ -212,13 +219,20 @@ export async function findOpenInvite(tx: Tx, householdId: string): Promise<Invit
 
 export async function insertInvite(
   tx: Tx,
-  invite: { id: string; householdId: string; email: string; tokenHash: Buffer; invitedBy: string },
+  invite: {
+    id: string;
+    householdId: string;
+    email: string;
+    firstName: string | null;
+    tokenHash: Buffer;
+    invitedBy: string;
+  },
 ): Promise<InviteRow> {
   const res =
-    await tx.execute<InviteSql>(sql`insert into invites (id, household_id, email, token_hash, invited_by, expires_at)
-    values (${invite.id}, ${invite.householdId}, ${invite.email}, ${invite.tokenHash}, ${invite.invitedBy},
-            now() + interval '7 days')
-    returning id, email::text as email, expires_at, created_at`);
+    await tx.execute<InviteSql>(sql`insert into invites (id, household_id, email, first_name, token_hash, invited_by, expires_at)
+    values (${invite.id}, ${invite.householdId}, ${invite.email}, ${invite.firstName}, ${invite.tokenHash},
+            ${invite.invitedBy}, now() + interval '7 days')
+    returning id, email::text as email, first_name, expires_at, created_at`);
   const row = res.rows[0];
   if (!row) throw new Error("invite insert returned no row");
   return toInvite(row);
@@ -306,4 +320,55 @@ export async function revokePendingInvitesBy(tx: Tx, householdId: string, userId
 export async function transferCreator(tx: Tx, householdId: string): Promise<string | null> {
   const res = await tx.execute<{ id: string | null }>(sql`select app_transfer_creator(${householdId}) as id`);
   return res.rows[0]?.id ?? null;
+}
+
+export interface InviteSecrets {
+  tokenHash: Buffer;
+  expiresAt: Date;
+}
+
+/** The invite by id with its current token hash (for resend and its rollback), if it is still open. */
+export async function findOpenInviteById(
+  tx: Tx,
+  householdId: string,
+  inviteId: string,
+): Promise<{ invite: InviteRow; secrets: InviteSecrets } | "missing" | "closed"> {
+  const res = await tx.execute<InviteSql & { token_hash: Buffer; open: boolean }>(
+    sql`select id, email::text as email, first_name, expires_at, created_at, token_hash,
+               (accepted_at is null and revoked_at is null and expires_at > now()) as open
+          from invites where id = ${inviteId} and household_id = ${householdId}`,
+  );
+  const row = res.rows[0];
+  if (!row) return "missing";
+  if (!row.open) return "closed";
+  return { invite: toInvite(row), secrets: { tokenHash: row.token_hash, expiresAt: toDate(row.expires_at) } };
+}
+
+/**
+ * `app_rotate_invite_token`: a new token hash on the same open invite, 7 days from now (or `expiresAt`). With
+ * `expect`, only if the invite still has that token (used to put the previous token back after a failed send).
+ */
+export async function rotateInviteToken(
+  tx: Tx,
+  householdId: string,
+  inviteId: string,
+  tokenHash: Buffer,
+  options: { expiresAt?: Date; expect?: Buffer } = {},
+): Promise<"ok" | "missing" | "closed"> {
+  const res = await tx.execute<{ status: "ok" | "missing" | "closed" }>(
+    sql`select app_rotate_invite_token(${householdId}, ${inviteId}, ${tokenHash},
+          ${options.expiresAt?.toISOString() ?? null}::timestamptz, ${options.expect ?? null}::bytea) as status`,
+  );
+  return res.rows[0]?.status ?? "missing";
+}
+
+export async function getInvite(
+  tx: Tx,
+  householdId: string,
+  inviteId: string,
+): Promise<InviteRow | undefined> {
+  const res =
+    await tx.execute<InviteSql>(sql`select id, email::text as email, first_name, expires_at, created_at
+    from invites where id = ${inviteId} and household_id = ${householdId}`);
+  return res.rows[0] ? toInvite(res.rows[0]) : undefined;
 }

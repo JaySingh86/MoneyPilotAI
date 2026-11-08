@@ -5,7 +5,13 @@ import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 import nextConfig from "../next.config.mjs";
 import { middleware } from "../middleware";
-import { STATIC_HEADERS, buildCsp, cognitoOrigins, productionEnvProblems } from "../security.mjs";
+import {
+  INVITE_HEADERS,
+  STATIC_HEADERS,
+  buildCsp,
+  cognitoOrigins,
+  productionEnvProblems,
+} from "../security.mjs";
 
 const prodEnv = {
   NEXT_PUBLIC_API_URL: "https://api.moneypilot.example",
@@ -93,7 +99,12 @@ describe("static security headers", () => {
   it("applies them to every route through next.config", async () => {
     const config = nextConfig("phase-development-server");
     const rules = await config.headers?.();
-    expect(rules).toEqual([{ source: "/:path*", headers: STATIC_HEADERS }]);
+    // Every route, then /invite with a stricter Referrer-Policy (its link carries a token).
+    expect(rules).toEqual([
+      { source: "/:path*", headers: STATIC_HEADERS },
+      { source: "/invite", headers: INVITE_HEADERS },
+    ]);
+    expect(INVITE_HEADERS).toEqual([{ key: "Referrer-Policy", value: "no-referrer" }]);
     expect(config.poweredByHeader).toBe(false);
   });
 });

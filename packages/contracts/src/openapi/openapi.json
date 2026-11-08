@@ -61,9 +61,20 @@
           },
           "current": { "description": "The current resource, on a version conflict (If-Match)" },
           "reason": {
-            "description": "plan_not_ready only: what the household still has to set up",
+            "description": "plan_not_ready: what is still to set up. Invite acceptance: why it was refused.",
             "type": "string",
-            "enum": ["no_balance", "no_primary_income"]
+            "enum": [
+              "no_balance",
+              "no_primary_income",
+              "expired",
+              "revoked",
+              "used",
+              "full",
+              "wrong_email",
+              "already_member",
+              "in_other_household",
+              "deleting"
+            ]
           }
         },
         "required": ["type", "title", "status", "code"],
@@ -431,9 +442,13 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "mfaEnabled": {
+            "type": "boolean",
+            "description": "Whether the member has 2-step verification on (Members & privacy, Q-177)"
           }
         },
-        "required": ["userId", "firstName", "lastName", "colorRole", "isCreator", "joinedAt"]
+        "required": ["userId", "firstName", "lastName", "colorRole", "isCreator", "joinedAt", "mfaEnabled"]
       },
       "InviteInput": {
         "type": "object",
@@ -444,6 +459,10 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
           "email": { "type": "string" },
+          "firstName": {
+            "description": "The invitee's first name, if the inviter gave one",
+            "type": ["string", "null"]
+          },
           "expiresAt": {
             "type": "string",
             "format": "date-time",
@@ -455,7 +474,7 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
           }
         },
-        "required": ["id", "email", "expiresAt", "createdAt"]
+        "required": ["id", "email", "firstName", "expiresAt", "createdAt"]
       },
       "CreateInviteBodyInput": {
         "type": "object",
@@ -465,7 +484,8 @@
             "maxLength": 254,
             "format": "email",
             "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
-          }
+          },
+          "firstName": { "type": "string", "minLength": 1, "maxLength": 50 }
         },
         "required": ["email"],
         "additionalProperties": false
@@ -3484,6 +3504,15 @@
         },
         "required": ["data"]
       },
+      "AutomationStatsInput": {
+        "type": "object",
+        "properties": {
+          "percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "automatedCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "handCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": ["percent", "automatedCount", "handCount"]
+      },
       "ProposalEffectInput": {
         "type": "object",
         "properties": {
@@ -5095,9 +5124,20 @@
           },
           "current": { "description": "The current resource, on a version conflict (If-Match)" },
           "reason": {
-            "description": "plan_not_ready only: what the household still has to set up",
+            "description": "plan_not_ready: what is still to set up. Invite acceptance: why it was refused.",
             "type": "string",
-            "enum": ["no_balance", "no_primary_income"]
+            "enum": [
+              "no_balance",
+              "no_primary_income",
+              "expired",
+              "revoked",
+              "used",
+              "full",
+              "wrong_email",
+              "already_member",
+              "in_other_household",
+              "deleting"
+            ]
           }
         },
         "required": ["type", "title", "status", "code"],
@@ -5480,9 +5520,13 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "mfaEnabled": {
+            "type": "boolean",
+            "description": "Whether the member has 2-step verification on (Members & privacy, Q-177)"
           }
         },
-        "required": ["userId", "firstName", "lastName", "colorRole", "isCreator", "joinedAt"],
+        "required": ["userId", "firstName", "lastName", "colorRole", "isCreator", "joinedAt", "mfaEnabled"],
         "additionalProperties": false
       },
       "Invite": {
@@ -5494,6 +5538,10 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
           "email": { "type": "string" },
+          "firstName": {
+            "description": "The invitee's first name, if the inviter gave one",
+            "type": ["string", "null"]
+          },
           "expiresAt": {
             "type": "string",
             "format": "date-time",
@@ -5505,7 +5553,7 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
           }
         },
-        "required": ["id", "email", "expiresAt", "createdAt"],
+        "required": ["id", "email", "firstName", "expiresAt", "createdAt"],
         "additionalProperties": false
       },
       "CreateInviteBody": {
@@ -5516,7 +5564,8 @@
             "maxLength": 254,
             "format": "email",
             "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
-          }
+          },
+          "firstName": { "type": "string", "minLength": 1, "maxLength": 50 }
         },
         "required": ["email"],
         "additionalProperties": false
@@ -8609,6 +8658,16 @@
         "required": ["data"],
         "additionalProperties": false
       },
+      "AutomationStats": {
+        "type": "object",
+        "properties": {
+          "percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "automatedCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "handCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": ["percent", "automatedCount", "handCount"],
+        "additionalProperties": false
+      },
       "ProposalEffect": {
         "type": "object",
         "properties": {
@@ -10521,6 +10580,52 @@
         }
       }
     },
+    "/v1/households/{hid}/invites/{id}/resend": {
+      "post": {
+        "summary": "Resend a pending invite (new link, same invite)",
+        "tags": ["households"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Invite" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
     "/v1/households/{hid}/invites/{id}": {
       "delete": {
         "summary": "Cancel a pending invite",
@@ -11703,6 +11808,44 @@
           "200": {
             "description": "Default Response",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReviewItemPage" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/automation-stats": {
+      "get": {
+        "summary": "Share of active items found automatically (email or CSV) rather than typed",
+        "tags": ["review"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/AutomationStats" } }
+            }
           },
           "4XX": {
             "description": "Client error (RFC 9457 problem details)",

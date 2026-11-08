@@ -114,7 +114,7 @@ describe("invite caps and escaping (M2)", () => {
     const hid = (await createHousehold(owner)).json<{ id: string }>().id;
     const res = await invite(owner, hid, "friend@example.test");
     expect(res.statusCode).toBe(201);
-    expect(Object.keys(res.json()).sort()).toEqual(["createdAt", "email", "expiresAt", "id"]);
+    expect(Object.keys(res.json()).sort()).toEqual(["createdAt", "email", "expiresAt", "firstName", "id"]);
   });
 });
 

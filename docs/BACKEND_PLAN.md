@@ -1154,6 +1154,9 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 | `GET/PUT /households/:hid/reminder-rules[/:itemId]` | Reminder offsets and channels | |
 | `POST /households/:hid/ask` (SSE) · `GET …/ask/threads/:id` | Ask MoneyPilot (P1) | Entitlement + rate limits |
 | `GET /households/:hid/activity` | Activity log (filtered audit) | |
+| `GET /households/:hid/automation-stats` | Share of active items found automatically (email or CSV vs. typed) | Q-172 |
+| `GET /households/:hid/forwarding-address` · `GET/PUT …/sharing` · `POST …/members/:uid/reminders` | Members & privacy | Q-177 |
+| `POST /households/:hid/invites/:id/resend` | New token on the same open invite | Q-179 |
 | `POST /households/:hid/exports` · `GET …/exports/:id` | Export | Step-up MFA |
 | `POST /households/:hid/deletion` · `DELETE /households/:hid/deletion` | Schedule / cancel deletion | Step-up MFA |
 | `GET /households/:hid/billing` · `POST …/billing/checkout` · `POST …/billing/portal` | Plan management | Billing owner |

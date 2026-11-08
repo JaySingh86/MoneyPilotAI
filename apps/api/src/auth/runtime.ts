@@ -18,10 +18,14 @@ export interface InviteSender {
     token: string;
     householdName: string;
     inviterFirstName: string;
+    /** The invitee's first name, if the inviter gave one. HTML-escaped like the other names. */
+    inviteeFirstName?: string;
     expiresAt: Date;
     /** The member sending it; the sender's per-user quota counts against them (WP-15). */
     invitedByUserId: string;
   }): Promise<void>;
+  /** Whether the user still has send quota, without using any. Optional: a sender without a quota omits it. */
+  canSend?(userId: string): Promise<boolean>;
 }
 
 export interface ApiRuntime {

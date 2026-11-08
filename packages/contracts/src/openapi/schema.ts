@@ -485,6 +485,63 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/households/{hid}/invites/{id}/resend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Resend a pending invite (new link, same invite) */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Invite"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/v1/households/{hid}/invites/{id}": {
     parameters: {
       query?: never;
@@ -1844,6 +1901,62 @@ export interface paths {
           };
           content: {
             "application/json": components["schemas"]["ReviewItemPage"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/automation-stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Share of active items found automatically (email or CSV) rather than typed */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["AutomationStats"];
           };
         };
         /** @description Client error (RFC 9457 problem details) */
@@ -4077,10 +4190,20 @@ export interface components {
       /** @description The current resource, on a version conflict (If-Match) */
       current?: unknown;
       /**
-       * @description plan_not_ready only: what the household still has to set up
+       * @description plan_not_ready: what is still to set up. Invite acceptance: why it was refused.
        * @enum {string}
        */
-      reason?: "no_balance" | "no_primary_income";
+      reason?:
+        | "no_balance"
+        | "no_primary_income"
+        | "expired"
+        | "revoked"
+        | "used"
+        | "full"
+        | "wrong_email"
+        | "already_member"
+        | "in_other_household"
+        | "deleting";
     };
     MembershipInput: {
       /** Format: uuid */
@@ -4247,11 +4370,15 @@ export interface components {
       isCreator: boolean;
       /** Format: date-time */
       joinedAt: string;
+      /** @description Whether the member has 2-step verification on (Members & privacy, Q-177) */
+      mfaEnabled: boolean;
     };
     InviteInput: {
       /** Format: uuid */
       id: string;
       email: string;
+      /** @description The invitee's first name, if the inviter gave one */
+      firstName: string | null;
       /** Format: date-time */
       expiresAt: string;
       /** Format: date-time */
@@ -4260,6 +4387,7 @@ export interface components {
     CreateInviteBodyInput: {
       /** Format: email */
       email: string;
+      firstName?: string;
     };
     AcceptInviteBodyInput: {
       token: string;
@@ -5386,6 +5514,11 @@ export interface components {
     SenderRuleListInput: {
       data: components["schemas"]["SenderRuleInput"][];
     };
+    AutomationStatsInput: {
+      percent: number;
+      automatedCount: number;
+      handCount: number;
+    };
     ProposalEffectInput: {
       /** @description Integer cents */
       safeToSpendBeforeCents: number;
@@ -6052,10 +6185,20 @@ export interface components {
       /** @description The current resource, on a version conflict (If-Match) */
       current?: unknown;
       /**
-       * @description plan_not_ready only: what the household still has to set up
+       * @description plan_not_ready: what is still to set up. Invite acceptance: why it was refused.
        * @enum {string}
        */
-      reason?: "no_balance" | "no_primary_income";
+      reason?:
+        | "no_balance"
+        | "no_primary_income"
+        | "expired"
+        | "revoked"
+        | "used"
+        | "full"
+        | "wrong_email"
+        | "already_member"
+        | "in_other_household"
+        | "deleting";
     };
     Membership: {
       /** Format: uuid */
@@ -6222,11 +6365,15 @@ export interface components {
       isCreator: boolean;
       /** Format: date-time */
       joinedAt: string;
+      /** @description Whether the member has 2-step verification on (Members & privacy, Q-177) */
+      mfaEnabled: boolean;
     };
     Invite: {
       /** Format: uuid */
       id: string;
       email: string;
+      /** @description The invitee's first name, if the inviter gave one */
+      firstName: string | null;
       /** Format: date-time */
       expiresAt: string;
       /** Format: date-time */
@@ -6235,6 +6382,7 @@ export interface components {
     CreateInviteBody: {
       /** Format: email */
       email: string;
+      firstName?: string;
     };
     AcceptInviteBody: {
       token: string;
@@ -7360,6 +7508,11 @@ export interface components {
     };
     SenderRuleList: {
       data: components["schemas"]["SenderRule"][];
+    };
+    AutomationStats: {
+      percent: number;
+      automatedCount: number;
+      handCount: number;
     };
     ProposalEffect: {
       /** @description Integer cents */

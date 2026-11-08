@@ -27,6 +27,7 @@ export type AuthErrorCode =
   | "user_exists"
   | "rate_limited"
   | "not_configured"
+  | "step_up_unavailable"
   | "network"
   | "unknown";
 
@@ -46,6 +47,16 @@ export interface SignUpInput {
   firstName: string;
 }
 
+/** A started TOTP setup: show the secret (or the `otpauth://` link as a QR code), then confirm with a code. */
+export interface TotpSetup {
+  /** The shared secret, to type into an authenticator app. */
+  sharedSecret: string;
+  /** The `otpauth://` URI an authenticator app can scan. */
+  setupUri: string;
+  /** Checks the first code from the app and turns 2-step verification on. */
+  confirm(code: string): Promise<void>;
+}
+
 export interface AuthAdapter {
   readonly kind: "cognito" | "mock";
   /** The current session, refreshing expired tokens. Null when signed out. */
@@ -59,6 +70,13 @@ export interface AuthAdapter {
   confirmPasswordReset(email: string, code: string, newPassword: string): Promise<void>;
   /** Federated sign-in; leaves the page. */
   signInWithGoogle(): Promise<void>;
+  /**
+   * Step-up (ADR-018): proves a fresh TOTP code and refreshes the access token, so the next request to a
+   * step-up route (leave, export, delete, connect email) carries a recent MFA time. Throws `invalid_code`.
+   */
+  stepUp(code: string): Promise<void>;
+  /** Starts TOTP enrollment for the signed-in user (the "Turn on 2-step verification" action). */
+  setUpTotp(): Promise<TotpSetup>;
   signOut(): Promise<void>;
   /**
    * Calls `listener` after a sign-in and after every token refresh, so the app can sync the user
@@ -85,6 +103,8 @@ export function authMessage(error: unknown): string {
         return "Too many tries. Wait a few minutes and try again.";
       case "not_configured":
         return "Sign-in isn’t set up for this environment yet.";
+      case "step_up_unavailable":
+        return "The 2-step check isn’t available yet in this environment.";
       case "network":
         return "We couldn’t reach the sign-in service. Check your connection and try again.";
       default:

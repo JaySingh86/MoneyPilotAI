@@ -218,3 +218,17 @@ export const PutSenderRule = z
 export type PutSenderRule = z.infer<typeof PutSenderRule>;
 
 export const SenderRuleList = z.object({ data: z.array(SenderRule) }).meta({ id: "SenderRuleList" });
+
+// ===== Automation stats (Q-172) =====
+/**
+ * The share of active recurring items found automatically (email or CSV) rather than typed by hand.
+ * `percent` is a whole number, rounded half up, and 0 when the household has no items.
+ */
+export const AutomationStats = z
+  .object({
+    percent: z.number().int().min(0).max(100),
+    automatedCount: z.number().int().min(0),
+    handCount: z.number().int().min(0),
+  })
+  .meta({ id: "AutomationStats" });
+export type AutomationStats = z.infer<typeof AutomationStats>;

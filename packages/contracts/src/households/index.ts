@@ -55,14 +55,20 @@ export const HouseholdMember = z
     colorRole: ColorRole,
     isCreator: z.boolean(),
     joinedAt: Timestamp,
+    mfaEnabled: z
+      .boolean()
+      .describe("Whether the member has 2-step verification on (Members & privacy, Q-177)"),
   })
   .meta({ id: "HouseholdMember" });
 export type HouseholdMember = z.infer<typeof HouseholdMember>;
+
+export const InviteeFirstName = z.string().trim().min(1).max(50);
 
 export const Invite = z
   .object({
     id: Uuid,
     email: z.string(),
+    firstName: z.string().nullable().describe("The invitee's first name, if the inviter gave one"),
     expiresAt: Timestamp,
     createdAt: Timestamp,
   })
@@ -70,7 +76,7 @@ export const Invite = z
 export type Invite = z.infer<typeof Invite>;
 
 export const CreateInviteBody = z
-  .object({ email: z.email().max(254) })
+  .object({ email: z.email().max(254), firstName: InviteeFirstName.optional() })
   .strict()
   .meta({ id: "CreateInviteBody" });
 export type CreateInviteBody = z.infer<typeof CreateInviteBody>;

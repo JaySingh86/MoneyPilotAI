@@ -16,6 +16,7 @@ import {
   ReviewMessage,
   Uuid,
   type AppliedChange,
+  type AutomationStats,
   type EditReviewItem,
   type Item,
   type PutSenderRule,
@@ -519,5 +520,24 @@ export async function putSenderRule(deps: ReviewDeps, a: Actor, body: PutSenderR
     });
     await repo.audit(tx, a.householdId, a.userId, "sender_rule.saved", "sender_rule", row.id);
     return { rule: toRule(row), created };
+  });
+}
+
+// ===== Automation stats (Q-172) =====
+/** Whole percent, rounded half up, in integer math. 0 when there is nothing to count. */
+export function automationPercent(automated: number, hand: number): number {
+  const total = automated + hand;
+  return total === 0 ? 0 : Math.floor((automated * 200 + total) / (total * 2));
+}
+
+export async function automationStats(deps: ReviewDeps, a: Actor): Promise<AutomationStats> {
+  return inTx(deps, a, async (tx) => {
+    const counts = await repo.automationCounts(tx, a.householdId);
+    if (!counts) throw notFound("Household");
+    return {
+      percent: automationPercent(counts.automated, counts.hand),
+      automatedCount: counts.automated,
+      handCount: counts.hand,
+    };
   });
 }

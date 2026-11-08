@@ -1,6 +1,6 @@
 // The bearer token goes only to the API's own origin, and redirects are never followed (L3).
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { authorized, getJson } from "./client";
+import { authorized, getJson, sendJson } from "./client";
 
 const API = "https://api.moneypilot.example";
 const token = async () => "secret-token";
@@ -58,5 +58,18 @@ describe("authorized fetch", () => {
     const sent = (fetchMock.mock.calls[0] as unknown as [Request, RequestInit])[0];
     expect(sent.headers.get("authorization")).toBe("Bearer secret-token");
     expect(sent.redirect).toBe("error");
+  });
+});
+
+describe("sendJson Idempotency-Key", () => {
+  it("sends a fresh key on every write, and the caller's key when it passes one", async () => {
+    const fetchMock = stubFetch();
+    await sendJson("POST", "/v1/households", token, { name: "x" }, API);
+    await sendJson("POST", "/v1/households", token, { name: "x" }, API);
+    await sendJson("DELETE", "/v1/x", token, undefined, API, { idempotencyKey: "fixed-key" });
+    const keys = fetchMock.mock.calls.map((c) => c[0]?.headers.get("idempotency-key"));
+    expect(keys[0]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(keys[1]).not.toBe(keys[0]);
+    expect(keys[2]).toBe("fixed-key");
   });
 });

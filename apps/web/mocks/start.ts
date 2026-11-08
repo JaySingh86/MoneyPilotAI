@@ -3,6 +3,7 @@ import { setupWorker } from "msw/browser";
 import { handlers } from "./handlers";
 import { createMockAuthAdapter } from "./mock-auth-adapter";
 import type { MockAuthAdapter } from "./mock-auth-adapter";
+import { resetWp23 } from "./wp23-data";
 import { initFromLocation, setFault, setScenario, state } from "./state";
 
 export interface MockHandle {
@@ -26,6 +27,7 @@ let started: Promise<MockHandle> | null = null;
 export function startMock(): Promise<MockHandle> {
   started ??= (async () => {
     initFromLocation(window.location);
+    resetWp23(window.location.search);
     const worker = setupWorker(...handlers);
     await worker.start({ onUnhandledRequest: "bypass", quiet: true });
     const auth = createMockAuthAdapter();

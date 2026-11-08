@@ -9,6 +9,9 @@ import { FIRST_NAME_MAX, bootstrapUser, browserTimeZone } from "./bootstrap";
 import type { Me } from "./bootstrap";
 import type { AuthAdapter, AuthSession } from "./types";
 
+/** Same key as `app/(auth)/invite/invite.ts`; kept here so lib code doesn't import from app routes. */
+const PENDING_INVITE_KEY = "mp.invite";
+
 export type AuthStatus = "loading" | "signed_out" | "needs_name" | "signed_in" | "failed";
 
 export interface AuthContextValue {
@@ -91,6 +94,12 @@ export function AuthProvider({ adapter, children }: { adapter: AuthAdapter; chil
   );
 
   const signOut = useCallback(async () => {
+    // A pending invite token must not outlive the session on a shared device (WP-23 security re-review).
+    try {
+      window.sessionStorage.removeItem(PENDING_INVITE_KEY);
+    } catch {
+      // Storage can be unavailable (private mode); nothing to clear then.
+    }
     await adapter.signOut();
     setMe(null);
     setSession(null);

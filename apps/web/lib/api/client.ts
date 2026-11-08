@@ -12,6 +12,8 @@ export class ApiError extends Error {
     readonly status: number,
     readonly code: string,
     message: string,
+    /** The problem's stable `reason`, when it has one (plan_not_ready, invite acceptance). */
+    readonly reason?: string,
   ) {
     super(message);
     this.name = "ApiError";
@@ -40,17 +42,24 @@ export function createClient(getToken: TokenProvider, baseUrl: string = API_BASE
 }
 
 /** Turns a problem+json response into an {@link ApiError}. */
-async function toApiError(response: Response): Promise<ApiError> {
+export async function toApiError(response: Response): Promise<ApiError> {
   let code = "internal_error";
   let detail = "Something went wrong.";
+  let reason: string | undefined;
   try {
-    const body = (await response.json()) as { code?: string; detail?: string; title?: string };
+    const body = (await response.json()) as {
+      code?: string;
+      detail?: string;
+      title?: string;
+      reason?: string;
+    };
     code = body.code ?? code;
     detail = body.detail ?? body.title ?? detail;
+    reason = body.reason;
   } catch {
     // Not JSON: keep the defaults.
   }
-  return new ApiError(response.status, code, detail);
+  return new ApiError(response.status, code, detail, reason);
 }
 
 /** GET a JSON resource that the generated client does not describe yet (planning, WP-12). */
@@ -70,5 +79,37 @@ export async function getJson<T>(
     baseUrl,
   );
   if (!response.ok) throw await toApiError(response);
+  return (await response.json()) as T;
+}
+
+/** A fresh Idempotency-Key: one per user action (BACKEND_PLAN §8.1). */
+export function newIdempotencyKey(): string {
+  return globalThis.crypto.randomUUID();
+}
+
+/**
+ * Sends a JSON request with a body (POST, PUT, PATCH) or none (DELETE). Returns null for 204. */
+export async function sendJson<T>(
+  method: "POST" | "PUT" | "PATCH" | "DELETE",
+  path: string,
+  getToken: TokenProvider,
+  body?: unknown,
+  baseUrl: string = API_BASE_URL,
+  options: { idempotencyKey?: string } = {},
+): Promise<T | null> {
+  const headers: Record<string, string> = { accept: "application/json" };
+  // Every write carries a key (routes that create things require one). A caller that may send the same action
+  // twice, such as a retry after step-up, passes the same key to both calls.
+  headers["idempotency-key"] = options.idempotencyKey ?? newIdempotencyKey();
+  if (body !== undefined) headers["content-type"] = "application/json";
+  const request = new Request(`${baseUrl}${path}`, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+    redirect: "error",
+  });
+  const response = await authorized(request, getToken, baseUrl);
+  if (!response.ok) throw await toApiError(response);
+  if (response.status === 204) return null;
   return (await response.json()) as T;
 }

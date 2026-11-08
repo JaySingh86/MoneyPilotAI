@@ -14,6 +14,9 @@ import {
   signInWithRedirect,
   signOut,
   signUp,
+  setUpTOTP,
+  updateMFAPreference,
+  verifyTOTPSetup,
 } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
 import type { CognitoConfig } from "../config";
@@ -161,6 +164,24 @@ export function createAmplifyAdapter(config: CognitoConfig | null): AuthAdapter 
     async signInWithGoogle() {
       requireConfig();
       await call(() => signInWithRedirect({ provider: "Google" }));
+    },
+    async stepUp() {
+      requireConfig();
+      // Cognito has no "re-check my TOTP and stamp the token" call. The real wiring (a TOTP challenge that
+      // refreshes the access token with a new auth time) lands with WP-09's pool configuration (Q-176).
+      throw new AuthError("step_up_unavailable", "step-up is not wired to the user pool yet");
+    },
+    async setUpTotp() {
+      requireConfig();
+      const details = await call(() => setUpTOTP());
+      return {
+        sharedSecret: details.sharedSecret,
+        setupUri: details.getSetupUri("MoneyPilot").toString(),
+        async confirm(code: string) {
+          await call(() => verifyTOTPSetup({ code }));
+          await call(() => updateMFAPreference({ totp: "PREFERRED" }));
+        },
+      };
     },
     async signOut() {
       if (config) await call(() => signOut());

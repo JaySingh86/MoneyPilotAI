@@ -8,6 +8,7 @@ import {
   AppliedChangeListQuery,
   AppliedChangePage,
   AppliedChangeParams,
+  AutomationStats,
   EditReviewItem,
   HouseholdParams,
   PutSenderRule,
@@ -46,6 +47,18 @@ export function reviewRoutes(deps: () => ReviewDeps): FastifyPluginAsyncZod {
         const { state, limit, cursor } = request.query;
         return service.listReview(deps(), actor(request), state, limit, cursor);
       },
+    );
+
+    scope.get(
+      "/households/:hid/automation-stats",
+      {
+        schema: {
+          summary: "Share of active items found automatically (email or CSV) rather than typed",
+          params: HouseholdParams,
+          response: { 200: AutomationStats },
+        },
+      },
+      async (request) => service.automationStats(deps(), actor(request)),
     );
 
     scope.get(

@@ -1,5 +1,5 @@
 import { PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD, PHASE_PRODUCTION_SERVER } from "next/constants.js";
-import { STATIC_HEADERS, productionEnvProblems } from "./security.mjs";
+import { INVITE_HEADERS, STATIC_HEADERS, productionEnvProblems } from "./security.mjs";
 
 /**
  * Mock mode (MSW plus a fake signed-in session) exists for local development and tests only. It is
@@ -42,7 +42,11 @@ export default function nextConfig(phase) {
     transpilePackages: ["@mp/format", "@mp/contracts", "@mp/ui", "@mp/engine"],
     // The Content-Security-Policy has a per-request nonce, so it is set in middleware.ts.
     async headers() {
-      return [{ source: "/:path*", headers: STATIC_HEADERS }];
+      // The later /invite rule replaces the Referrer-Policy of the first.
+      return [
+        { source: "/:path*", headers: STATIC_HEADERS },
+        { source: "/invite", headers: INVITE_HEADERS },
+      ];
     },
   };
 }

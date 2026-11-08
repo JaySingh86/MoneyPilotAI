@@ -14,6 +14,13 @@ export function createDbSendQuota(db: ApiDb, options: DbSendQuotaOptions = {}): 
   const limit = options.limit ?? INVITE_DAILY_QUOTA;
   const hours = options.windowHours ?? 24;
   return {
+    async hasRoom(userId, kind) {
+      return db.withHouseholdTx({ userId }, async (tx) => {
+        const res = await tx.execute<{ n: string }>(sql`select count(*)::text as n from send_quota_events
+          where user_id = ${userId} and kind = ${kind} and created_at > now() - make_interval(hours => ${hours})`);
+        return Number(res.rows[0]?.n ?? 0) < limit;
+      });
+    },
     async consume(userId, kind) {
       return db.withHouseholdTx({ userId }, async (tx) => {
         await tx.execute(

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { ComponentType, ReactNode } from "react";
 import { AuthProvider } from "../lib/auth/AuthProvider";
+import { StepUpProvider } from "../lib/auth/StepUp";
 import { createAmplifyAdapter } from "../lib/auth/amplify-adapter";
 import type { AuthAdapter } from "../lib/auth/types";
 import { COGNITO, MOCK_MODE } from "../lib/config";
@@ -49,7 +50,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider adapter={adapter}>
-        {children}
+        <StepUpProvider>{children}</StepUpProvider>
         {DevBar && <DevBar />}
       </AuthProvider>
     </QueryClientProvider>

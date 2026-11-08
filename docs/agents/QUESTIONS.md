@@ -54,6 +54,46 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-201 · WP-23 · "What MoneyPilot reads" bullet 5 and the Disconnect dialog disagree about what is kept
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-09
+- Where: canvas "Web · Email & imports" ("What MoneyPilot reads", bullet 5: "You choose whether to keep what we found"); the Disconnect dialog on Email & imports and Members & privacy ("What we already found stays in your plan"); BACKEND_PLAN §6 (disconnect)
+- Question: The card promises a choice about keeping what was found; the dialog says it always stays and offers no choice. Which is the product rule? If there is a choice, `DELETE …/email-connections/:id` needs a `keep` option (WP-21).
+- Options considered: (a) always keep (dialog as built, card text changes); (b) ask in the dialog (keep or remove what came from this inbox).
+- Blocking: no. Both texts are drawn as on the canvas.
+- Answer:
+
+## Q-200 · WP-23 · Disconnect label and chip variant: kept as drawn on the canvas
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-09
+- Where: canvas "Web · Email & imports" and "Web · Members & privacy" (connected rows); DESIGN_SPEC §4 (buttons, status chips)
+- Question: The canvas draws a plain "Disconnect" button and an info-blue "Connected" chip on a healthy source. Reviewers suggested "Disconnect Gmail" (a label that says what it acts on) and the ok (green) chip. The build keeps the canvas: "Disconnect" and the info chip; the confirm dialog's title names the provider. Should the canvas change?
+- Options considered: (a) as built (canvas); (b) provider in the button label and an ok chip.
+- Blocking: no.
+- Answer:
+
+## Q-183 · WP-23 · Setup CSV list: nothing says which detections are confident
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-09
+- Where: canvas "Mobile · Household setup" (CSV panel: three rows checked, the rest not); `packages/contracts/src/review` (`ReviewItem`), WP-16 `Import`
+- Question: The old mock carried `confident` and a "Seen once in May. Every 6 months?" note per detection. A CSV detection is now a review item with no confidence or note, so the setup list checks every row by default and shows only "Monthly · next Nov 5". Should the contract carry a confidence flag or note for `source = csv` items?
+- Options considered: (a) as built (all checked); (b) add `confidence` and `note` to `ReviewItem` for CSV rows (WP-14/WP-16).
+- Blocking: no.
+- Answer:
+
+## Q-182 · WP-23 · Plan row: no price in `BillingState`
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-09
+- Where: `packages/contracts/src/billing` (`BillingState`); canvas "Web · Members & privacy" Plan row
+- Question: The canvas Plan row reads "Family Plus · $x/mo". WP-25's `GET …/billing` has the interval and period end but no price, and the web never invents an amount. The row now reads "Family Plus · billed monthly" and "Renews Nov 26". Should `BillingState` carry a `priceCents`?
+- Options considered: (a) as built; (b) add `priceCents` to `BillingState` (WP-25).
+- Blocking: no.
+- Answer:
+
+## Q-181 · WP-23 · Invite page: layout and who invited you
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-09
+- Where: `apps/web/app/(auth)/invite`; WP-15 invite email (`/invite?token=…`); `packages/contracts/src/households`; DESIGN_SPEC and canvas have no invite screen
+- Question: The page follows the sign-in layout (one centered card). `POST /invites/accept` needs a signed-in user and there is no unauthenticated lookup, so a signed-out visitor sees generic copy, not "{name} invited you to {household}". The token is only held in memory and sent to accept. Should the API expose a token lookup that returns the inviter's first name and household name (masked, rate-limited)? Is the layout right?
+- Options considered: (a) as built; (b) add `GET /invites/lookup?token=` (households module).
+- Blocking: no.
+- Answer:
+
 ## Q-180 · WP-15 · Email max width token
 - Asked by: wp-builder/wp/15-notify · 2026-11-08
 - Where: `packages/notify/src/theme.ts` and `templates.ts` (hard rule 6, no hand-written values); `design/tokens.json` `size.*`
@@ -69,6 +109,86 @@ Format (newest first):
   (6) Goals preview math: the canvas labels the total row "By Mar 1"; the preview endpoint is itself only a request (Q-160), so the mock keeps "By target date" until the API defines the label. (7) Task linked amounts ("Car insurance · $684"): shown with two decimals ("$684.00") because §7 sets lists to two decimals; the canvas drops the cents. Monthly renewals get no amount (a monthly premium is not the renewal cost); a candidate API field, e.g. `Task.linkedAmountCents`, so the web needs no rule. (8) Goal rows in "Planned expenses ahead" end "· Both" on the canvas; `Goal` carries no owner, so the owner is left out. (9) Calendar sidebar card "Reminders": the policy words are fixed copy until `GET …/reminder-rules` (WP-15, Q-161) supplies them, and "Change defaults" stays a disabled button until Q-165 is answered. (10) The Calendar keyboard hint ("Use the arrow keys…") is now visually hidden, because the canvas draws no such line; it stays in the DOM for screen readers. (11) The dark "Plan for it" on the Overview attention card is a local override of the primary Button; a candidate Button variant for DESIGN_SPEC §4. (12) Goal cards use padding 20 where the canvas has 18, and the Household tasks due chip pads 2 × 8 where the canvas has 1 × 8: no spacing tokens for 18 or 1. The caption under a goal bar is 12 muted (ProgressBar) where the canvas has 13 secondary.
 - Options considered: (a) add the fields to the contracts (WP-12/WP-13); (b) leave the web's text. Taken: (b).
 - Blocking: no
+- Answer:
+
+## Q-179 · WP-23 · Setup invite: the invitee's name, and what "Resend" does
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: `packages/contracts/src/households` (`Invite`, `CreateInviteBody`); canvas "Mobile · Household setup" ("Jordan invited · waiting to join · Resend"); BACKEND_PLAN §8.2
+- Question: An invite carries only an email, so the setup line reads "jordan@… invited · waiting to join", not "Jordan invited". Resend is built as `DELETE …/invites/:id` then `POST …/invites` (5 per day, 429 `rate_limited`). If the POST fails after the DELETE, the old invite is gone. Should the API replace an open invite in one call, and should the invite take an optional first name?
+- Options considered: (a) as built; (b) `POST` replaces the open invite atomically; (c) add `firstName` to the invite body and `Invite`.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (b) and (c), as minimal cross-WP changes to the households module in the WP-23 fix round. Add `POST …/invites/:id/resend`, which issues a new token on the same open invite in one transaction and counts against the per-user quota. Add an optional `firstName` (max 50 characters, HTML-escaped like the other names) to `CreateInviteBody` and `Invite`, so setup can say "Jordan invited".
+
+## Q-178 · WP-23 · Setup "Enter manually" has no date for the schedule
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: canvas "Mobile · Household setup" manual panel (Name, Amount, Repeats); `CreateItem` (`schedule` needs `dtstart`)
+- Question: The canvas has three fields, but every schedule type needs an anchor date. I added a fourth field, "Next due" (date input), and map Repeats to `monthly_day`, `every_n_weeks` (2), `every_n_months` (6) and `yearly`. Items are created as outflow bills, category `other`, fixed amount, owned by the signed-in member. Is that right?
+- Options considered: (a) as built; (b) drop the field and default the anchor to the 1st of next month; (c) redraw the canvas panel.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (a). Keep the "Next due" field, the Repeats mapping and the defaults as built. The canvas panel will be redrawn to include it.
+
+## Q-177 · WP-23 · Members & privacy: endpoints with no contract
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: DESIGN_SPEC §5.1 Members & privacy; BACKEND_PLAN §8.2 (no rows for these)
+- Question: These shapes are assumed and mocked in `apps/web/mocks/wp23-handlers.ts` (types in `apps/web/lib/api/imports-types.ts`): `GET/PUT …/sharing` (the three switches: bills from email, tasks, connected address, per member); `GET …/member-status` (`mfaEnabled`, `emailConnected` per member, since `Me.mfaEnabled` covers only the signed-in user); `POST …/members/:uid/reminders` with `{ about: "connect_email" | "two_step" }` (the "Remind {name}" buttons); `GET …/activity?limit=5` (`{ id, action, actorName, at }`, with the action text written by the server); `GET …/billing` (plan, price, renews on); `GET …/forwarding-address`. "Download full log" requests an export. The Billing link points at `/settings/billing` (WP-25). Please confirm or provide the contracts.
+- Options considered: Leaving the sub-parts out. Rejected: they are on the canvas and in §5.1.
+- Blocking: no. Everything works against the mock.
+- Answer: Answered (tech lead for owner, 2026-11-08): use the endpoints that exist, and track the rest on their owner packages. (1) Billing uses WP-25's `GET …/billing` contract. (2) Use `GET …/summary` for member status: WP-23's fix round adds `mfaEnabled` to each member in the summary (households module, cross-WP) instead of a new `member-status` route. (3) Activity uses `GET …/activity` from BACKEND_PLAN §8.2, built by WP-24. (4) `GET/PUT …/sharing` and the "Remind {name}" nudge (`POST …/members/:uid/reminders`, at most one per member and topic per day) go on WP-24's checklist. (5) `GET …/forwarding-address` goes on WP-20's checklist. (6) "Download full log" calls `POST …/exports` with step-up. Keep the mocks for (3) to (5) until those packages land.
+
+## Q-176 · WP-23 · Step-up (`mfa_required`) has no sign-in flow to call
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: BACKEND_PLAN §8.2 (leave, exports, deletion, connect: step-up MFA); `apps/web/lib/auth/types.ts` (`AuthAdapter` has no re-auth method)
+- Question: When the API answers 403 `mfa_required`, the web can only say "This needs 2-step verification. Turn it on in your account, then try again." and keep the dialog open. Should the adapter get a `stepUp()` (TOTP prompt) so leave, export, delete and connect can retry in place? Nothing in the web app turns 2-step on yet either.
+- Options considered: (a) message only (built); (b) add `stepUp` to `AuthAdapter` and a TOTP dialog.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (b). ADR-018 requires a fresh TOTP challenge, so add `stepUp()` (TOTP prompt) and `setUpTotp()` to the web `AuthAdapter` and its fake. Then add a TOTP dialog that opens on 403 `mfa_required` and retries the action once after it succeeds. Add a "Turn on 2-step verification" action to the signed-in member's row in Members & privacy. Touching `apps/web/lib/auth/` (WP-17) is a cross-WP change. The real Cognito wiring follows WP-09.
+
+## Q-175 · WP-23 · Undoing the partner's applied change
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: DESIGN_SPEC §5.1 Email & imports ("Applied automatically"); WP-14 `POST …/applied-changes/:id/undo` (403 `approval_required`)
+- Question: On 403 the screen shows "This is on Jordan’s item. Ask Jordan to approve it." and changes nothing. Should it instead create a proposal ("Ask Jordan to approve") through `POST …/proposals`? The proposal type for an undo is not defined in `packages/contracts/src/proposals`.
+- Options considered: (a) message only (built); (b) a proposal of kind `undo_change`.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (a). Show the message and change nothing. An undo proposal type is out of scope for the MVP.
+
+## Q-174 · WP-23 · CSV import endpoints (WP-16 is in progress)
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: BACKEND_PLAN §8.2 ("`POST …/imports` → presigned URL, `process`, `PUT …/mapping`, `GET …/imports/:id`"); canvas setup CSV panel
+- Question: Assumed and mocked: `POST …/imports {filename, sizeBytes}` → `{id, uploadUrl}`; `PUT` the file to `uploadUrl` (no bearer token); `POST …/imports/:id/process`; `GET …/imports/:id` → `{id, filename, status, detections[]}` where a detection is `{id, name, direction, amountCents, scheduleLabel, note, confident}` (label and note are server text without amounts); `POST …/imports/:id/confirm {detectionIds}` → `{created}`; `GET …/imports/latest` for the Bank CSV row. There is no column-mapping screen yet (`needs_mapping`). Files over 5 MB or not `.csv` are refused in the browser. Do these match WP-16?
+- Options considered: Waiting for WP-16. Rejected, the UI needs a shape.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): no. Switch to the WP-16 contract that shipped in `packages/contracts/src/imports`. (1) `POST …/imports` returns `CreatedImport { import, upload }`, and the upload uses `upload.method`, `url`, `headers` and `fields` (form POST or PUT). (2) The limit is `IMPORT_MAX_BYTES` (10 MB), not 5 MB. (3) There are no `confirm` or `latest` endpoints. Detections become review items with `source = csv` in the normal review queue (Q-142), so the setup CSV panel shows queued review items filtered by `source` in the client. The Bank CSV row shows the import the user just made, kept in client state. (4) Build the column-mapping step for `needs_mapping` with `Import.columns` and `PUT …/imports/:id/mapping` (`ColumnMapping`).
+
+## Q-173 · WP-23 · Email connection endpoints (WP-21 does not exist yet)
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: BACKEND_PLAN §8.2 (`GET …/email-connections`, `POST /email-connections/:provider/start` → `{ authUrl }`, `…/callback`, `pause`, `resume`, `DELETE`)
+- Question: Assumed: a connection is `{ id, provider: gmail | outlook, ownerUserId, maskedAddress, status: connected | paused | error, lastCheckedAt, backfillMonths, matchedCount, usedCount }`, with the address already masked by the API. `start` takes `{ returnTo: "/imports" | "/setup" }`, and the API's callback redirects the browser to `{returnTo}?connected=gmail|outlook` or `?connect_error=access_denied|…`, which the web handles. Only the mailbox owner sees Pause and Disconnect; a partner sees "Only {name} can connect it" and a reminder button. Please confirm the return-trip contract.
+- Options considered: A fixed return path of `/imports`. Rejected, setup needs to come back to `/setup`.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): the contract is confirmed as assumed, with one hardening rule: `returnTo` is an enum (`/imports` or `/setup`), validated server-side and never a free URL, so the callback cannot be used as an open redirect. The API masks the address. Only the mailbox owner can pause or disconnect. WP-21 builds to this shape (added to its checklist). Until then WP-23 keeps the mock.
+
+## Q-172 · WP-23 · "92% found automatically" has no source
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: DESIGN_SPEC §5.1 Email & imports (automation stat tile); hard rule 4
+- Question: No contract or plan field gives the percentage or the "23 from email & CSV · 2 typed by hand" counts. Assumed `GET …/automation-stats` → `{ percent, automatedCount, handCount }`, computed by the API so the web never divides. Which module owns it (items by `source`, this month)?
+- Options considered: Computing it in the web from `GET /items` sources. Rejected (numbers come from the server).
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): the shape is accepted: `GET /households/:hid/automation-stats` → `{ percent, automatedCount, handCount }`, computed by the API. It counts active recurring items: automated when `source` is email or csv, by hand when manual. `percent` is a whole number, rounded half up, and 0 when there are no items. It lives in the API's review module, built in the WP-23 fix round as a cross-WP change, with a contract and a test. BACKEND_PLAN §8.2 now lists it.
+
+## Q-171 · WP-23 · Review item card: title, sender and effect text come from fields, not the contract
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: `ReviewItem` (WP-14); canvas "Web · Email & imports"; DESIGN_SPEC §4 "Review queue item"
+- Question: `ReviewItem` has no display title and `message` carries only `fromDomain` and `subject`. The card title is built in `review-map.ts` from `docType`, `insuranceType`, `providerName` and `autoRenews` (so "City Power & Light bill", not the canvas's "Electricity bill"). The sender line shows `providerName` (the canvas's "Forwarded by Jordan" is not representable). Fields the contract lacks are not drawn (canvas "Attachment", "Paid from"). `effect.summary` has no amounts, so "Safe to spend goes from $1,007 to $997." is built from the current plan plus `effect.planDelta.safeToSpendCents`, read as a change to add to the engine's value; if `planDelta` is an absolute value this is wrong. After a decision the line comes from `ReviewDecision`: the golden "Electricity set to $151.37. Safe to spend is now $997." needs `appliedChange.entityName` ("Electricity") and `plan.safeToSpendCents`. The applied list builds "Internet, $70.00 due Nov 5" from `entityName` and `after`, and shows $684.00 (spec §7: two decimals in lists) where the canvas shows $684. Is this right, or should the API send a `title`?
+- Options considered: (a) as built; (b) add `title` and `senderLabel` to `ReviewItem`, and `reason` to `AppliedChange`.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (a), with two corrections. (1) For an `update` match, title the card from the matched item's name plus the document type ("Electricity bill", as on the canvas). Look the name up with `matchItemId` in the items the web already loads. Use `providerName` only for a `new` match. (2) `planDelta.safeToSpendCents` is a change, not an absolute value (see the contract doc comment). It is always null for now (Q-121), so leave out the "Safe to spend goes from … to …" sentence while it is null, and never compute it in the web. Lists keep two decimals (DESIGN_SPEC §7). No `title` or `senderLabel` is added to `ReviewItem`, and "Attachment", "Paid from" and "Forwarded by" stay undrawn until the contract carries them.
+
+## Q-170 · WP-23 · No confirm dialog in the UI kit; income list for the payday select
+- Asked by: wp-builder/wp/23-web-imports-settings · 2026-11-04
+- Where: DESIGN_SPEC §4 "Button: destructive"; `packages/ui`; Members & privacy "Primary income"
+- Question: The spec requires a confirm dialog (type the name to delete, one confirm to leave) but `@mp/ui` has none. I built `apps/web/lib/components/ConfirmDialog.tsx` on a native `<dialog>` and use it for leave, delete, disconnect, new forwarding address, edit-in-queue and the watched-senders list. Should it move into `@mp/ui` (WP-10)? Also: the primary-income select reads `GET …/items?direction=inflow`, which WP-18 (Bills) will also mock; at rebase, one `items` handler must win. On the canvas "Disconnect" has no ellipsis; I followed the canvas and still ask first.
+- Options considered: Leaving the dialog out. Rejected (rule: destructive actions confirm).
+- Blocking: no.
 - Answer:
 
 ## Q-166 · WP-18 · Overview tasks now come from the tasks API

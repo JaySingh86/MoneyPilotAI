@@ -121,10 +121,25 @@ export function householdRoutes(
           caller(request),
           request.params.hid,
           request.body.email,
+          request.body.firstName,
           requestMeta(request),
         );
         return reply.code(201).send(invite);
       },
+    );
+
+    scope.post(
+      "/households/:hid/invites/:id/resend",
+      {
+        schema: {
+          summary: "Resend a pending invite (new link, same invite)",
+          params: InviteParams,
+          response: { 200: Invite },
+        },
+        config: { idempotency: "required", rateLimitGroup: "authSensitive" },
+      },
+      async (request) =>
+        service().resendInvite(caller(request), request.params.hid, request.params.id, requestMeta(request)),
     );
 
     scope.delete(

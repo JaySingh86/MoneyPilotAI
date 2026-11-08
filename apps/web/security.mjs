@@ -75,6 +75,9 @@ export const STATIC_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
 ];
 
+/** The invite link carries a secret token in its URL: never send it as a Referer (the page also strips it). */
+export const INVITE_HEADERS = [{ key: "Referrer-Policy", value: "no-referrer" }];
+
 /**
  * Problems that must stop a production build or server: the API must be https and the Cognito pool
  * must be configured, otherwise the app would ship talking to localhost or unable to sign in.

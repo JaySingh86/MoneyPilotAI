@@ -1,0 +1,224 @@
+/* Email & imports layout, DESIGN_SPEC §5.1. Components come from @mp/ui; this only places them. */
+
+.body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--mp-space-5);
+}
+
+.main {
+  display: flex;
+  flex: 2 1 560px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  gap: var(--mp-space-5);
+  min-width: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3_5);
+}
+
+.footer {
+  margin: 0;
+  font: var(--mp-type-caption);
+  color: var(--mp-text-muted);
+}
+
+/* The "92% found automatically" tile in the header. */
+.stat {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-3_5);
+  padding: var(--mp-space-3) var(--mp-space-4);
+  border: 1px solid var(--mp-border-default);
+  border-radius: var(--mp-radius-xl);
+  background: var(--mp-bg-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.statValue {
+  font: var(--mp-type-amount-l);
+  color: var(--mp-brand-default);
+}
+
+.statText {
+  display: flex;
+  flex-direction: column;
+  font: var(--mp-type-small);
+  color: var(--mp-text-secondary);
+}
+
+.statMeta {
+  color: var(--mp-text-muted);
+}
+
+/* Applied automatically. */
+.appliedList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.appliedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-2_5) 0;
+  border-bottom: 1px solid var(--mp-border-divider);
+}
+
+.appliedRow:last-child {
+  border-bottom: 0;
+}
+
+.appliedText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.appliedTitle {
+  font: var(--mp-type-body);
+  font-weight: 600;
+}
+
+.appliedDetail {
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+/* Connected sources. */
+.source {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  padding-bottom: var(--mp-space-3_5);
+  border-bottom: 1px solid var(--mp-border-divider);
+}
+
+.sourceHead {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+}
+
+.sourceText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sourceTitle {
+  margin: 0;
+  font: var(--mp-type-body);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.sourceMeta {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+}
+
+.sourceStats {
+  margin: 0;
+  font: var(--mp-type-small);
+  color: var(--mp-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sourceActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mp-space-2);
+}
+
+.codeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+}
+
+.code {
+  flex: 1;
+  min-width: 0;
+  padding: var(--mp-space-2) var(--mp-space-2_5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-bg-canvas);
+  font: var(--mp-type-small);
+}
+
+.csvRow {
+  display: flex;
+  align-items: center;
+  gap: var(--mp-space-2_5);
+}
+
+.rules {
+  display: flex;
+  max-height: 320px;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* "What MoneyPilot reads": brand.strong colors. */
+.reads {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+  padding: var(--mp-space-5_5);
+  border-radius: var(--mp-radius-3xl);
+  background: var(--mp-brand-strong);
+  color: var(--mp-text-inverse);
+}
+
+.readsTitle {
+  margin: 0;
+  font: var(--mp-type-heading-2);
+  letter-spacing: var(--mp-tracking-heading);
+}
+
+.readsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  margin: 0;
+  padding-left: var(--mp-space-4);
+  font: var(--mp-type-small);
+  color: var(--mp-brand-on-strong-subtle);
+}
+
+.readsLink {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: var(--mp-type-small);
+  font-weight: 600;
+  color: var(--mp-text-inverse);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.connectNotice {
+  margin: 0;
+}

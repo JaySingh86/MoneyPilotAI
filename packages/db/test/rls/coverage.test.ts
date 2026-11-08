@@ -89,6 +89,7 @@ describe("RLS posture of every table", () => {
       app_household_unclaimed_by_me: ["mp_api"],
       app_user_email: ["mp_api"],
       app_accept_invite: ["mp_api"],
+      app_rotate_invite_token: ["mp_api"],
       app_invite_lookup: ["mp_api"],
       app_sync_auth_user: ["mp_api", "mp_worker"],
       app_transfer_creator: ["mp_api"],

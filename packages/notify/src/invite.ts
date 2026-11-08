@@ -10,18 +10,24 @@ export interface InviteEmail {
   token: string;
   householdName: string;
   inviterFirstName: string;
+  /** The invitee's first name when the inviter gave one; already HTML-escaped by the API like the other names. */
+  inviteeFirstName?: string;
   expiresAt: Date;
   invitedByUserId: string;
 }
 
 export interface InviteSenderPort {
   send(invite: InviteEmail): Promise<void>;
+  /** Whether this user still has quota, without using any (so a caller can refuse before changing anything). */
+  canSend(userId: string): Promise<boolean>;
 }
 
 /** Counts sends per user. Implementations are atomic (check and record together). */
 export interface SendQuota {
   /** Records one send of `kind` for the user and returns true, or returns false when the quota is used up. */
   consume(userId: string, kind: "invite"): Promise<boolean>;
+  /** True while the user has quota left. Read-only. */
+  hasRoom?(userId: string, kind: "invite"): Promise<boolean>;
 }
 
 export class SendQuotaExceededError extends Error {
@@ -59,6 +65,10 @@ export function createMemorySendQuota(options: MemoryQuotaOptions = {}): SendQuo
       events.set(key, recent);
       return true;
     },
+    async hasRoom(userId, kind) {
+      const t = now();
+      return (events.get(`${kind}:${userId}`) ?? []).filter((at) => t - at < windowMs).length < limit;
+    },
   };
 }
 
@@ -81,6 +91,7 @@ export function createInviteSender(options: InviteSenderOptions): InviteSenderPo
     throw new TypeError("appUrl must be an absolute URL.");
   }
   return {
+    canSend: async (userId) => (await options.quota.hasRoom?.(userId, "invite")) ?? true,
     async send(invite) {
       if (!(await options.quota.consume(invite.invitedByUserId, "invite")))
         throw new SendQuotaExceededError();

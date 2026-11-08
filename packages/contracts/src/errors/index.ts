@@ -87,6 +87,24 @@ export const ProblemFieldSchema = z
 
 export type ProblemField = z.infer<typeof ProblemFieldSchema>;
 
+/**
+ * Stable `reason` values on a problem: what `plan_not_ready` still needs, or why an invite cannot be accepted
+ * (WP-05 `POST /invites/accept`). Clients switch on these, never on `detail` text.
+ */
+export const PROBLEM_REASONS = [
+  "no_balance",
+  "no_primary_income",
+  "expired",
+  "revoked",
+  "used",
+  "full",
+  "wrong_email",
+  "already_member",
+  "in_other_household",
+  "deleting",
+] as const;
+export type ProblemReason = (typeof PROBLEM_REASONS)[number];
+
 export const ProblemSchema = z
   .object({
     type: z.string().describe("URI reference identifying the problem type"),
@@ -99,9 +117,9 @@ export const ProblemSchema = z
     fields: z.array(ProblemFieldSchema).optional().describe("Per-field errors for validation_failed"),
     current: z.unknown().optional().describe("The current resource, on a version conflict (If-Match)"),
     reason: z
-      .enum(["no_balance", "no_primary_income"])
+      .enum(PROBLEM_REASONS)
       .optional()
-      .describe("plan_not_ready only: what the household still has to set up"),
+      .describe("plan_not_ready: what is still to set up. Invite acceptance: why it was refused."),
   })
   .meta({ id: "Problem", description: "RFC 9457 problem details" });
 
@@ -111,8 +129,8 @@ export interface AppErrorOptions {
   fields?: ProblemField[];
   /** Current resource for a 409 version conflict. */
   current?: unknown;
-  /** `plan_not_ready`: static reason code. */
-  reason?: "no_balance" | "no_primary_income";
+  /** A static reason code (`plan_not_ready`, invite acceptance). */
+  reason?: ProblemReason;
   /** Extra response headers, e.g. `Retry-After`. */
   headers?: Record<string, string>;
   cause?: unknown;
@@ -129,7 +147,7 @@ export class AppError extends Error {
   readonly status: number;
   readonly fields: ProblemField[] | undefined;
   readonly current: unknown;
-  readonly reason: "no_balance" | "no_primary_income" | undefined;
+  readonly reason: ProblemReason | undefined;
   readonly headers: Record<string, string>;
 
   constructor(
