@@ -86,7 +86,7 @@ This is separate from Sign in with Google. It's our API reading bills from your 
    ```
    It runs `packages/db/supabase/bootstrap.sql`, which:
    - creates `mp_migrator`, `mp_api`, `mp_worker`, `mp_queue` (login, no superuser, **no BYPASSRLS**, cannot create roles or databases) and an unused `mp_analytics` (no login), because the migrations name it;
-   - lets `mp_migrator` run `pnpm db:migrate` without owning your database: `CREATE` on schema `public` and on the database (for the `pgboss` schema). It owns the tables it creates;
+   - lets `mp_migrator` run `pnpm db:migrate` without owning your database: `CREATE` on schema `public`, plus a `pgboss` schema the bootstrap creates for it (no database-wide `CREATE`). It owns the tables it creates;
    - pre-creates the `citext` extension in `public` (where it lives on a normal Postgres, which our functions assume). `pgcrypto` stays in Supabase's `extensions` schema;
    - takes all access to `public` away from `anon`, `authenticated`, `service_role` and PUBLIC. The Data API stays off as well (step 2).
 
