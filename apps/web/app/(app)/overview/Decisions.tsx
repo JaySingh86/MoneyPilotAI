@@ -66,7 +66,11 @@ function CardActions({
       return (
         <>
           {hasWhatIf(decision) && (
-            <Button size={size} onClick={() => onOpen({ kind: "what-if", decision })}>
+            <Button
+              className={styles.planButton}
+              size={size}
+              onClick={() => onOpen({ kind: "what-if", decision })}
+            >
               Plan for it
             </Button>
           )}

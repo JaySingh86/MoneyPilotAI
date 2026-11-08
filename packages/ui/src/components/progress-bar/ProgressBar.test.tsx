@@ -19,6 +19,13 @@ describe("ProgressBar", () => {
     expect((bar.firstElementChild as HTMLElement).style.width).toBe("100%");
   });
 
+  it("bare draws only the track, still named and valued", () => {
+    const { container } = render(<ProgressBar variant="bare" title="Lake Tahoe trip" percent={48} />);
+    const bar = screen.getByRole("progressbar", { name: "Lake Tahoe trip" });
+    expect(bar.getAttribute("aria-valuenow")).toBe("48");
+    expect(container.textContent).toBe("");
+  });
+
   it("has no axe violations", async () => {
     const { container } = render(<ProgressBar title="Emergency fund" percent={64} />);
     await expectNoAxeViolations(container);

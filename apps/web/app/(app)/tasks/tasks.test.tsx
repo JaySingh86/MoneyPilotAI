@@ -33,7 +33,7 @@ describe("Household tasks", () => {
     expect(within(week).getByText("Fri, Oct 30")).toBeTruthy();
     expect(within(week).getByText("When the bill arrives, about Nov 1")).toBeTruthy();
     expect(within(week).getByText("Electricity")).toBeTruthy();
-    expect(within(week).getByText(/Suggested by MoneyPilot · completes itself/)).toBeTruthy();
+    expect(within(week).getByText(/Completes itself if the bill arrives by email/)).toBeTruthy();
     expect(within(group("Later")).getAllByText("From email")).toHaveLength(2);
     expect(within(group("Later")).getAllByText("Renewal reminder")).toHaveLength(2);
     expect(within(week).getByText("Added by Sam")).toBeTruthy();

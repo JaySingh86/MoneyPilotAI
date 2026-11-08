@@ -1,7 +1,7 @@
 // Avatar and owner dot, DESIGN_SPEC §4. Colors come from the member's role (§1 rule 5).
 import type { ReactNode } from "react";
 import { cx } from "../internal/cx";
-import type { OwnerRole, PartnerRole } from "../internal/types";
+import type { OwnerRole } from "../internal/types";
 import styles from "./avatar.module.css";
 
 /** 32 header, 28 lists, 24 table, 22 activity, 40 members card. */
@@ -10,18 +10,22 @@ export type AvatarSize = 22 | 24 | 28 | 32 | 40;
 export interface AvatarProps {
   /** First name; the avatar shows its initial. */
   name: string;
-  role: PartnerRole;
+  /** `both` is one circle in brand colors, for items two people own ("S+J" in Household tasks). */
+  role: OwnerRole;
+  /** Text to draw instead of the first letter of `name`, e.g. "S+J". */
+  initials?: string;
   size?: AvatarSize;
   /** Hide from screen readers when the name is already written next to it. */
   decorative?: boolean;
   className?: string;
 }
 
-export function Avatar({ name, role, size = 28, decorative = false, className }: AvatarProps) {
-  const initial = [...name.trim()][0]?.toUpperCase() ?? "";
+export function Avatar({ name, role, initials, size = 28, decorative = false, className }: AvatarProps) {
+  const initial = initials ?? [...name.trim()][0]?.toUpperCase() ?? "";
+  const long = [...initial].length > 1;
   return (
     <span
-      className={cx(styles.avatar, styles[role], styles[`size${size}`], className)}
+      className={cx(styles.avatar, styles[role], styles[`size${size}`], long && styles.long, className)}
       {...(decorative ? { "aria-hidden": true } : { role: "img", "aria-label": name })}
     >
       {initial}

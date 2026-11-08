@@ -17,6 +17,15 @@ describe("Avatar", () => {
     expect(container.firstElementChild?.getAttribute("aria-hidden")).toBe("true");
   });
 
+  it("draws one brand circle for Both, with its own initials", () => {
+    render(<Avatar name="Both" role="both" initials="S+J" size={28} />);
+    const avatar = screen.getByRole("img", { name: "Both" });
+    expect(avatar.textContent).toBe("S+J");
+    expect(avatar.className).toContain("both");
+    expect(avatar.className).toContain("long");
+    expect(avatar.className).toContain("size28");
+  });
+
   it("stacks avatars under one name", async () => {
     const { container } = render(
       <AvatarStack label="Sam and Jordan">

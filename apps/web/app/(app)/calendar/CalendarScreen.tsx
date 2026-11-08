@@ -228,6 +228,7 @@ export function CalendarScreen() {
                       outsideMonth={day === null}
                       payday={day?.isPayday ?? false}
                       selected={iso === selected}
+                      chipLayout="line"
                       events={day ? day.entries.map((e) => chip(e, owners)) : []}
                       onSelect={() => setPicked(iso)}
                     />

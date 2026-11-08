@@ -2,7 +2,7 @@
 
 .bar {
   position: fixed;
-  left: var(--mp-space-4);
+  right: var(--mp-space-4);
   bottom: var(--mp-space-4);
   z-index: 40;
   display: flex;

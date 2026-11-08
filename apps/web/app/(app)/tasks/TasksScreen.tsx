@@ -10,16 +10,16 @@ import {
   SegmentedControl,
   SelectField,
   Skeleton,
-  StatusChip,
   TextField,
 } from "@mp/ui";
 import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { money } from "@mp/format";
 import { PageHeader } from "../../../lib/components/PageHeader";
 import { OwnerCell } from "../../../lib/components/OwnerCell";
 import { shortDate } from "../../../lib/format/dates";
-import { useCompleteTask, useCreateTask, useTasks, useToday } from "../../../lib/lists/hooks";
+import { useCompleteTask, useCreateTask, useRenewals, useTasks, useToday } from "../../../lib/lists/hooks";
 import type { Task, TaskGroups } from "../../../lib/lists/hooks";
 import { useOwners } from "../../../lib/owners";
 import type { Owners } from "../../../lib/owners";
@@ -35,8 +35,9 @@ function source(task: Task, owners: Owners): string {
   const by = task.createdBy ? owners.member(task.createdBy)?.name : null;
   switch (task.source) {
     case "engine":
+      // The canvas drops "Suggested by MoneyPilot" when the task completes itself.
       return task.autoCompleteRule
-        ? "Suggested by MoneyPilot · completes itself if the bill arrives by email"
+        ? "Completes itself if the bill arrives by email"
         : "Suggested by MoneyPilot";
     case "email":
       return "From email";
@@ -55,6 +56,7 @@ function TaskRow({
   soon,
   owners,
   pending,
+  amounts,
   onToggle,
 }: {
   task: Task;
@@ -62,8 +64,10 @@ function TaskRow({
   soon: boolean;
   owners: Owners;
   pending: boolean;
+  amounts: ReadonlyMap<string, number>;
   onToggle: (task: Task, completed: boolean) => void;
 }) {
+  const amountCents = task.linkedItemId ? amounts.get(task.linkedItemId) : undefined;
   const due = task.completed
     ? `Done ${task.completedAt ? shortDate(task.completedAt.slice(0, 10), today) : ""}`.trim()
     : (task.dueHint ?? (task.dueOn ? shortDate(task.dueOn, today, { weekday: true }) : "No date"));
@@ -71,6 +75,7 @@ function TaskRow({
   return (
     <li className={styles.row}>
       <Checkbox
+        className={styles.check}
         strikeWhenChecked
         checked={task.completed}
         disabled={pending}
@@ -78,20 +83,18 @@ function TaskRow({
         label={task.title}
       />
       <div className={styles.meta}>
-        {soon ? (
-          <StatusChip variant="attention">{due}</StatusChip>
-        ) : (
-          <span className={styles.due}>{due}</span>
-        )}
+        {soon ? <span className={styles.dueSoon}>{due}</span> : <span className={styles.due}>{due}</span>}
         {task.linkedItemName && (
           <Link href={href} className={styles.link}>
-            {task.linkedItemName}
+            {amountCents === undefined
+              ? task.linkedItemName
+              : `${task.linkedItemName} · ${money(amountCents, { mode: "detail" })}`}
           </Link>
         )}
         <span>{source(task, owners)}</span>
       </div>
       <span className={styles.avatar}>
-        <OwnerCell ownerId={ownerKey(task)} owners={owners} size={28} showName={false} />
+        <OwnerCell ownerId={ownerKey(task)} owners={owners} size={28} showName={false} combined />
       </span>
     </li>
   );
@@ -111,10 +114,12 @@ function Group({
   today: string;
   owners: Owners;
   pending: boolean;
+  amounts: ReadonlyMap<string, number>;
   onToggle: (task: Task, completed: boolean) => void;
 }) {
   return (
     <Card
+      className={styles.group}
       title={title}
       actions={
         <span className={styles.count}>{`${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`}</span>
@@ -203,7 +208,7 @@ function Aside({ groups, owners }: { groups: TaskGroups; owners: Owners }) {
             </li>
           ))}
           <li>
-            <OwnerCell ownerId="both" owners={owners} size={24} />
+            <OwnerCell ownerId="both" owners={owners} size={24} combined />
             <strong>{count((t) => t.ownerType !== "member")}</strong>
           </li>
         </ul>
@@ -234,6 +239,7 @@ export function TasksScreen() {
   const today = useToday();
   const owners = useOwners();
   const complete = useCompleteTask();
+  const renewals = useRenewals();
   const [filter, setFilter] = useState("all");
 
   const header = (actions?: React.ReactNode) => (
@@ -268,9 +274,18 @@ export function TasksScreen() {
   }
   const groups = tasks.data;
   const shown = (list: readonly Task[]) => list.filter((t) => visible(t, filter));
+  // The canvas writes the amount after a renewal's name ("Car insurance · $684"). It comes from the
+  // renewals list, never computed here; a monthly premium is not the renewal's cost, so it has none.
+  const amounts = new Map<string, number>();
+  for (const r of renewals.data ?? []) {
+    if (r.every.unit === "month" && r.every.n === 1) continue;
+    amounts.set(r.id, r.amountCents);
+    if (r.itemId) amounts.set(r.itemId, r.amountCents);
+  }
   const common = {
     today,
     owners,
+    amounts,
     pending: complete.isPending,
     onToggle: (task: Task, completed: boolean) => complete.mutate({ task, completed }),
   };

@@ -80,7 +80,9 @@
 }
 
 .gridCard {
-  flex: 2 1 600px;
+  position: relative;
+  /* "2 1 600px" content-box in the canvas: 600 + 2 × 16 padding + 2 × 1 border */
+  flex: 2 1 634px;
   min-width: 0;
   overflow-x: auto;
   box-sizing: border-box;
@@ -117,10 +119,16 @@
   gap: var(--mp-space-1_5);
 }
 
+/* The canvas draws no keyboard hint; it stays for screen readers (the grid has one tab stop). */
 .hint {
-  margin: var(--mp-space-2) 0 0;
-  font: var(--mp-type-caption);
-  color: var(--mp-text-muted);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .side {

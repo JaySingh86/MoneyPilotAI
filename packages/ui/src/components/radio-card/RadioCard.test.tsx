@@ -30,6 +30,24 @@ function Group({ initial = "a" as V | null }) {
 const radio = (name: RegExp) => screen.getByRole("radio", { name });
 
 describe("RadioCardGroup", () => {
+  it("goal variant draws an overline row above the title", () => {
+    render(
+      <RadioCardGroup
+        label="Goals"
+        variant="goal"
+        hideIndicator
+        value="a"
+        onChange={() => undefined}
+        options={[{ value: "a", title: "Lake Tahoe trip", overline: "Goal", overlineEnd: "48%" }]}
+      />,
+    );
+    const card = screen.getByRole("radio", { name: /Lake Tahoe trip/ });
+    expect(card.className).toContain("goalCard");
+    const text = card.textContent ?? "";
+    expect(text.indexOf("Goal")).toBeLessThan(text.indexOf("Lake Tahoe trip"));
+    expect(text).toContain("48%");
+  });
+
   it("is a radiogroup of radios with one checked", () => {
     render(<Group />);
     expect(screen.getByRole("radiogroup", { name: "Ways to cover the gap" })).toBeTruthy();

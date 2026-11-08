@@ -20,6 +20,11 @@
   color: var(--mp-partner-b-text);
 }
 
+.both {
+  background: var(--mp-brand-soft);
+  color: var(--mp-brand-on-soft);
+}
+
 .size22 {
   width: 22px;
   height: 22px;
@@ -52,6 +57,12 @@
   width: 40px;
   height: 40px;
   font: var(--mp-type-body-l);
+  font-weight: 600;
+}
+
+/* Two or more characters ("S+J") use the nano size so they fit the circle. */
+.long {
+  font: var(--mp-type-nano);
   font-weight: 600;
 }
 

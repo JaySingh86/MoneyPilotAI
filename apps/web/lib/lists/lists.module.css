@@ -34,9 +34,16 @@
   min-width: 0;
 }
 
+.mainWide {
+  flex-basis: 606px;
+}
+
+/* The canvas sizes these boxes content-box: an aside of "1 1 300px" with 22 padding and a 1 px border
+   is 346 wide before it grows, and the table card in "2 1 560px" is 606. Same numbers here, in
+   border-box, so the columns split the page the way the boards do. */
 .aside {
   display: flex;
-  flex: 1 1 300px;
+  flex: 1 1 346px;
   flex-direction: column;
   gap: var(--mp-space-3_5);
   min-width: 0;
@@ -187,4 +194,9 @@
 
 .heroTile > p:nth-child(2) {
   color: var(--mp-text-inverse);
+}
+
+/* Table cells that stay on one line ("Oct 29" over "in 2 days"), as the canvas rows do. */
+.noWrap {
+  white-space: nowrap;
 }

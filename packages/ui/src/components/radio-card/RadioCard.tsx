@@ -13,6 +13,10 @@ export interface RadioCardOption<V extends string> {
   description?: ReactNode;
   /** Optional 40 px leading icon tile. */
   icon?: LucideIcon;
+  /** Goal cards: a small uppercase line above the title ("Goal", "Planned expense")... */
+  overline?: string;
+  /** ...with a value at its right end ("64%"). */
+  overlineEnd?: string;
   /** A chip after the title, e.g. "Recommended". */
   badge?: ReactNode;
   /** Extra content under the description (goal cards: progress and status). */
@@ -34,6 +38,11 @@ export interface RadioCardGroupProps<V extends string> {
    * "Web · Goals"); the radio semantics stay.
    */
   hideIndicator?: boolean;
+  /**
+   * `goal`: the larger card of "Web · Goals & planned expenses" (radius 3xl, roomier padding, a
+   * heading-2 title, the selection drawn as a 2 px border).
+   */
+  variant?: "default" | "goal";
   className?: string;
 }
 
@@ -44,6 +53,7 @@ export function RadioCardGroup<V extends string>({
   onChange,
   layout = "column",
   hideIndicator = false,
+  variant = "default",
   className,
 }: RadioCardGroupProps<V>) {
   const refs = useRef(new Map<V, HTMLButtonElement>());
@@ -66,7 +76,12 @@ export function RadioCardGroup<V extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className={cx(styles.group, layout === "grid" && styles.grid, className)}
+      className={cx(
+        styles.group,
+        layout === "grid" && styles.grid,
+        variant === "goal" && styles.goalGroup,
+        className,
+      )}
     >
       {options.map((option) => {
         const checked = option.value === value;
@@ -82,7 +97,12 @@ export function RadioCardGroup<V extends string>({
             aria-checked={checked}
             aria-disabled={option.disabled || undefined}
             tabIndex={option.value === tabStop ? 0 : -1}
-            className={cx(styles.card, checked && styles.checked, option.disabled && styles.disabled)}
+            className={cx(
+              styles.card,
+              variant === "goal" && styles.goalCard,
+              checked && styles.checked,
+              option.disabled && styles.disabled,
+            )}
             onClick={() => {
               if (!option.disabled) onChange(option.value);
             }}
@@ -99,6 +119,12 @@ export function RadioCardGroup<V extends string>({
               </span>
             )}
             <span className={styles.body}>
+              {option.overline && (
+                <span className={styles.overlineRow}>
+                  <span className={styles.overline}>{option.overline}</span>
+                  {option.overlineEnd && <span className={styles.overlineEnd}>{option.overlineEnd}</span>}
+                </span>
+              )}
               <span className={styles.titleRow}>
                 <span className={styles.title}>{option.title}</span>
                 {option.badge}

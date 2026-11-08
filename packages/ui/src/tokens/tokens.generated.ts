@@ -244,7 +244,7 @@ export const tokens = {
   size: {
     touchTarget: "44px",
     sidebarWidth: "240px",
-    contentMaxWidth: "1160px",
+    contentMaxWidth: "1600px",
     mobileGutter: "16px",
     buttonHeightWeb: "40px",
     buttonHeightMobile: "46px",

@@ -18,13 +18,18 @@ export interface EventChipProps {
   name: string;
   /** Signed cents: income positive, outflows negative. */
   amountCents: number;
+  /**
+   * `wrap` (default) lets the amount drop under the name in a narrow cell. `line` keeps the chip on one
+   * line and cuts the name with an ellipsis, as the canvas "Web · Shared bills calendar" draws it.
+   */
+  layout?: "wrap" | "line";
 }
 
 /** Calendar event chip: owner dot, name (ellipsis), signed amount (600). */
-export function EventChip({ kind, owner, name, amountCents }: EventChipProps) {
+export function EventChip({ kind, owner, name, amountCents, layout = "wrap" }: EventChipProps) {
   const amount = money(amountCents, { mode: "chip" });
   return (
-    <span className={cx(styles.chip, styles[kind])} data-kind={kind}>
+    <span className={cx(styles.chip, styles[kind], layout === "line" && styles.chipLine)} data-kind={kind}>
       <OwnerDot role={owner} />
       <span className={styles.chipName}>{name}</span>
       <VisuallyHidden> </VisuallyHidden>
@@ -41,6 +46,8 @@ export interface CalendarCellProps extends Omit<
 > {
   date: CalendarDate;
   events: readonly EventChipProps[];
+  /** Applies to every chip in the cell; see `EventChipProps.layout`. */
+  chipLayout?: "wrap" | "line";
   selected?: boolean;
   /** brand.tint background and a "PAYDAY" label. */
   payday?: boolean;
@@ -77,6 +84,7 @@ const MONTHS = [
 export function CalendarCell({
   date,
   events,
+  chipLayout,
   selected = false,
   payday = false,
   outsideMonth = false,
@@ -119,7 +127,7 @@ export function CalendarCell({
       {shown.map((event, i) => (
         <span key={`${event.name}-${i}`} className={styles.chipSlot}>
           <VisuallyHidden>, </VisuallyHidden>
-          <EventChip {...event} />
+          <EventChip layout={chipLayout} {...event} />
         </span>
       ))}
       {more > 0 && (

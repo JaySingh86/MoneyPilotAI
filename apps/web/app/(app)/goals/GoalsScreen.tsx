@@ -22,11 +22,12 @@ import type { TableColumn } from "@mp/ui";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { usePlan } from "../../../lib/api/hooks";
+import { usePlan, useSummary } from "../../../lib/api/hooks";
 import { useAuth } from "../../../lib/auth/AuthProvider";
 import { PageHeader } from "../../../lib/components/PageHeader";
 import { shortDate, shortDateNoYear } from "../../../lib/format/dates";
 import {
+  useBillsItems,
   useCreateGoal,
   useGoalPreview,
   useGoals,
@@ -149,11 +150,24 @@ function NewGoal({
   );
 }
 
+/** The first name of whoever's pay sets the household's payday, once it is known. */
+function usePrimaryPayer(owners: Owners | null): string | null {
+  const summary = useSummary();
+  const items = useBillsItems();
+  const itemId = summary.data?.household.primaryIncomeItemId;
+  const item = itemId ? items.data?.items.find((i) => i.id === itemId) : undefined;
+  return (item?.ownerUserId ? owners?.member(item.ownerUserId)?.name : null) ?? null;
+}
+
+const subtitle = (payer: string | null): string =>
+  `Transfers are reminders on ${payer ? `${payer}’s ` : ""}payday. You move the money yourselves.`;
+
 function Loaded({ list, today, owners }: { list: GoalList; today: string; owners: Owners }) {
   const { me } = useAuth();
   const planned = usePlannedExpenses();
   const renewals = useRenewals();
   const proposals = useProposals();
+  const payer = usePrimaryPayer(owners);
   const [picked, setPicked] = useState<string | null>(null);
   // One draft at a time: moving to another goal drops it (nothing was sent).
   const [draft, setDraft] = useState<{ goalId: string; cents: number } | null>(null);
@@ -161,7 +175,12 @@ function Loaded({ list, today, owners }: { list: GoalList; today: string; owners
   const [notice, setNotice] = useState<string | null>(null);
 
   const goals = list.data;
-  const selected = goals.find((g) => g.id === picked) ?? goals[0];
+  // The canvas opens on the goal that needs a decision: the first one that is behind, then the first
+  // planned expense with something left to set aside, then the first goal.
+  const needsAttention =
+    goals.find((g) => g.progress.status === "behind") ??
+    goals.find((g) => g.progress.status === "to_set_aside");
+  const selected = goals.find((g) => g.id === picked) ?? needsAttention ?? goals[0];
   const partner = owners.members.find((m) => m.id !== me?.id);
   const partnerName = partner?.name ?? "your partner";
   const activeDraft = draft && selected && draft.goalId === selected.id ? draft.cents : null;
@@ -199,7 +218,7 @@ function Loaded({ list, today, owners }: { list: GoalList; today: string; owners
       <PageHeader
         overline="Saving together"
         title="Goals & planned expenses"
-        subtitle="Transfers are reminders on payday. You move the money yourselves."
+        subtitle={subtitle(payer)}
         actions={
           <Button icon={Plus} aria-expanded={adding} onClick={() => setAdding((v) => !v)}>
             New goal
@@ -256,6 +275,7 @@ function Loaded({ list, today, owners }: { list: GoalList; today: string; owners
           ) : (
             <RadioCardGroup
               label="Goals"
+              variant="goal"
               layout="grid"
               hideIndicator
               value={selected?.id ?? null}
@@ -263,10 +283,13 @@ function Loaded({ list, today, owners }: { list: GoalList; today: string; owners
               options={goals.map((g: Goal) => ({
                 value: g.id,
                 title: g.name,
+                overline: kindLabel(g),
+                overlineEnd: `${g.progress.percent}%`,
                 children: (
                   <>
                     <ProgressBar
-                      title={kindLabel(g)}
+                      variant="bare"
+                      title={`${g.name} progress`}
                       percent={g.progress.percent}
                       tone={TONES[g.colorSlot as 1 | 2 | 3] ?? "brand"}
                       caption={amountsLine(g)}
@@ -308,6 +331,7 @@ function Loaded({ list, today, owners }: { list: GoalList; today: string; owners
             draftCents={activeDraft}
             onDraft={(cents) => setDraft(cents === null ? null : { goalId: selected.id, cents })}
             partnerName={partnerName}
+            payerName={payer}
             pending={pending}
           />
         )}
@@ -321,12 +345,9 @@ export function GoalsScreen() {
   const plan = usePlan();
   const goals = useGoals();
   const owners = useOwners();
+  const payer = usePrimaryPayer(owners);
   const header = (
-    <PageHeader
-      overline="Saving together"
-      title="Goals & planned expenses"
-      subtitle="Transfers are reminders on payday. You move the money yourselves."
-    />
+    <PageHeader overline="Saving together" title="Goals & planned expenses" subtitle={subtitle(payer)} />
   );
   if (goals.isError || plan.isError) {
     return (

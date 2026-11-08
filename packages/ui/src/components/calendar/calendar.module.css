@@ -99,6 +99,17 @@
   font: var(--mp-type-micro);
 }
 
+/* One line: the name takes what the amount leaves and is cut with an ellipsis. */
+.chipLine {
+  flex-wrap: nowrap;
+  gap: 0 var(--mp-space-1_5);
+}
+
+.chipLine .chipName {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .chipName {
   flex: 1 1 4.5ch;
   /* Wide enough for "Rent" and "Phone" before the ellipsis starts. */

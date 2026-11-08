@@ -54,6 +54,15 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-167 · WP-18 · Canvas-fidelity round: text the canvas draws that no contract carries or the spec decided otherwise
+- Asked by: wp-builder/wp/18-canvas-fidelity · 2026-11-08
+- Where: canvas Web · Subscriptions & renewals, Web · Goals & planned expenses, Web · Overview, Web · Shared bills calendar; DESIGN_SPEC §5.1, §7
+- Question: (1) (see Q-163) Renewals status chips read "Up $3 since Sep" and "Up $19 (+13%)" on the canvas; the list rows carry `annualIncreaseCents` only (no monthly delta, no change month, no percent), and a percent computed in the web would be a second derived number (rule 4). Should `RenewalRow` carry a ready `priceChange` text or its parts? Today: "Up $36 a year", "Up $19 a year". (2) "Planned expenses ahead" shows a description line on the canvas ("Groceries and hosting · Both"); `PlannedExpense` has no description. (3) The Overview decision cards on the canvas say "…If your insurer allows paying on Nov 6, safe to spend rises to $1,691." and "…by Mar 1."; the engine's templates (rule 9 "Only if your provider allows it", §7 "Mar 1, 2027") differ. Kept the engine and the spec. (4) Overview "Household tasks": the canvas shows a "2" count badge for the Both task and free text "streaming price up $3, two music services"; neither is data. (5) The canvas lists the Overview tasks latest date first; the rule is not written anywhere. Implemented as latest date first.
+  (6) Goals preview math: the canvas labels the total row "By Mar 1"; the preview endpoint is itself only a request (Q-160), so the mock keeps "By target date" until the API defines the label. (7) Task linked amounts ("Car insurance · $684"): shown with two decimals ("$684.00") because §7 sets lists to two decimals; the canvas drops the cents. Monthly renewals get no amount (a monthly premium is not the renewal cost); a candidate API field, e.g. `Task.linkedAmountCents`, so the web needs no rule. (8) Goal rows in "Planned expenses ahead" end "· Both" on the canvas; `Goal` carries no owner, so the owner is left out. (9) Calendar sidebar card "Reminders": the policy words are fixed copy until `GET …/reminder-rules` (WP-15, Q-161) supplies them, and "Change defaults" stays a disabled button until Q-165 is answered. (10) The Calendar keyboard hint ("Use the arrow keys…") is now visually hidden, because the canvas draws no such line; it stays in the DOM for screen readers. (11) The dark "Plan for it" on the Overview attention card is a local override of the primary Button; a candidate Button variant for DESIGN_SPEC §4. (12) Goal cards use padding 20 where the canvas has 18, and the Household tasks due chip pads 2 × 8 where the canvas has 1 × 8: no spacing tokens for 18 or 1. The caption under a goal bar is 12 muted (ProgressBar) where the canvas has 13 secondary.
+- Options considered: (a) add the fields to the contracts (WP-12/WP-13); (b) leave the web's text. Taken: (b).
+- Blocking: no
+- Answer:
+
 ## Q-166 · WP-18 · Overview tasks now come from the tasks API
 - Asked by: wp-builder/wp/18-web-pages · 2026-11-04
 - Where: DESIGN_SPEC §5.1 Overview; Q-095, Q-096

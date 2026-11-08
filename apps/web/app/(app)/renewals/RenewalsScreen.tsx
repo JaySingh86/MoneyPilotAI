@@ -77,14 +77,15 @@ function Radar({
   const short = (iso: string) => shortDate(iso, today);
   const end = Temporal.PlainDate.from(today).add({ days: RADAR_DAYS }).toString();
   const place = (iso: string) => `${Math.min(100, Math.max(0, (daysFrom(today, iso) / RADAR_DAYS) * 100))}%`;
-  // Month starts inside the window label the track.
+  // Month starts inside the window label the track, except one so close to "Today" that the labels
+  // would run into each other (the canvas drops "Nov 1" next to "Today").
   const ticks: string[] = [];
   for (
     let d = Temporal.PlainDate.from(today).add({ months: 1 }).with({ day: 1 });
     Temporal.PlainDate.compare(d, Temporal.PlainDate.from(end)) < 0;
     d = d.add({ months: 1 })
   )
-    ticks.push(d.toString());
+    if (daysFrom(today, d.toString()) >= RADAR_DAYS / 6) ticks.push(d.toString());
   return (
     <Card
       title="Renewal radar · next 90 days"
@@ -282,7 +283,7 @@ function Loaded({
       <Radar rows={radar} today={today} plan={plan} owners={owners} />
 
       <div className={lists.layout}>
-        <div className={lists.main}>
+        <div className={`${lists.main} ${lists.mainWide}`}>
           <Card>
             <div className={lists.cardBody}>
               <FilterPills

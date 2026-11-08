@@ -21,6 +21,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useSummary } from "../api/hooks";
+import { useRenewalsSummary } from "../lists/hooks";
 import { useAuth } from "../auth/AuthProvider";
 import { useOwners } from "../owners";
 import styles from "./shell.module.css";
@@ -114,19 +115,61 @@ function HouseholdBadge({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function SidebarFooter() {
-  const { signOut } = useAuth();
+/** The card pinned to the sidebar's bottom edge: contextual per page, as the canvas draws it. */
+function ContextCard({ pathname }: { pathname: string }) {
   const summary = useSummary();
+  const renewals = useRenewalsSummary();
   const queued = summary.data?.badges.reviewQueue ?? 0;
+  if (pathname.startsWith("/overview")) {
+    return (
+      <div className={styles.sources}>
+        <p className={styles.sourcesTitle}>Data sources</p>
+        <p className={styles.sourcesText}>CSV import and the Gmail connection. Bank connection: off.</p>
+        {queued > 0 && (
+          <Link href="/imports" className={styles.sourcesLink}>
+            {`Review ${queued} items found in email`}
+          </Link>
+        )}
+      </div>
+    );
+  }
+  if (pathname.startsWith("/calendar")) {
+    // The words are the default reminder policy as the canvas draws it. They must come from
+    // `GET …/reminder-rules` once WP-15 adds it (Q-161), and "Change defaults" opens its editor
+    // (Q-165); until then the copy is fixed and the control is disabled. See Q-167.
+    return (
+      <div className={styles.sources}>
+        <p className={styles.sourcesTitle}>Reminders</p>
+        <p className={styles.sourcesText}>
+          Email + push, 3 days before and on the due date. Each owner gets their own.
+        </p>
+        <button type="button" className={styles.sourcesLinkDisabled} disabled title="Coming soon">
+          Change defaults
+        </button>
+      </div>
+    );
+  }
+  if (pathname.startsWith("/renewals") && renewals.data && renewals.data.count > 0) {
+    const { count, foundAutomatically: found } = renewals.data;
+    return (
+      <div className={styles.sources}>
+        <p className={styles.sourcesTitle}>Found automatically</p>
+        <p className={styles.sourcesText}>
+          {found === count
+            ? `All ${count} came from your email or bank CSV. None were typed by hand.`
+            : `${found} of ${count} came from your email or bank CSV. The rest were typed by hand.`}
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
+function SidebarFooter({ pathname }: { pathname: string }) {
+  const { signOut } = useAuth();
   return (
-    <div className={styles.sources}>
-      <p className={styles.sourcesTitle}>Data sources</p>
-      <p className={styles.sourcesText}>CSV import and the Gmail connection. Bank connection: off.</p>
-      {queued > 0 && (
-        <Link href="/imports" className={styles.sourcesLink}>
-          {`Review ${queued} items found in email`}
-        </Link>
-      )}
+    <div className={styles.footer}>
+      <ContextCard pathname={pathname} />
       <Button variant="text" size="compact" className={styles.signOut} onClick={() => void signOut()}>
         Sign out
       </Button>
@@ -149,7 +192,7 @@ function Sidebar({ className }: { className?: string }) {
         </>
       }
       groups={groups(pathname, badges?.tasksDue ?? 0, badges?.reviewQueue ?? 0)}
-      footer={<SidebarFooter />}
+      footer={<SidebarFooter pathname={pathname} />}
     />
   );
 }
@@ -199,7 +242,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <div className={styles.sidebarSlot}>
-        <Sidebar />
+        <div className={styles.sidebarStick}>
+          <Sidebar />
+        </div>
       </div>
       <div>
         <header className={styles.topBar}>

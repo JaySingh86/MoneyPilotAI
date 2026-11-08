@@ -45,6 +45,20 @@ describe("EventChip", () => {
   });
 });
 
+describe("EventChip layout", () => {
+  it("wraps by default and stays on one line with layout=line, in a cell or alone", () => {
+    const { container } = render(
+      <>
+        <EventChip {...insurance} />
+        <EventChip {...insurance} layout="line" />
+        <CalendarCell date={nov4} events={[insurance]} chipLayout="line" />
+      </>,
+    );
+    const chips = [...container.querySelectorAll("[data-kind]")];
+    expect(chips.map((c) => c.className.includes("chipLine"))).toEqual([false, true, true]);
+  });
+});
+
 describe("CalendarCell", () => {
   it("is named from its visible content plus hidden words, described by its item count (Q-049)", async () => {
     const onSelect = vi.fn();

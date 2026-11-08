@@ -134,3 +134,54 @@
 .checked .dot {
   background: var(--mp-brand-default);
 }
+
+/* Goal variant, canvas "Web · Goals & planned expenses": the selected card is a 2 px border, drawn as
+   a 1 px border plus a 1 px ring just inside it, so nothing inside moves. */
+.goalGroup {
+  gap: var(--mp-space-4);
+}
+
+.goalCard {
+  padding: var(--mp-space-5);
+  border-radius: var(--mp-radius-3xl);
+}
+
+.goalCard .body {
+  gap: var(--mp-space-2_5);
+}
+
+.goalCard .title {
+  font: var(--mp-type-heading-2);
+}
+
+.goalCard.checked {
+  padding: var(--mp-space-5);
+  border: 1px solid var(--mp-brand-default);
+  outline: 1px solid var(--mp-brand-default);
+  outline-offset: -2px;
+}
+
+.goalCard.checked:focus-visible {
+  outline: var(--mp-focus-ring);
+  outline-offset: var(--mp-focus-offset);
+}
+
+.overlineRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--mp-space-2);
+}
+
+.overline {
+  font: var(--mp-type-overline);
+  letter-spacing: var(--mp-tracking-nano);
+  text-transform: uppercase;
+  color: var(--mp-text-muted);
+}
+
+.overlineEnd {
+  font: var(--mp-type-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

@@ -9,13 +9,23 @@
   font: var(--mp-type-body);
 }
 
+/* The slot runs the full height of the page, as the canvas sidebar does; the nav inside sticks to
+   the viewport, so the bottom card stays pinned to the bottom edge while the page scrolls. */
 .sidebarSlot {
+  background: var(--mp-bg-surface);
+  border-right: 1px solid var(--mp-border-default);
+}
+
+.sidebarStick {
   position: sticky;
   top: 0;
-  align-self: start;
   height: 100vh;
   overflow-y: auto;
-  background: var(--mp-bg-surface);
+}
+
+.sidebarStick > nav {
+  width: auto;
+  border-right: 0;
 }
 
 .topBar {
@@ -101,11 +111,17 @@
   color: var(--mp-text-muted);
 }
 
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-2);
+  margin-top: auto;
+}
+
 .sources {
   display: flex;
   flex-direction: column;
   gap: var(--mp-space-1_5);
-  margin-top: auto;
   padding: var(--mp-space-3_5);
   border-radius: var(--mp-radius-lg);
   background: var(--mp-bg-canvas);
@@ -129,8 +145,20 @@
   color: var(--mp-brand-default);
 }
 
+.sourcesLinkDisabled {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: var(--mp-type-caption);
+  font-weight: 600;
+  color: var(--mp-text-disabled);
+  cursor: not-allowed;
+}
+
 .signOut {
   align-self: flex-start;
+  color: var(--mp-text-muted);
 }
 
 .skipLink {

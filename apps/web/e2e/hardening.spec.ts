@@ -2,6 +2,7 @@
 import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
 import { openApp, waitForCalendar, waitForOverview } from "./helpers";
+import { waitForList } from "./lists-helpers";
 
 test.describe("security headers", () => {
   test("every page has the CSP with a fresh nonce, HSTS and the rest", async ({ page }) => {
@@ -83,6 +84,7 @@ test.describe("touch screens (pointer: coarse)", () => {
   for (const [name, path, wait] of [
     ["Overview", "/overview", waitForOverview],
     ["Calendar", "/calendar", waitForCalendar],
+    ["Tasks", "/tasks", (page: Page) => waitForList(page, "tasks")],
   ] as const) {
     test(`${name}: every control is at least 44 px`, async ({ page }) => {
       await openApp(page, path);
@@ -120,20 +122,33 @@ test.describe("mouse (pointer: fine)", () => {
 
 test.describe("calendar chips", () => {
   for (const width of [1440, 1024]) {
-    test(`names stay readable at ${width}`, async ({ page }) => {
+    // Canvas "Web · Shared bills calendar": a chip is one line (dot, name cut with an ellipsis, amount).
+    // The name is clipped, never dropped: the full text stays in the DOM and in the cell's name.
+    test(`chips are one line and keep their full names at ${width}`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await openApp(page, "/calendar");
       await waitForCalendar(page);
-      const names = await page
-        .locator("[data-date] [class*=chipName]")
-        .evaluateAll((els) =>
-          els.map((el) => ({ text: el.textContent ?? "", width: el.getBoundingClientRect().width })),
-        );
-      expect(names.length).toBeGreaterThan(15);
-      // No name is squeezed to a few pixels: at least about four characters of 11 px text.
-      for (const n of names) expect(n.width, n.text).toBeGreaterThanOrEqual(24);
-      const rent = names.find((n) => n.text === "Rent");
-      expect(rent?.width).toBeGreaterThan(26);
+      const chips = await page.locator("[data-date] [data-kind]").evaluateAll((els) =>
+        els.map((el) => {
+          const chip = el.getBoundingClientRect();
+          const amount = (el.lastElementChild as HTMLElement).getBoundingClientRect();
+          const cell = el.closest("[data-date]")?.getBoundingClientRect();
+          return {
+            height: chip.height,
+            overflow: el.scrollWidth - el.clientWidth,
+            // The amount is the last thing in the chip: it must end inside the chip and the cell.
+            amountClipped: Math.max(amount.right - chip.right, amount.right - (cell?.right ?? Infinity)),
+          };
+        }),
+      );
+      expect(chips.length).toBeGreaterThan(15);
+      for (const c of chips) {
+        expect(c.height).toBeLessThanOrEqual(24);
+        // A chip may be a pixel or two wider than its cell at 1024 (dot + amount alone); never more.
+        expect(c.overflow).toBeLessThanOrEqual(2);
+        expect(c.amountClipped).toBeLessThanOrEqual(0);
+      }
+      await expect(page.getByRole("button", { name: /^November 1.*Rent/ })).toBeVisible();
     });
   }
 });

@@ -77,7 +77,13 @@ export function Tasks({ plan, owners }: { plan: PlanResponse; owners: Owners }) 
   // The tasks API (WP-13) is the source: due within 7 days, plus the latest done. Checking one saves it.
   const groups = useTasks();
   const complete = useCompleteTask();
-  const tasks = groups.data ? [...groups.data.dueThisWeek, ...groups.data.done.slice(0, 1)] : [];
+  // Canvas "Web · Overview" lists the week's tasks latest date first, then the latest done.
+  const tasks = groups.data
+    ? [
+        ...[...groups.data.dueThisWeek].sort((a, b) => (b.dueOn ?? "").localeCompare(a.dueOn ?? "")),
+        ...groups.data.done.slice(0, 1),
+      ]
+    : [];
   return (
     <Card title="Household tasks">
       {groups.isError ? (

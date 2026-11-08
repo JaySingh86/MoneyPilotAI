@@ -54,6 +54,17 @@
   list-style: none;
 }
 
+/* Canvas Web · Household tasks: a group card is padding 8 / 22 / 12 with a 12 / 6 header, rows are 12
+   high on each side with a 4 gap between the title and the meta line. */
+.group {
+  gap: 0;
+  padding: var(--mp-space-2) var(--mp-space-5_5) var(--mp-space-3);
+}
+
+.group > :first-child {
+  padding: var(--mp-space-3) 0 var(--mp-space-1_5);
+}
+
 .row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -63,8 +74,25 @@
   border-top: 1px solid var(--mp-border-divider);
 }
 
-.row:first-child {
-  border-top: 0;
+/* The checkbox row is a 44 px touch target in @mp/ui. With a fine pointer the 20 px box and the title
+   are the row, as the canvas draws it; with a coarse pointer it keeps the 44 (DESIGN_SPEC §8). */
+.row .check {
+  align-items: flex-start;
+  gap: var(--mp-space-3);
+}
+
+@media (pointer: fine) {
+  .row .check {
+    min-height: 0;
+  }
+}
+
+.row .check input {
+  margin: var(--mp-space-0_5) 0 calc(-1 * var(--mp-space-0_5));
+}
+
+.row .check label {
+  font-weight: 600;
 }
 
 .meta {
@@ -73,14 +101,15 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--mp-space-1_5) var(--mp-space-2_5);
-  padding-left: var(--mp-space-7);
+  /* 20 px checkbox + 12 px gap */
+  padding-left: calc(var(--mp-space-5) + var(--mp-space-3));
   font: var(--mp-type-caption);
   color: var(--mp-text-muted);
 }
 
 .avatar {
   grid-column: 2;
-  grid-row: 1;
+  grid-row: 1 / span 2;
 }
 
 .due {
@@ -88,9 +117,25 @@
   color: var(--mp-text-secondary);
 }
 
+.dueSoon {
+  padding: var(--mp-space-0_5) var(--mp-space-2);
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-attention-soft);
+  color: var(--mp-attention-text);
+  font-weight: 600;
+}
+
 .link {
   font-weight: 600;
   color: var(--mp-brand-default);
+}
+
+/* Inline links are 44 px targets on touch screens, through padding (DESIGN_SPEC §8). */
+@media (pointer: coarse) {
+  .link {
+    display: inline-block;
+    padding-block: var(--mp-space-3_5);
+  }
 }
 
 .count {

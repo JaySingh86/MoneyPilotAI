@@ -45,15 +45,30 @@ describe("Goals & planned expenses", () => {
     expect(within(table).getByText("$2,400.00")).toBeTruthy();
   });
 
-  it("selects the first goal, with a stepper and no suggestion when on track", async () => {
+  it("opens on the goal that is behind, with its suggestion and the paydays math", async () => {
     renderApp(<GoalsScreen />);
     await loaded();
     await within(aside()).findByText("Result");
-    expect(within(aside()).getByRole("heading", { name: "Emergency fund" })).toBeTruthy();
+    expect(within(aside()).getByRole("heading", { name: "Lake Tahoe trip" })).toBeTruthy();
+    expect(within(aside()).getByRole("button", { name: "Use $313 a month to stay on track" })).toBeTruthy();
+    expect(within(aside()).getByText("4 paydays × $250")).toBeTruthy();
+    expect(within(aside()).getByText("By target date")).toBeTruthy();
+    expect(
+      screen.getByText("Transfers are reminders on Sam’s payday. You move the money yourselves."),
+    ).toBeTruthy();
+  });
+
+  it("shows a stepper and no suggestion for a goal that is on track", async () => {
+    renderApp(<GoalsScreen />);
+    await loaded();
+    await userEvent.click(screen.getByRole("radio", { name: /Emergency fund/ }));
+    await waitFor(() =>
+      expect(within(aside()).getByRole("heading", { name: "Emergency fund" })).toBeTruthy(),
+    );
+    await within(aside()).findByText("Reached Oct 2027");
     expect(within(aside()).getByText("Target $10,000 · no deadline")).toBeTruthy();
     expect(within(aside()).getByRole("group", { name: "Monthly deposit" })).toBeTruthy();
     expect(within(aside()).queryByText(/to stay on track/)).toBeNull();
-    expect(within(aside()).getByText("Reached Oct 2027")).toBeTruthy();
   });
 
   it("steps Tahoe by $25, updates the total live, and suggests $313", async () => {

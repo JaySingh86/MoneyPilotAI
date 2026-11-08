@@ -1,6 +1,7 @@
 /* Goals & planned expenses, DESIGN_SPEC §5.1. */
-.cards {
-  display: block;
+/* Canvas: the selected-goal aside is "1 1 320px" content-box, 366 border-box (the others are 300 / 346). */
+.detail.detail {
+  flex-basis: 366px;
 }
 
 .stepBlock {
@@ -122,5 +123,4 @@
 
 .statusChip {
   align-self: flex-start;
-  margin-top: var(--mp-space-2);
 }

@@ -264,3 +264,13 @@
     height: calc(var(--mp-touch-target) + 2px);
   }
 }
+
+/* Canvas "Web · Overview": "Plan for it" on the attention card is a dark button (text.primary, white text). */
+.planButton.planButton:not(:disabled) {
+  background: var(--mp-text-primary);
+  color: var(--mp-text-inverse);
+}
+
+.planButton.planButton:hover:not(:disabled) {
+  background: var(--mp-text-secondary);
+}

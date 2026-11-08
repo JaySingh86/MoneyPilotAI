@@ -39,6 +39,7 @@ export function GoalDetail({
   draftCents,
   onDraft,
   partnerName,
+  payerName,
   pending,
 }: {
   goal: Goal;
@@ -47,6 +48,8 @@ export function GoalDetail({
   draftCents: number | null;
   onDraft: (monthlyCents: number | null) => void;
   partnerName: string;
+  /** Whose payday the deposit lands on, when known ("Sam"). */
+  payerName: string | null;
   /** The pending proposal for this goal's monthly amount, if any. */
   pending: Proposal | null;
 }) {
@@ -71,7 +74,7 @@ export function GoalDetail({
   );
 
   return (
-    <aside className={lists.aside} aria-label="Selected goal">
+    <aside className={`${lists.aside} ${styles.detail}`} aria-label="Selected goal">
       <div>
         <p className={lists.overline}>{kindLabel(goal)}</p>
         <h2 className={lists.asideTitle}>{goal.name}</h2>
@@ -125,7 +128,7 @@ export function GoalDetail({
       </div>
       <p className={lists.footer}>
         Changes take effect after both partners approve. Calculated by MoneyPilot’s planning rules: one
-        deposit per month on the first payday.
+        deposit per month on {payerName ? `${payerName}’s ` : ""}first payday.
       </p>
     </aside>
   );

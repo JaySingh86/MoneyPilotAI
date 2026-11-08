@@ -156,16 +156,22 @@ export function BillsScreen() {
         />
       ),
     },
-    { key: "schedule", header: "Schedule", render: (r) => scheduleLabel(r.item.schedule, r.item.amountType) },
+    {
+      key: "schedule",
+      header: "Schedule",
+      render: (r) => scheduleLabel(r.item.schedule, r.item.amountType),
+    },
     {
       key: "next",
       header: "Next",
       render: (r) =>
         r.next ? (
-          <TwoLineCell
-            title={shortDate(r.next, plan.data.asOf)}
-            meta={relativeFrom(plan.data.asOf, r.next)}
-          />
+          <span className={lists.noWrap}>
+            <TwoLineCell
+              title={shortDate(r.next, plan.data.asOf)}
+              meta={relativeFrom(plan.data.asOf, r.next)}
+            />
+          </span>
         ) : (
           "—"
         ),
@@ -239,7 +245,7 @@ export function BillsScreen() {
       )}
 
       <div className={lists.layout}>
-        <div className={lists.main}>
+        <div className={`${lists.main} ${lists.mainWide}`}>
           <Card>
             <div className={lists.cardBody}>
               <div className={lists.toolbar}>
