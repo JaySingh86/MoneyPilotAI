@@ -73,7 +73,7 @@ The exact values are in `design/tokens.json`. This section covers how to use the
 ## 3. Layout
 
 ### 3.1 Web
-- **Shell:** a sidebar (`size.sidebarWidth` 240, `bg.surface`, right border) next to the content area. The content area has padding of 28 at the top, `clamp(16px, 3vw, 40px)` on the sides and 40 at the bottom. Content fills the space up to `max-width: 1600px` (`size.contentMaxWidth`), then centers; owner decision 2026-11-09, so the app fills common wide screens instead of floating in a 1160 column.
+- **Shell:** a sidebar (`size.sidebarWidth` 240, `bg.surface`, right border) next to the content area. The content area has padding of 28 at the top, `clamp(16px, 3vw, 40px)` on the sides and 40 at the bottom. Content fills the space up to `max-width: 1600px` (`size.contentMaxWidth`), then centers; owner decision 2026-11-09, so the app fills common wide screens instead of floating in a 1160 column. Email (notifications) uses `size.emailMaxWidth` 600 (Q-180).
 - **Page header:** an overline (date or section), `heading-1` title, and `body-l` subtitle in `text.muted`. Actions sit on the right and wrap below on narrow widths.
 - **KPI row:** CSS grid `repeat(auto-fit, minmax(240px, 1fr))` with gap 16. The hero tile spans 2 columns when there is room.
 - **Body:** two columns, main and side, in a 2:1 ratio with gap 20. Main has a minimum width of 560 and side a minimum of 320. Sections inside a column are spaced 20 apart.

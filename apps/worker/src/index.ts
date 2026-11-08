@@ -1,4 +1,5 @@
 import { createWorkerDb } from "@mp/db";
+import { createEmailSender, type EmailSender } from "@mp/notify";
 import { createLogger } from "@mp/observability";
 import { startJobs } from "./boss";
 import { StartupCheckError, checkBossConnection } from "./startup-checks";
@@ -21,8 +22,21 @@ try {
   process.exit(1);
 }
 
+// Email delivery (WP-15): SES in production, Mailpit locally. A production worker without EMAIL_TRANSPORT and
+// WEB_ORIGIN (the origin email links point to) stops here instead of silently never sending.
+let email: EmailSender;
+let appUrl: string;
+try {
+  email = createEmailSender(process.env);
+  appUrl = process.env.WEB_ORIGIN ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:3100");
+  new URL(appUrl);
+} catch (err) {
+  log.error({ err }, "email delivery is misconfigured; refusing to start");
+  process.exit(1);
+}
+
 const db = createWorkerDb({ connectionString: databaseUrl });
-const jobs = await startJobs({ bossUrl, db, now: () => new Date().toISOString(), log });
+const jobs = await startJobs({ bossUrl, db, now: () => new Date().toISOString(), log, email, appUrl });
 log.info("worker started");
 
 let stopping: Promise<void> | null = null;

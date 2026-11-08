@@ -32,7 +32,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-12 | Planning API: plan, what-if, calendar, renewals, bills, snapshots | 3 | WP-06, WP-07, WP-08 | M | — | done |
 | WP-13 | Goals, proposals, tasks | 3 | WP-05, WP-07, WP-08 | M | — | done |
 | WP-14 | Review queue + applied changes (undo) | 3 | WP-06, WP-08 | M | — | done |
-| WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | in-progress (wp-builder, wp/15-notify) |
+| WP-15 | Reminders + notifications (SES) | 3 | WP-06, WP-08 | M | — | done |
 | WP-16 | CSV import + recurring detection | 3 | WP-14 | M | — | done |
 | WP-17 | Web: shell, sign-in, Overview (incl. shortfall), Calendar | 3 | WP-10, WP-08 (WP-12 for live data) | L | — | done |
 | WP-18 | Web: Bills, Renewals, Goals, Tasks | 3 | WP-10, WP-08 (WP-12, WP-13 for live data) | L | — | done |
@@ -261,11 +261,11 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
 - **Owns:** `packages/notify/**`, `apps/worker/src/jobs/{reminders,notifications}/**`, `apps/api/src/modules/notify/**`, related migrations.
 - **Read first:** BACKEND_PLAN §7.6; ARCHITECTURE §4.4.
 - **Acceptance:**
-  - [ ] Running `reminders.plan` twice creates no duplicates (unique dedupe key).
-  - [ ] Send times equal 09:00 household local time across the DST boundary (test with Nov 1, 2026).
-  - [ ] Paying or moving an occurrence cancels and re-plans its future notifications.
-  - [ ] SES bounce events update delivery status; a hard bounce disables the email channel.
-  - [ ] `packages/notify` provides WP-05's `InviteSender` (link `/invite?token=`, names escaped, per-user send quota) and the `invite.accepted` notification to the creator (Q-081, Q-087).
+  - [x] Running `reminders.plan` twice creates no duplicates (unique dedupe key).
+  - [x] Send times equal 09:00 household local time across the DST boundary (test with Nov 1, 2026).
+  - [x] Paying or moving an occurrence cancels and re-plans its future notifications.
+  - [x] SES bounce events update delivery status; a hard bounce disables the email channel.
+  - [x] `packages/notify` provides WP-05's `InviteSender` (link `/invite?token=`, names escaped, per-user send quota) and the `invite.accepted` notification to the creator (Q-081, Q-087).
 
 ## WP-16 · CSV import + recurring detection
 - **Owns:** `packages/detection/**`, `apps/api/src/modules/imports/**`, `apps/worker/src/jobs/imports/**`, migrations for `imports`, `transactions`.
@@ -334,6 +334,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Map the WP-11 snake_case extraction (fields and evidence field names) to the camelCase review contracts explicitly, with tests.
   - [ ] Run the subject through the WP-19 redactor before writing `extracted_items.message_meta`; `domainMatch` comes only from `isDomainMatch`, and `senderFirstSeen` defaults to true on any error.
   - [ ] The worker writes `providerDomain: null` in `extracted_items.fields` (a model-supplied domain is never trusted; only a user edit sets it), with a test.
+  - [ ] A detected price change on a monthly subscription creates a one-off reminder through `packages/notify` (DESIGN_SPEC §6 rule 11, Q-134).
 - **Gate:** G3 before `auto_apply` is enabled for any household.
 
 ## WP-23 · Web: Email & imports, Members & privacy, setup, review UI
@@ -352,6 +353,7 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] The retention purge nulls `extracted_items.message_meta` and `evidence` after 13 months and expires `queued` review items after the configured age; soft-deleted items and goals are hard-deleted after the retention period (WP-06 Q-055).
   - [ ] The purge covers `calc_snapshots` older than 90 days that no `ai_texts` row or proposal references, through a SECURITY DEFINER function (Q-104).
   - [ ] Deletion and retention cover `subscriptions` and `billing_events` (cascade from households; processed events and `webhook_events` purged at 13 months, Q-154).
+  - [ ] The retention purge deletes `notifications` older than 90 days (deliveries cascade) and `send_quota_events` older than 2 days (WP-15 security review).
 - **Gate:** G2.
 
 ## WP-25 · Billing + entitlements
@@ -370,6 +372,8 @@ Frontend WPs (WP-17, WP-18, WP-23) can start before their APIs exist, using the 
   - [ ] Runbooks exist: token key rotation, watch outage, SES bounce spike, restore from PITR.
   - [ ] The idempotency store is database-backed, so a repeated key within 24 h returns the stored response across API instances (§8.1).
   - [ ] Writes to items, occurrences, balances, planned expenses and goals enqueue `plan.recompute` after commit, through WP-09's enqueue function (Q-102).
+  - [ ] Marking paid, moving, skipping or deleting an occurrence enqueues `reminders.plan` after commit (Q-132).
+  - [ ] Signed one-click unsubscribe route plus RFC 8058 `List-Unsubscribe` / `List-Unsubscribe-Post` headers on mutable notification kinds (Q-135).
 - **Gate:** G4.
 
 ## P1 packages (start only after the Day-60 decision gate)

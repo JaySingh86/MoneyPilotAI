@@ -21,6 +21,7 @@
     "@mp/db": "workspace:*",
     "@mp/detection": "workspace:*",
     "@mp/engine": "workspace:*",
+    "@mp/notify": "workspace:*",
     "@mp/observability": "workspace:*",
     "@mp/review-rules": "workspace:*",
     "aws-jwt-verify": "5.2.1",

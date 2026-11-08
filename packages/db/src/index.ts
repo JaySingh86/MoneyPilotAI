@@ -51,6 +51,13 @@ export {
   type PlannedOccurrence,
   type ScheduledItem,
 } from "./items/materialize";
+export { NOTIFICATION_KINDS, type NotificationKind } from "./schema/notify";
+export {
+  insertNotification,
+  notifyInviteAccepted,
+  type InviteAcceptedNotice,
+  type NewNotification,
+} from "./notify/insert";
 export { expireProposals } from "./proposals/expire";
 export { autoCompleteTasks, type AutoCompleteEvent, type AutoCompleted } from "./tasks/auto-complete";
 export {

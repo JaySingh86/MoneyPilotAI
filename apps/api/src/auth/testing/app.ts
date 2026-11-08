@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { inject } from "vitest";
 import { createApiDb, type ApiDb } from "@mp/db";
+import type { ApiModule } from "../../lib/module";
 import { buildServer, type ApiServer } from "../../server";
 import { createHouseholdsModule } from "../../modules/households";
 import { createIdentityModule } from "../../modules/identity";
@@ -56,6 +57,10 @@ export interface TestApiOptions {
   now?: () => string;
   /** The billing provider behind the billing routes (WP-25). Default: none configured. */
   billingProvider?: BillingProvider | null;
+  /** More modules to mount (for example WP-15's notify modules), built from the test runtime. */
+  extraModules?: (rt: ApiRuntime) => readonly ApiModule[];
+  /** Replaces the capturing invite sender, for example with WP-15's real one over a fake mail transport. */
+  inviteSender?: (db: ApiDb) => InviteSender;
 }
 
 export async function createTestApi(options: TestApiOptions = {}): Promise<TestApi> {
@@ -79,7 +84,7 @@ export async function createTestApi(options: TestApiOptions = {}): Promise<TestA
       });
     },
   };
-  const rt: ApiRuntime = { db, provider, inviteSender };
+  const rt: ApiRuntime = { db, provider, inviteSender: options.inviteSender?.(db) ?? inviteSender };
   const app = buildServer({
     authenticate: createAuthenticator({ provider, db }),
     modules: [
@@ -89,6 +94,7 @@ export async function createTestApi(options: TestApiOptions = {}): Promise<TestA
       ...createWp13Modules(() => rt, { now }),
       createPlanningModule(() => rt, { now }),
       ...createBillingModules(() => rt, { now, provider: options.billingProvider ?? null }),
+      ...(options.extraModules?.(rt) ?? []),
     ],
   });
   await app.ready();

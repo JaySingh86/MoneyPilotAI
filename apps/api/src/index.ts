@@ -3,7 +3,9 @@ import { createLogger } from "@mp/observability";
 import { createAuthenticator } from "./auth/authenticator";
 import { AuthConfigError, loadCognitoConfig } from "./auth/config";
 import { createCognitoProvider } from "./auth/cognito";
-import { configureRuntime, createUnconfiguredInviteSender } from "./auth/runtime";
+import { createEmailSender, createInviteSender, type InviteSenderPort } from "@mp/notify";
+import { configureRuntime } from "./auth/runtime";
+import { createDbSendQuota } from "./modules/notify";
 import { unauthorized, type AuthProvider } from "./auth/provider";
 import { createSharedDb, installShutdown } from "./lib/db-pool";
 import { buildServer } from "./server";
@@ -64,9 +66,21 @@ try {
   process.exit(1);
 }
 
-// The invite sender is packages/notify's job (WP-15, Q-081). Until it is wired, this one fails in
-// production so an invite is never reported as sent when it was not.
-configureRuntime({ db, provider, inviteSender: createUnconfiguredInviteSender(process.env, log) });
+// Invite emails (WP-15, Q-081): SES in production, Mailpit locally. Production without EMAIL_TRANSPORT stops the
+// API at startup, so an invite is never reported as sent when it was not.
+let inviteSender: InviteSenderPort;
+try {
+  inviteSender = createInviteSender({
+    email: createEmailSender(process.env),
+    quota: createDbSendQuota(db),
+    // Production must set WEB_ORIGIN (an empty URL makes createInviteSender throw).
+    appUrl: webOrigin ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:3100"),
+  });
+} catch (err) {
+  log.error({ err }, "email delivery is misconfigured; refusing to start");
+  process.exit(1);
+}
+configureRuntime({ db, provider, inviteSender });
 
 // TODO(WP-26): database-backed idempotency store (lib/idempotency-store.ts); the in-memory default is per process.
 const app = buildServer({

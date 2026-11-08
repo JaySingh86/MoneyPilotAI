@@ -12,3 +12,4 @@ export * from "./proposals";
 export * from "./tasks";
 export * from "./billing";
 export * from "./imports";
+export * from "./notify";

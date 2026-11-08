@@ -54,6 +54,14 @@ Format (newest first):
 - Answer: … (tech lead, date)
 ```
 
+## Q-180 · WP-15 · Email max width token
+- Asked by: wp-builder/wp/15-notify · 2026-11-08
+- Where: `packages/notify/src/theme.ts` and `templates.ts` (hard rule 6, no hand-written values); `design/tokens.json` `size.*`
+- Question: The email card is 600px wide in every mail client convention, but `design/tokens.json` has no such token. The templates use `size.contentMaxWidth` (1160px), which is too wide for a one-column mail. Please approve adding `size.emailMaxWidth = 600px` to `design/tokens.json` (and `tokens.css`) so the theme can read it. This is a human spec change; agents do not edit `design/`.
+- Options considered: (a) keep `size.contentMaxWidth` (built); (b) add `size.emailMaxWidth`.
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-09): (b). `size.emailMaxWidth` = 600px is added to `design/tokens.json` and `tokens.css`; `packages/notify` uses it. Reminder emails keep the amount in the body (subjects stay amount-free).
+
 ## Q-167 · WP-18 · Canvas-fidelity round: text the canvas draws that no contract carries or the spec decided otherwise
 - Asked by: wp-builder/wp/18-canvas-fidelity · 2026-11-08
 - Where: canvas Web · Subscriptions & renewals, Web · Goals & planned expenses, Web · Overview, Web · Shared bills calendar; DESIGN_SPEC §5.1, §7
@@ -182,6 +190,70 @@ Format (newest first):
 - Options considered: put the schedule in a new `fields` key (strict schema, a WP-14 change); create income items directly (forbidden: items come only from `fromReview`).
 - Blocking: no for detection; yes for a one-click biweekly paycheck.
 - Answer: …
+
+## Q-137 · WP-15 · An expired proposal does not notify the proposer
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: BACKEND_PLAN §7.3, ARCHITECTURE §4.5 ("notify Sam" only on supersede), Q-115 / Q-117
+- Question: The proposer is notified when a proposal is approved, declined or superseded. The hourly `proposals.expire` job (and the lazy expiry inside `insertProposal`) mark a proposal `expired` silently. Should the proposer hear that it lapsed after 7 days? It needs the expiry code to return which proposals it closed.
+- Options considered: (a) no notice, the Overview already shows it as expired (built); (b) notify the proposer once on expiry.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (a). Send no notice on expiry. The Overview already shows the proposal as expired, and ARCHITECTURE §4.5 notifies only on supersede.
+
+## Q-136 · WP-15 · Email styling has no colors
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: CLAUDE.md hard rule 6 (tokens only, no hex outside `design/` and `packages/ui/tokens`); `packages/notify/src/templates.ts`
+- Question: HTML email needs inline styles, which cannot use CSS variables. The templates therefore set only layout and font weight, no colors, so the mail renders in the client's defaults. Do you want an email theme (a generated map from `design/tokens.json` to inline values, owned by `packages/notify`) so mail can use the brand colors and the canvas typography?
+- Options considered: (a) no colors (built); (b) a generated email theme from the tokens, with a build step and a test that no hex is hand-written.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (b), with no build step. `packages/notify` reads its colors and type values from `design/tokens.json` at module load and maps them to inline styles, so no hex is ever hand-written. Add a test that fails if `packages/notify/src` contains a hex color literal.
+
+## Q-135 · WP-15 · Unsubscribe is a link to settings, not one-click
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: BACKEND_PLAN §7.6 ("Transactional mail includes an unsubscribe link for non-essential categories")
+- Question: Mail for the kinds a person can mute (reminder, review, task, digest) ends with a link to Notifications settings (`/notifications`), where `PUT /me/notification-preferences` mutes a kind. There is no signed one-click link and no `List-Unsubscribe` / `List-Unsubscribe-Post` header (RFC 8058, which Gmail and Yahoo expect for bulk senders), because that needs a public unsubscribe endpoint with a signed token. Is the settings link enough for the MVP? The Notifications screen is not drawn yet, so `/notifications` is also my guess at its route.
+- Options considered: (a) settings link only (built); (b) add a signed-token unsubscribe route and the RFC 8058 headers.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (a) for the MVP. Reminder, review, task and digest mail is relationship mail at pilot volume, and the settings link meets BACKEND_PLAN §7.6. Use `/settings/notifications` as the route (WP-23 owns `settings/**`). A signed one-click unsubscribe route and the RFC 8058 `List-Unsubscribe`/`List-Unsubscribe-Post` headers go on the WP-26 checklist, to be done before the pilot (G4).
+
+## Q-134 · WP-15 · Which bills get reminders, and the monthly-subscription rule
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: DESIGN_SPEC §6 rule 11 ("Monthly subscriptions only get a reminder when the price changes"), BACKEND_PLAN §5.2 (`offsets_days` default `{3,0}`)
+- Question: The planner reminds for active outflow items with a scheduled occurrence: offsets `{3,0}` by default, and `{30,7,0}` for items billed every 6 months or less often (rule 11), unless the household or the item has a `reminder_rules` row. It does NOT apply "monthly subscriptions only when the price changes", because the price-change event has no source yet (it arrives with email capture, WP-22), and a monthly subscription would otherwise be reminded 3 days and 0 days before every charge. Should monthly subscriptions (category `subscription`, monthly cadence) get no reminders until a price change, and should that change create a one-off reminder?
+- Options considered: (a) remind like any bill (built); (b) skip monthly subscriptions and add a price-change reminder when WP-22 lands.
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): (b). DESIGN_SPEC §6 rule 11 wins: a monthly subscription (category `subscription`, monthly cadence) gets no default reminders. An explicit item-level `reminder_rules` row still applies, because the user asked for it. The one-off price-change reminder lands with WP-22 and is added to its checklist.
+
+## Q-133 · WP-15 · No API to edit reminder rules; no path to re-enable a bounced address
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: BACKEND_PLAN §8.2 (the endpoint list has notifications and preferences but no reminder rules), DESIGN_SPEC §5.1 ("Edit reminders", the Reminders switch rows)
+- Question: `reminder_rules` exists with RLS and member write grants, and the planner and dispatcher read it, but no route edits it, so the Reminders card and "Edit reminders" have nothing to call. Also, after a hard bounce or a complaint `email_suppressed_*` stays set and the person cannot clear it; it should clear when their email address changes (the auth sync in WP-05) or through support. Which routes and which clearing rule do you want?
+- Options considered: add `GET/PUT /households/:hid/reminder-rules` and `…/items/:id/reminders`; clear suppression in `app_sync_auth_user` when the email changes.
+- Blocking: no (rules can be seeded; suppression can be cleared by a migration-owned script).
+- Answer: Answered (tech lead for owner, 2026-11-08): build both in the WP-15 fix round. (1) Add `GET/PUT /households/:hid/reminder-rules` (the household default) and `GET/PUT /households/:hid/items/:id/reminders` (one item; `PUT` with `null` removes the item override), with contracts in `@mp/contracts` and member write access as the table grants already allow. This also unblocks WP-18's Q-161 and Q-165. (2) Clear `email_suppressed_*` in `app_sync_auth_user` when the user's email address changes, in a new migration (cross-WP: WP-05's function), with a test. Support handles any other clearing.
+
+## Q-132 · WP-15 · "On occurrence change" re-planning waits for the API queue
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: BACKEND_PLAN §7.6 ("reminders.plan … plus on occurrence change"), Q-102 / Q-105 (the API has no queue connection until `mp_queue`)
+- Question: `reminders.plan` is idempotent and reconciles a household with its calendar, and `enqueueRemindersPlan(sender, householdId)` is ready, but the API cannot enqueue, so paying, moving or deleting an occurrence is only picked up by the 15-minute sweep. Nothing wrong is ever sent in that window: the dispatcher re-checks every reminder against the live occurrence (still scheduled, same due date, bill still active) and cancels a stale one. The hooks for items.service (mark paid, move, skip, delete) belong with the other enqueue hooks on the WP-26 checklist. OK?
+- Options considered: n/a
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): accepted. Re-planning relies on the 15-minute sweep plus the dispatcher's live re-check until the API can enqueue. The items.service hooks that enqueue `reminders.plan` (mark paid, move, skip, delete) are added to the WP-26 checklist next to `plan.recompute`.
+
+## Q-131 · WP-15 · Reminder dedupe key and table shape differ from the BACKEND_PLAN sketch
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: BACKEND_PLAN §5.2 and §7.6 (`dedupe_key = reminder:{occurrence_id}:{offset}:{user_id}`, unique), DESIGN_SPEC §6 rule 12 ("The dedupe key is (item, occurrence date, offset)")
+- Question: The DESIGN_SPEC wins on precedence, and it also behaves better: rebuilding future occurrences after an item edit gives them new ids, so an `occurrence_id` key would send the same reminder twice. The key is `reminder:{item_id}:{scheduled_on}:{offset}:{user_id}` (the rule date, which a manual move does not change, so a moved bill updates its rows in place). The migration therefore adds `item_id`, `scheduled_on`, `offset_days`, `due_on` and `attempt_at` (the retry/lease time, so `send_at` stays "when it was due") to `notifications`, makes the unique key `(household_id, dedupe_key)` (a global unique would let one tenant probe another's keys), and adds `household_id` to `notification_deliveries` (hard rule 3). Please confirm, and update §5.2.
+- Options considered: keep `occurrence_id` and cancel/re-plan on every rebuild (resends are possible).
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): confirmed. DESIGN_SPEC §6 rule 12 wins: the key is `reminder:{item_id}:{scheduled_on}:{offset}:{user_id}`, unique per `(household_id, dedupe_key)`. The new `notifications` columns and `household_id` on `notification_deliveries` are accepted. BACKEND_PLAN §5.2 and §7.6 now match.
+
+## Q-130 · WP-15 · Edits outside WP-15's paths
+- Asked by: wp-builder/wp/15-notify · 2026-11-04
+- Where: WORK_PLAN WP-15 ("Owns"), CLAUDE.md rule 13
+- Question: These cross-WP edits were needed; please confirm none should move. (1) `InviteSender.send` (WP-05, `apps/api/src/auth/runtime.ts`) gained `invitedByUserId`, which the per-user quota needs; `households/service.ts` passes it, maps the quota error to 429 `rate_limited`, and calls `notifyInviteAccepted` in the accept transaction. The sender un-escapes the names the API already HTML-escapes (the WP-05 test pins that behavior) and escapes again per output part, so there is no double escaping. (2) WP-13: `proposals/core.ts` (`insertProposal`, the one place every proposal is created: proposals, goals, items) notifies the other member, and `proposals/service.ts` notifies the proposer on approve, reject and supersede. (3) WP-12/WP-13 worker wiring: `boss.ts` registers `proposals.expire` (with a new hourly `proposals.expire.sweep`, file `jobs/proposals/sweep.ts`) and `tasks.auto_complete` (Q-117). (4) `@mp/db`: schema mirror, `insertNotification`, `WorkerDb.listHouseholdIdsWithDueNotifications`, the RLS world and cases for the new tables, and two new rows in the G1 definer-function allowlist (`coverage.test.ts`). (5) The API test app (`auth/testing/app.ts`) accepts `extraModules` and `inviteSender`.
+- Options considered: n/a
+- Blocking: no.
+- Answer: Answered (tech lead for owner, 2026-11-08): accepted. All five cross-WP edits stay where they are. List them under "Cross-WP changes" in the WP-15 PR.
 
 ## Q-119 · WP-13 · The split's "(rest)" planned expense is attributed to the approver, not the proposer
 - Asked by: wp-builder/wp/13-goals-tasks · 2026-11-03

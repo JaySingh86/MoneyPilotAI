@@ -13,7 +13,8 @@ import {
   type PatchHouseholdBody,
 } from "@mp/contracts";
 import { entitlementsForPlan } from "@mp/billing";
-import type { ApiDb, ApiContext, Tx } from "@mp/db";
+import { notifyInviteAccepted, type ApiDb, type ApiContext, type Tx } from "@mp/db";
+import { SendQuotaExceededError } from "@mp/notify";
 import { assertVersion } from "../../lib/if-match";
 import type { InviteSender } from "../../auth/runtime";
 import { recordAudit, type RequestMeta } from "../identity/audit";
@@ -361,6 +362,7 @@ export class HouseholdService {
         householdName: escapeHtml(created.householdName),
         inviterFirstName: escapeHtml(created.inviterFirstName),
         expiresAt: created.invite.expiresAt,
+        invitedByUserId: caller.userId,
       });
     } catch (err) {
       // Do not leave an unsendable invite blocking the next attempt.
@@ -369,6 +371,13 @@ export class HouseholdService {
           repo.revokeInvite(tx, householdId, created.invite.id),
         )
         .catch(() => undefined);
+      if (err instanceof SendQuotaExceededError) {
+        throw new AppError(
+          "rate_limited",
+          429,
+          "You have sent too many invitations today. Try again tomorrow.",
+        );
+      }
       throw new AppError("internal_error", 502, "We could not send the invitation email. Try again.", {
         cause: err,
       });
@@ -424,8 +433,9 @@ export class HouseholdService {
       if (await repo.hasActiveMembership(tx, caller.userId)) {
         throw new AppError("conflict", 409, ALREADY_IN_HOUSEHOLD);
       }
+      let householdId: string;
       try {
-        return { householdId: await repo.acceptInvite(tx, tokenHash) };
+        householdId = await repo.acceptInvite(tx, tokenHash);
       } catch (err) {
         if (isUniqueViolation(err, ONE_ACTIVE_INDEX))
           throw new AppError("conflict", 409, ALREADY_IN_HOUSEHOLD);
@@ -435,6 +445,9 @@ export class HouseholdService {
         }
         throw err;
       }
+      // Tell whoever sent the invite (WP-15, Q-087); in this transaction, so it exists exactly when the membership does.
+      await notifyInviteAccepted(tx, { householdId, tokenHash, accepterUserId: caller.userId });
+      return { householdId };
     });
   }
 

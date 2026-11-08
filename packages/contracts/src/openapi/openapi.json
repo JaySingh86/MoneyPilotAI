@@ -4908,6 +4908,139 @@
         },
         "required": ["import", "upload"]
       },
+      "NotificationKindInput": {
+        "type": "string",
+        "enum": ["reminder", "review", "proposal", "task", "digest", "security", "system"]
+      },
+      "NotificationDeliveryInput": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "enum": ["email", "push"] },
+          "status": {
+            "type": "string",
+            "enum": ["queued", "sent", "delivered", "bounced", "complained", "failed"]
+          }
+        },
+        "required": ["channel", "status"]
+      },
+      "NotificationInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "kind": { "$ref": "#/components/schemas/NotificationKindInput" },
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "deepLink": { "type": ["string", "null"] },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "status": { "type": "string", "enum": ["scheduled", "sent", "failed"] },
+          "read": { "type": "boolean" },
+          "readAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "delivery": {
+            "anyOf": [{ "$ref": "#/components/schemas/NotificationDeliveryInput" }, { "type": "null" }]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body",
+          "deepLink",
+          "sentAt",
+          "status",
+          "read",
+          "readAt",
+          "delivery"
+        ]
+      },
+      "NotificationListInput": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/NotificationInput" } },
+          "nextCursor": { "type": ["string", "null"] },
+          "unreadCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": ["data", "nextCursor", "unreadCount"]
+      },
+      "NotificationPreferencesInput": {
+        "type": "object",
+        "properties": {
+          "emailEnabled": { "type": "boolean" },
+          "mutedKinds": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["reminder", "review", "task", "digest"] }
+          },
+          "emailSuppressed": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "reason": { "type": "string", "enum": ["hard_bounce", "complaint"] },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                  }
+                },
+                "required": ["reason", "at"]
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["emailEnabled", "mutedKinds", "emailSuppressed"]
+      },
+      "UpdateNotificationPreferencesInput": {
+        "type": "object",
+        "properties": {
+          "emailEnabled": { "type": "boolean" },
+          "mutedKinds": {
+            "maxItems": 4,
+            "type": "array",
+            "items": { "type": "string", "enum": ["reminder", "review", "task", "digest"] }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReminderRuleInput": {
+        "type": "object",
+        "properties": {
+          "offsetsDays": {
+            "minItems": 1,
+            "maxItems": 6,
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0, "maximum": 60 }
+          },
+          "channels": {
+            "minItems": 1,
+            "maxItems": 2,
+            "type": "array",
+            "items": { "type": "string", "enum": ["email", "push"] }
+          },
+          "alsoNotifyPartner": { "type": "boolean" }
+        },
+        "required": ["offsetsDays", "channels", "alsoNotifyPartner"],
+        "additionalProperties": false
+      },
+      "ItemReminderRuleInput": {
+        "anyOf": [{ "$ref": "#/components/schemas/ReminderRuleInput" }, { "type": "null" }]
+      },
       "ProblemField": {
         "type": "object",
         "properties": {
@@ -9945,7 +10078,143 @@
         },
         "required": ["import", "upload"],
         "additionalProperties": false
-      }
+      },
+      "NotificationKind": {
+        "type": "string",
+        "enum": ["reminder", "review", "proposal", "task", "digest", "security", "system"]
+      },
+      "NotificationDelivery": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "enum": ["email", "push"] },
+          "status": {
+            "type": "string",
+            "enum": ["queued", "sent", "delivered", "bounced", "complained", "failed"]
+          }
+        },
+        "required": ["channel", "status"],
+        "additionalProperties": false
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "kind": { "$ref": "#/components/schemas/NotificationKind" },
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "deepLink": { "type": ["string", "null"] },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+          },
+          "status": { "type": "string", "enum": ["scheduled", "sent", "failed"] },
+          "read": { "type": "boolean" },
+          "readAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "delivery": {
+            "anyOf": [{ "$ref": "#/components/schemas/NotificationDelivery" }, { "type": "null" }]
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body",
+          "deepLink",
+          "sentAt",
+          "status",
+          "read",
+          "readAt",
+          "delivery"
+        ],
+        "additionalProperties": false
+      },
+      "NotificationList": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Notification" } },
+          "nextCursor": { "type": ["string", "null"] },
+          "unreadCount": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+        },
+        "required": ["data", "nextCursor", "unreadCount"],
+        "additionalProperties": false
+      },
+      "NotificationPreferences": {
+        "type": "object",
+        "properties": {
+          "emailEnabled": { "type": "boolean" },
+          "mutedKinds": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["reminder", "review", "task", "digest"] }
+          },
+          "emailSuppressed": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "reason": { "type": "string", "enum": ["hard_bounce", "complaint"] },
+                  "at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                  }
+                },
+                "required": ["reason", "at"],
+                "additionalProperties": false
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["emailEnabled", "mutedKinds", "emailSuppressed"],
+        "additionalProperties": false
+      },
+      "UpdateNotificationPreferences": {
+        "type": "object",
+        "properties": {
+          "emailEnabled": { "type": "boolean" },
+          "mutedKinds": {
+            "maxItems": 4,
+            "type": "array",
+            "items": { "type": "string", "enum": ["reminder", "review", "task", "digest"] }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReminderRule": {
+        "type": "object",
+        "properties": {
+          "offsetsDays": {
+            "minItems": 1,
+            "maxItems": 6,
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0, "maximum": 60 }
+          },
+          "channels": {
+            "minItems": 1,
+            "maxItems": 2,
+            "type": "array",
+            "items": { "type": "string", "enum": ["email", "push"] }
+          },
+          "alsoNotifyPartner": { "type": "boolean" }
+        },
+        "required": ["offsetsDays", "channels", "alsoNotifyPartner"],
+        "additionalProperties": false
+      },
+      "ItemReminderRule": { "anyOf": [{ "$ref": "#/components/schemas/ReminderRule" }, { "type": "null" }] }
     }
   },
   "paths": {
@@ -12849,6 +13118,342 @@
           "200": {
             "description": "Default Response",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Import" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/notifications": {
+      "get": {
+        "summary": "The caller's notifications, newest first, with the unread count",
+        "tags": ["notify"],
+        "parameters": [
+          {
+            "schema": { "default": 50, "type": "integer", "minimum": 1, "maximum": 100 },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "minLength": 1, "maxLength": 512 },
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "schema": { "type": "string", "enum": ["true", "false"] },
+            "in": "query",
+            "name": "unread",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/NotificationList" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/notifications/{id}/read": {
+      "post": {
+        "summary": "Mark one of the caller's notifications read",
+        "tags": ["notify"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Notification" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/notification-preferences": {
+      "get": {
+        "summary": "The caller's email notification preferences",
+        "tags": ["notify"],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/NotificationPreferences" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Change the caller's email notification preferences",
+        "tags": ["notify"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateNotificationPreferencesInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/NotificationPreferences" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/reminder-rules": {
+      "get": {
+        "summary": "The household's default reminder rule (built-in default until one is set)",
+        "tags": ["notify"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReminderRule" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Set the household's default reminder rule",
+        "tags": ["notify"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ReminderRuleInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ReminderRule" } } }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/{hid}/items/{id}/reminders": {
+      "get": {
+        "summary": "One item's own reminder rule, or null when it follows the household default",
+        "tags": ["notify"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ItemReminderRule" } }
+            }
+          },
+          "4XX": {
+            "description": "Client error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          },
+          "5XX": {
+            "description": "Server error (RFC 9457 problem details)",
+            "content": {
+              "application/problem+json": { "schema": { "$ref": "#/components/schemas/Problem" } }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Set one item's reminder rule; a null body removes the override",
+        "tags": ["notify"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ItemReminderRuleInput" } }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "hid",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ItemReminderRule" } }
+            }
           },
           "4XX": {
             "description": "Client error (RFC 9457 problem details)",

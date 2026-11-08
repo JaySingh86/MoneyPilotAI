@@ -13,6 +13,7 @@ import { engineSafe } from "../goals/service";
 import { loadPlanInput } from "../goals/load-input";
 import * as goalsRepo from "../goals/repo";
 import { assertCanWrite, canWriteFeature } from "../billing/guard";
+import { notifyProposalDecided } from "../notify/hooks";
 import { applyPayload, Superseded } from "./apply";
 import { insertProposal, PROPOSAL_COLUMNS, toProposal } from "./core";
 
@@ -247,6 +248,7 @@ export async function approveProposal(deps: ProposalsDeps, a: Actor, id: string)
     if (!parsed.success) {
       await closeProposal(tx, id, "superseded", "The request could not be read.");
       await audit(tx, a, "proposal.superseded", id, "invalid");
+      await notifyProposalDecided(tx, a, proposal, "superseded");
       return { kind: "stale", message: "This proposal is no longer valid. Ask again." };
     }
     // The plan can lapse between create and approve. A blocked approval ends the proposal like any other one
@@ -279,11 +281,13 @@ export async function approveProposal(deps: ProposalsDeps, a: Actor, id: string)
       if (note === null) throw err;
       await closeProposal(tx, id, "superseded", note);
       await audit(tx, a, "proposal.superseded", id, proposal.payload.type);
+      await notifyProposalDecided(tx, a, proposal, "superseded");
       return { kind: "stale", message: "This proposal is out of date because the data changed. Ask again." };
     }
     await tx.execute(sql`update proposals
       set status = 'applied', decided_by = ${a.userId}, decided_at = ${deps.now()}::timestamptz where id = ${id}`);
     await audit(tx, a, "proposal.approved", id, proposal.payload.type);
+    await notifyProposalDecided(tx, a, proposal, "approved");
     await autoCompleteTasks(tx, a.householdId, { type: "proposal_decided", proposalId: id }, a.userId);
     return { kind: "decided", proposal: await reload(tx, deps, a, id) };
   });
@@ -304,6 +308,7 @@ export async function rejectProposal(
           decision_note = ${note ?? null}
       where id = ${id}`);
     await audit(tx, a, "proposal.rejected", id, locked.proposal.payload.type);
+    await notifyProposalDecided(tx, a, locked.proposal, "rejected");
     await autoCompleteTasks(tx, a.householdId, { type: "proposal_decided", proposalId: id }, a.userId);
     return { kind: "decided", proposal: await reload(tx, deps, a, id) };
   });

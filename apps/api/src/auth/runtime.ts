@@ -19,6 +19,8 @@ export interface InviteSender {
     householdName: string;
     inviterFirstName: string;
     expiresAt: Date;
+    /** The member sending it; the sender's per-user quota counts against them (WP-15). */
+    invitedByUserId: string;
   }): Promise<void>;
 }
 

@@ -183,4 +183,26 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
     update: (t) =>
       sql`update import_mappings set mapping = '{"x":1}'::jsonb where household_id = ${t.householdId}`,
   },
+  // ===== WP-15: reminder rules, notifications, deliveries =====
+  {
+    table: "reminder_rules",
+    insert: (t) => sql`insert into reminder_rules (household_id) values (${t.householdId})`,
+    update: (t) =>
+      sql`update reminder_rules set also_notify_partner = true where household_id = ${t.householdId}`,
+  },
+  {
+    table: "notifications",
+    insert: (
+      t,
+    ) => sql`insert into notifications (household_id, user_id, kind, dedupe_key, title, body, send_at)
+      values (${t.householdId}, ${t.someUserId}, 'system', ${`probe:${randomUUID()}`}, 'Probe', 'Probe', now())`,
+    update: (t) => sql`update notifications set read_at = now() where household_id = ${t.householdId}`,
+  },
+  {
+    table: "notification_deliveries",
+    insert: (t) => sql`insert into notification_deliveries (household_id, notification_id, channel, status)
+      values (${t.householdId}, ${randomUUID()}, 'email', 'sent')`,
+    update: (t) =>
+      sql`update notification_deliveries set status = 'failed' where household_id = ${t.householdId}`,
+  },
 ];

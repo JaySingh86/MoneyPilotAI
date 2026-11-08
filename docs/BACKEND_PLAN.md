@@ -556,7 +556,7 @@ create table notifications (
   household_id  uuid not null references households(id) on delete cascade,
   user_id       uuid not null references users(id),
   kind          text not null check (kind in ('reminder','review','proposal','task','digest','security','system')),
-  dedupe_key    text not null unique,                   -- e.g. reminder:{occurrence}:{offset}:{user}
+  dedupe_key    text not null,                          -- reminder:{item}:{scheduled_on}:{offset}:{user} (DESIGN_SPEC §6 rule 12, Q-131)
   title         text not null,
   body          text not null,
   deep_link     text,
@@ -565,6 +565,8 @@ create table notifications (
   read_at       timestamptz,
   created_at    timestamptz not null default now()
 );
+-- WP-15 adds item_id, scheduled_on, offset_days, due_on, attempt_at; household_id on notification_deliveries (Q-131)
+create unique index notifications_dedupe_uq on notifications(household_id, dedupe_key);
 create index notifications_due_idx on notifications(send_at) where status = 'scheduled';
 
 create table notification_deliveries (
@@ -897,7 +899,8 @@ export interface PlanResult {
 
 - **Scheduling:** `reminders.plan` (every 15 min, plus on occurrence change) creates `notifications` rows.
   - One row per recipient × offset × occurrence, with `send_at` = due date − offset at **09:00 household local time**, converted to UTC.
-  - `dedupe_key = reminder:{occurrence_id}:{offset}:{user_id}` is unique, which prevents duplicates (NFR).
+  - `dedupe_key = reminder:{item_id}:{scheduled_on}:{offset}:{user_id}` is unique per household, which prevents duplicates (NFR). `scheduled_on` is the rule date, so rebuilding occurrences never resends and a manual move updates the row in place (Q-131).
+  - Monthly subscriptions get no default reminders, only an item-level rule or a price-change reminder (DESIGN_SPEC §6 rule 11, Q-134).
 - **Sending:** `notifications.dispatch` (every minute) claims due rows with `FOR UPDATE SKIP LOCKED` and renders templates.
   - Sends through SES with a configuration set, then writes `notification_deliveries`.
   - Retries at 1 min, 5 min, 30 min and 2 h, then marks `failed` and shows it in the Notifications screen.

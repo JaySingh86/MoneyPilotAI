@@ -12,9 +12,12 @@
   },
   "dependencies": {
     "@mp/billing": "workspace:*",
+    "@js-temporal/polyfill": "^0.5.1",
     "@mp/contracts": "workspace:*",
     "@mp/db": "workspace:*",
     "@mp/detection": "workspace:*",
+    "@mp/format": "workspace:*",
+    "@mp/notify": "workspace:*",
     "@mp/observability": "workspace:*",
     "@mp/review-rules": "workspace:*",
     "drizzle-orm": "^0.45.4",

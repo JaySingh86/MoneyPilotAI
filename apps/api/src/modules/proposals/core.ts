@@ -2,6 +2,7 @@
 // items or goals modules, so those modules can create proposals without a cycle; applying a proposal lives
 // in ./apply.ts.
 import { sql } from "drizzle-orm";
+import { notifyProposalCreated } from "../notify/hooks";
 import {
   AppError,
   MAX_PENDING_PROPOSALS,
@@ -91,5 +92,8 @@ export async function insertProposal(tx: Tx, p: NewProposal): Promise<Proposal> 
       (household_id, actor_user_id, actor_type, action, entity_type, entity_id, metadata)
     values (${p.householdId}, ${p.proposedBy}, 'user', 'proposal.created', 'proposal', ${proposal.id},
       ${JSON.stringify({ type: p.payload.type })}::jsonb)`);
+  // Every way a proposal is created (this module, goals, items) ends here, so the other member hears about
+  // it exactly once (WP-15, BACKEND_PLAN §7.3 step 2).
+  await notifyProposalCreated(tx, { householdId: p.householdId, userId: p.proposedBy }, proposal.id);
   return proposal;
 }

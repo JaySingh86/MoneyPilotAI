@@ -8,6 +8,8 @@ import { afterAll, beforeAll, describe, expect, inject, it } from "vitest";
 import { createApiDb, createWorkerDb, type ApiDb, type WorkerDb } from "@mp/db";
 import { createHousehold, ensureUser, seedFixture, seedPlanning, type SeedResult } from "@mp/db/testing";
 import { createLogger } from "@mp/observability";
+import { FakeEmailSender } from "@mp/notify/testing";
+import { createFixtures, type Fixtures } from "./testing/notify-fixtures";
 import { startJobs, type StartedJobs } from "./boss";
 import { assertQueueRole, checkBossConnection, readConnectionRole } from "./startup-checks";
 import { OCCURRENCES_SWEEP_CRON, OCCURRENCES_SWEEP_QUEUE } from "./jobs/occurrences/sweep";
@@ -20,6 +22,8 @@ let jobs: StartedJobs;
 let seeded: SeedResult;
 let secondHousehold: string;
 let expectedSafeToSpend: number;
+let fixtures: Fixtures;
+const email = new FakeEmailSender();
 
 async function until<T>(read: () => Promise<T | null | undefined | false>, what: string): Promise<T> {
   const deadline = Date.now() + 30_000;
@@ -67,11 +71,15 @@ beforeAll(async () => {
     now: () => "2026-10-27T16:00:00Z",
     log: createLogger("worker", "silent"),
     pollingIntervalSeconds: 0.5,
+    email,
+    appUrl: "https://app.example.test",
   });
+  fixtures = await createFixtures();
 }, 240_000);
 
 afterAll(async () => {
   await jobs?.stop();
+  await fixtures?.close();
   await admin?.end();
   await api?.close();
   await worker?.close();
@@ -113,9 +121,14 @@ describe("job registration", () => {
       db: worker,
       now: () => "2026-10-27T16:00:00Z",
       log: createLogger("worker", "silent"),
+      email,
+      appUrl: "https://app.example.test",
     });
     try {
       expect(await again.boss.getSchedules(OCCURRENCES_SWEEP_QUEUE)).toHaveLength(1);
+      for (const name of ["reminders.sweep", "notifications.sweep", "proposals.expire.sweep"]) {
+        expect(await again.boss.getSchedules(name), name).toHaveLength(1);
+      }
     } finally {
       await again.stop();
     }
@@ -220,5 +233,125 @@ describe("plan.recompute", () => {
     expect(
       await count("select count(*)::int as n from calc_snapshots where household_id = $1", [secondHousehold]),
     ).toBe(0);
+  });
+});
+
+describe("WP-15 and WP-13 job registration", () => {
+  it("creates the queues and the schedules: reminders every 15 min, dispatch every minute, proposals hourly", async () => {
+    for (const name of [
+      "reminders.sweep",
+      "reminders.plan",
+      "notifications.sweep",
+      "notifications.dispatch",
+      "proposals.expire.sweep",
+      "proposals.expire",
+      "tasks.auto_complete",
+    ]) {
+      expect(await jobs.boss.getQueue(name), name).not.toBeNull();
+    }
+    const cron = async (name: string) => (await jobs.boss.getSchedules(name))[0]?.cron;
+    expect(await cron("reminders.sweep")).toBe("*/15 * * * *");
+    expect(await cron("notifications.sweep")).toBe("* * * * *");
+    expect(await cron("proposals.expire.sweep")).toBe("0 * * * *");
+  });
+
+  it("reminders.sweep fans out reminders.plan, which plans each household", async () => {
+    const hh = await fixtures.household();
+    await fixtures.bill(hh, { scheduledOn: "2026-11-06" });
+    // The worker clock is 2026-10-27; the bill is 10 days out, so the 3-day and 0-day reminders are planned.
+    await jobs.boss.send("reminders.sweep", {});
+    await until(
+      async () =>
+        (await count(
+          "select count(*)::int as n from notifications where household_id = $1 and kind = 'reminder'",
+          [hh.id],
+        )) === 2,
+      "the reminders to be planned",
+    );
+    // a second sweep adds nothing
+    await jobs.boss.send("reminders.sweep", {});
+    await new Promise((r) => setTimeout(r, 2500));
+    expect(
+      await count(
+        "select count(*)::int as n from notifications where household_id = $1 and kind = 'reminder'",
+        [hh.id],
+      ),
+    ).toBe(2);
+  });
+
+  it("notifications.sweep fans out notifications.dispatch, which emails what is due", async () => {
+    const hh = await fixtures.household();
+    await fixtures.query(
+      `insert into notifications (household_id, user_id, kind, dedupe_key, title, body, send_at)
+       values ($1, $2, 'proposal', $3, 'Sam asked you to approve a change', 'Open MoneyPilot.', '2026-10-27T15:00:00Z')`,
+      [hh.id, hh.jordan.id, `boss:${hh.id}`],
+    );
+    await jobs.boss.send("notifications.sweep", {});
+    await until(
+      async () => email.sent.some((m) => m.to === hh.jordan.email),
+      "the notification to be emailed",
+    );
+    expect(
+      await count(
+        "select count(*)::int as n from notifications where household_id = $1 and status = 'sent'",
+        [hh.id],
+      ),
+    ).toBe(1);
+  });
+
+  it("proposals.expire runs for a household and expires its overdue proposal (Q-117)", async () => {
+    const hh = await fixtures.household();
+    const id = crypto.randomUUID();
+    await fixtures.query(
+      `insert into proposals (id, household_id, kind, payload, proposed_by, expires_at, created_at)
+       values ($1, $2, 'goal_change', '{"type":"goal_delete"}'::jsonb, $3, '2026-10-26T00:00:00Z', '2026-10-19T00:00:00Z')`,
+      [id, hh.id, hh.sam.id],
+    );
+    await jobs.boss.send("proposals.expire", { householdId: hh.id });
+    await until(
+      async () =>
+        (await admin.query("select status from proposals where id = $1", [id])).rows[0]?.status === "expired",
+      "the proposal to expire",
+    );
+  });
+
+  it("tasks.auto_complete completes the task waiting for the event (Q-117)", async () => {
+    const hh = await fixtures.household();
+    const { itemId } = await fixtures.bill(hh, { scheduledOn: "2026-11-06" });
+    const taskId = crypto.randomUUID();
+    await fixtures.query(
+      `insert into tasks (id, household_id, title, owner_type, source, auto_complete_rule)
+       values ($1, $2, 'Check the amount', 'both', 'engine', $3::jsonb)`,
+      [taskId, hh.id, JSON.stringify({ type: "item_reviewed", itemId })],
+    );
+    await jobs.boss.send("tasks.auto_complete", {
+      householdId: hh.id,
+      event: { type: "item_reviewed", itemId },
+    });
+    await until(
+      async () =>
+        (await admin.query("select completed_reason from tasks where id = $1", [taskId])).rows[0]
+          ?.completed_reason === "item_reviewed",
+      "the task to complete",
+    );
+  });
+
+  it("a bad payload fails the job without leaking it", async () => {
+    const id = await jobs.boss.send("proposals.expire", {
+      householdId: "not-a-uuid",
+      secret: "jordan@example.test",
+    });
+    await until(
+      async () =>
+        ["retry", "failed"].includes(
+          (await admin.query("select state from pgboss.job where id = $1", [id])).rows[0]?.state as string,
+        ),
+      "the job to fail",
+    );
+    const out = JSON.stringify(
+      (await admin.query("select output from pgboss.job where id = $1", [id])).rows[0],
+    );
+    expect(out).not.toContain("jordan@example.test");
+    expect(out).not.toContain("not-a-uuid");
   });
 });

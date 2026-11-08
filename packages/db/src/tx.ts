@@ -51,6 +51,8 @@ export interface WorkerDb {
   listHouseholdIds(): Promise<string[]>;
   /** Households with billing events to apply, or a plan out of step with an ended subscription (WP-25). */
   listBillingPendingHouseholds(): Promise<string[]>;
+  /** Households with a notification ready to send (`app_list_households_with_due_notifications()`, WP-15). */
+  listHouseholdIdsWithDueNotifications(): Promise<string[]>;
   close(): Promise<void>;
 }
 
@@ -173,6 +175,13 @@ export function createWorkerDb(options: DbOptions): WorkerDb {
       const none: Session = { "app.user_id": "", "app.household_id": "", "app.auth_subject": "" };
       const res = await runner.run(none, (tx) =>
         tx.execute<{ id: string }>(sql`select app_billing_pending_households() as id`),
+      );
+      return res.rows.map((r) => r.id);
+    },
+    async listHouseholdIdsWithDueNotifications() {
+      const none: Session = { "app.user_id": "", "app.household_id": "", "app.auth_subject": "" };
+      const res = await runner.run(none, (tx) =>
+        tx.execute<{ id: string }>(sql`select app_list_households_with_due_notifications() as id`),
       );
       return res.rows.map((r) => r.id);
     },

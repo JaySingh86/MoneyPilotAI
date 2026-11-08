@@ -8,6 +8,7 @@ const invite = {
   householdName: "h",
   inviterFirstName: "i",
   expiresAt: new Date(0),
+  invitedByUserId: "00000000-0000-4000-8000-00000000000a",
 };
 const good = {
   COGNITO_REGION: "us-east-1",

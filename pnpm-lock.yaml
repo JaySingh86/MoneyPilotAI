@@ -71,6 +71,9 @@ importers:
       '@mp/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@mp/notify':
+        specifier: workspace:*
+        version: link:../../packages/notify
       '@mp/observability':
         specifier: workspace:*
         version: link:../../packages/observability
@@ -187,6 +190,9 @@ importers:
 
   apps/worker:
     dependencies:
+      '@js-temporal/polyfill':
+        specifier: ^0.5.1
+        version: 0.5.1
       '@mp/billing':
         specifier: workspace:*
         version: link:../../packages/billing
@@ -199,6 +205,12 @@ importers:
       '@mp/detection':
         specifier: workspace:*
         version: link:../../packages/detection
+      '@mp/format':
+        specifier: workspace:*
+        version: link:../../packages/format
+      '@mp/notify':
+        specifier: workspace:*
+        version: link:../../packages/notify
       '@mp/observability':
         specifier: workspace:*
         version: link:../../packages/observability
@@ -349,7 +361,24 @@ importers:
         specifier: ^0.5.1
         version: 0.5.1
 
-  packages/notify: {}
+  packages/notify:
+    dependencies:
+      '@aws-sdk/client-sesv2':
+        specifier: ^3.700.0
+        version: 3.1161.0
+      '@js-temporal/polyfill':
+        specifier: ^0.5.1
+        version: 0.5.1
+      '@mp/format':
+        specifier: workspace:*
+        version: link:../format
+      nodemailer:
+        specifier: ^7.0.0
+        version: 7.0.13
+    devDependencies:
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.24
 
   packages/observability:
     dependencies:
@@ -513,6 +542,10 @@ packages:
 
   '@aws-sdk/client-personalize-events@3.1161.0':
     resolution: {integrity: sha512-u8FyhBvwYfpmJCWhlwyzu9WxBTClhc0GihClveh5grO5JM+/kF6IaQPZBjeUXV89W+CWU73nPA6T2ZXXYMAARA==}
+    engines: {node: '>=20.0.0'}
+
+  '@aws-sdk/client-sesv2@3.1161.0':
+    resolution: {integrity: sha512-UIaU6OixjkY44nKaJZA2f41vnjj3pk9HbadZTWK2ZoVE81lzX2e+vWpOWWgJCfRxymm9GEiRMtEN/5rfcvDJYQ==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/core@3.979.1':
@@ -2092,6 +2125,9 @@ packages:
 
   '@types/node@22.20.5':
     resolution: {integrity: sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==}
+
+  '@types/nodemailer@6.4.24':
+    resolution: {integrity: sha512-Ww4u0rT9wQNXh4JiQaIwx3QWdcOFXzOjQA2zc+jtFYNmQiT4mIUqcDin51bDFdkzKubFnQCZNK7FIHlPKQ/q9w==}
 
   '@types/papaparse@5.5.2':
     resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
@@ -3693,6 +3729,10 @@ packages:
     resolution: {integrity: sha512-OmO8+GM1JUZqXET720VrJCwkjUCXmCMQm0Z3UDDRbfNLHS4NEAvY60j5jiFv0tkKw2PNNlqOLhahVmwJIOLDIQ==}
     engines: {node: '>=18'}
 
+  nodemailer@7.0.13:
+    resolution: {integrity: sha512-PNDFSJdP+KFgdsG3ZzMXCgquO7I6McjY2vlqILjtJd0hy8wEvtugS9xKRF2NWlPNGxvLCXlTNIae4serI7dinw==}
+    engines: {node: '>=6.0.0'}
+
   non-error@0.1.0:
     resolution: {integrity: sha512-TMB1uHiGsHRGv1uYclfhivcnf0/PdFp2pNqRxXjncaAsjYMoisaQJI+SSZCqRq+VliwRTC8tsMQfmrWjDMhkPQ==}
     engines: {node: '>=20'}
@@ -4956,6 +4996,18 @@ snapshots:
     dependencies:
       '@aws-sdk/core': 3.979.1
       '@aws-sdk/credential-provider-node': 3.972.92
+      '@aws-sdk/types': 3.975.0
+      '@smithy/core': 3.38.1
+      '@smithy/fetch-http-handler': 5.8.0
+      '@smithy/node-http-handler': 4.14.1
+      '@smithy/types': 4.19.0
+      tslib: 2.8.1
+
+  '@aws-sdk/client-sesv2@3.1161.0':
+    dependencies:
+      '@aws-sdk/core': 3.979.1
+      '@aws-sdk/credential-provider-node': 3.972.92
+      '@aws-sdk/signature-v4-multi-region': 3.996.51
       '@aws-sdk/types': 3.975.0
       '@smithy/core': 3.38.1
       '@smithy/fetch-http-handler': 5.8.0
@@ -6396,6 +6448,10 @@ snapshots:
   '@types/node@22.20.5':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/nodemailer@6.4.24':
+    dependencies:
+      '@types/node': 22.20.5
 
   '@types/papaparse@5.5.2':
     dependencies:
@@ -7995,6 +8051,8 @@ snapshots:
       - babel-plugin-macros
 
   node-releases@2.0.60: {}
+
+  nodemailer@7.0.13: {}
 
   non-error@0.1.0: {}
 

@@ -230,6 +230,21 @@ describe("default certificate loader", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
+  it("caps the cache: the oldest entry is evicted past maxEntries", async () => {
+    const fetchImpl = vi.fn(async () => new Response(sns.certPem, { status: 200 }));
+    const load = createCertificateLoader(fetchImpl as unknown as typeof fetch, 5000, 2);
+    const url = (n: number) => `https://sns.us-east-1.amazonaws.com/cert-${n}.pem`;
+    await load(url(1));
+    await load(url(2));
+    await load(url(3)); // evicts cert-1
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    await load(url(3));
+    await load(url(2));
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    await load(url(1));
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
+  });
+
   it("rejects non-certificates and does not cache failures", async () => {
     const fetchImpl = vi
       .fn()

@@ -96,6 +96,9 @@ describe("RLS posture of every table", () => {
       app_list_household_ids: ["mp_worker"],
       app_billing_ingest: ["mp_api"], // WP-25: the API's only path from a verified webhook to the worker
       app_billing_pending_households: ["mp_worker"], // WP-25: ids only
+      // WP-15: the dispatch fan-out (ids only) and the SES event webhook.
+      app_list_households_with_due_notifications: ["mp_worker"],
+      app_record_delivery_event: ["mp_api"],
     };
     const res = await apiClient.query<{ proname: string; roles: string[] }>(`
       select p.proname,

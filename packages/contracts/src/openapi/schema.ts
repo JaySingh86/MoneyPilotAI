@@ -3615,6 +3615,421 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/v1/households/{hid}/notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The caller's notifications, newest first, with the unread count */
+    get: {
+      parameters: {
+        query?: {
+          limit?: number;
+          cursor?: string;
+          unread?: "true" | "false";
+        };
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["NotificationList"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/notifications/{id}/read": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Mark one of the caller's notifications read */
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["Notification"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/me/notification-preferences": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The caller's email notification preferences */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["NotificationPreferences"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    /** Change the caller's email notification preferences */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["UpdateNotificationPreferencesInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["NotificationPreferences"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/reminder-rules": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The household's default reminder rule (built-in default until one is set) */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReminderRule"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    /** Set the household's default reminder rule */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["ReminderRuleInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ReminderRule"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/v1/households/{hid}/items/{id}/reminders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One item's own reminder rule, or null when it follows the household default */
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ItemReminderRule"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    /** Set one item's reminder rule; a null body removes the override */
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          hid: string;
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["ItemReminderRuleInput"];
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": components["schemas"]["ItemReminderRule"];
+          };
+        };
+        /** @description Client error (RFC 9457 problem details) */
+        "4XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+        /** @description Server error (RFC 9457 problem details) */
+        "5XX": {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": components["schemas"]["Problem"];
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -5546,6 +5961,54 @@ export interface components {
       import: components["schemas"]["ImportInput"];
       upload: components["schemas"]["ImportUploadInput"];
     };
+    /** @enum {string} */
+    NotificationKindInput: "reminder" | "review" | "proposal" | "task" | "digest" | "security" | "system";
+    NotificationDeliveryInput: {
+      /** @enum {string} */
+      channel: "email" | "push";
+      /** @enum {string} */
+      status: "queued" | "sent" | "delivered" | "bounced" | "complained" | "failed";
+    };
+    NotificationInput: {
+      /** Format: uuid */
+      id: string;
+      kind: components["schemas"]["NotificationKindInput"];
+      title: string;
+      body: string;
+      deepLink: string | null;
+      /** Format: date-time */
+      sentAt: string;
+      /** @enum {string} */
+      status: "scheduled" | "sent" | "failed";
+      read: boolean;
+      readAt: string | null;
+      delivery: components["schemas"]["NotificationDeliveryInput"] | null;
+    };
+    NotificationListInput: {
+      data: components["schemas"]["NotificationInput"][];
+      nextCursor: string | null;
+      unreadCount: number;
+    };
+    NotificationPreferencesInput: {
+      emailEnabled: boolean;
+      mutedKinds: ("reminder" | "review" | "task" | "digest")[];
+      emailSuppressed: {
+        /** @enum {string} */
+        reason: "hard_bounce" | "complaint";
+        /** Format: date-time */
+        at: string;
+      } | null;
+    };
+    UpdateNotificationPreferencesInput: {
+      emailEnabled?: boolean;
+      mutedKinds?: ("reminder" | "review" | "task" | "digest")[];
+    };
+    ReminderRuleInput: {
+      offsetsDays: number[];
+      channels: ("email" | "push")[];
+      alsoNotifyPartner: boolean;
+    };
+    ItemReminderRuleInput: components["schemas"]["ReminderRuleInput"] | null;
     ProblemField: {
       /**
        * @description Where the invalid value was sent
@@ -7473,6 +7936,54 @@ export interface components {
       import: components["schemas"]["Import"];
       upload: components["schemas"]["ImportUpload"];
     };
+    /** @enum {string} */
+    NotificationKind: "reminder" | "review" | "proposal" | "task" | "digest" | "security" | "system";
+    NotificationDelivery: {
+      /** @enum {string} */
+      channel: "email" | "push";
+      /** @enum {string} */
+      status: "queued" | "sent" | "delivered" | "bounced" | "complained" | "failed";
+    };
+    Notification: {
+      /** Format: uuid */
+      id: string;
+      kind: components["schemas"]["NotificationKind"];
+      title: string;
+      body: string;
+      deepLink: string | null;
+      /** Format: date-time */
+      sentAt: string;
+      /** @enum {string} */
+      status: "scheduled" | "sent" | "failed";
+      read: boolean;
+      readAt: string | null;
+      delivery: components["schemas"]["NotificationDelivery"] | null;
+    };
+    NotificationList: {
+      data: components["schemas"]["Notification"][];
+      nextCursor: string | null;
+      unreadCount: number;
+    };
+    NotificationPreferences: {
+      emailEnabled: boolean;
+      mutedKinds: ("reminder" | "review" | "task" | "digest")[];
+      emailSuppressed: {
+        /** @enum {string} */
+        reason: "hard_bounce" | "complaint";
+        /** Format: date-time */
+        at: string;
+      } | null;
+    };
+    UpdateNotificationPreferences: {
+      emailEnabled?: boolean;
+      mutedKinds?: ("reminder" | "review" | "task" | "digest")[];
+    };
+    ReminderRule: {
+      offsetsDays: number[];
+      channels: ("email" | "push")[];
+      alsoNotifyPartner: boolean;
+    };
+    ItemReminderRule: components["schemas"]["ReminderRule"] | null;
   };
   responses: never;
   parameters: never;

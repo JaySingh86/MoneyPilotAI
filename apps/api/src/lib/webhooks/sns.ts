@@ -209,11 +209,12 @@ export function trustedSubscribeUrl(
 
 /**
  * Default loader: fetches the certificate over HTTPS from an SNS host and caches it per URL for the
- * process. `verifySnsMessage` has already pinned the URL to the topic's region.
+ * process (at most `maxEntries`, default 50). `verifySnsMessage` has already pinned the URL to the topic's region.
  */
 export function createCertificateLoader(
   fetchImpl: typeof fetch = fetch,
   timeoutMs = 5000,
+  maxEntries = 50,
 ): CertificateLoader {
   const cache = new Map<string, Promise<string>>();
   return (url) => {
@@ -237,6 +238,12 @@ export function createCertificateLoader(
         return pem;
       })();
       pending.catch(() => cache.delete(url));
+      // Bounded: the oldest entry goes first (Map keeps insertion order).
+      while (cache.size >= maxEntries) {
+        const oldest = cache.keys().next().value;
+        if (oldest === undefined) break;
+        cache.delete(oldest);
+      }
       cache.set(url, pending);
     }
     return pending;

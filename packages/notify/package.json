@@ -3,12 +3,22 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Email and push rendering and delivery. Built in WP-15.",
+  "description": "Email and push rendering and delivery: templates, SES/SMTP/fake senders, the invite sender, reminder times. No database access. Built in WP-15.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.700.0",
+    "@js-temporal/polyfill": "^0.5.1",
+    "@mp/format": "workspace:*",
+    "nodemailer": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17"
   }
 }
