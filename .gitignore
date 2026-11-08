@@ -28,3 +28,9 @@ playwright-report/
 
 # Live eval reports and recordings of external corpora (WP-11); only the offline report is committed
 packages/ai/evals/reports/latest-live.*
+
+# OAuth / cloud credential files: never commit (values go in .env.local)
+client_secret*.json
+*credentials*.json
+*service-account*.json
+*.p12
