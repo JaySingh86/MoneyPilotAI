@@ -208,6 +208,9 @@ importers:
       '@js-temporal/polyfill':
         specifier: ^0.5.1
         version: 0.5.1
+      '@mp/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@mp/billing':
         specifier: workspace:*
         version: link:../../packages/billing
@@ -226,6 +229,9 @@ importers:
       '@mp/email':
         specifier: workspace:*
         version: link:../../packages/email
+      '@mp/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
       '@mp/format':
         specifier: workspace:*
         version: link:../../packages/format

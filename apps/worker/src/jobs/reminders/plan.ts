@@ -253,10 +253,12 @@ export async function planReminders(tx: Tx, householdId: string, nowIso: string)
     }
   }
 
-  // Cancel what the calendar no longer asks for.
+  // Cancel what the calendar no longer asks for. A one-off price-change reminder (WP-22, Q-134) is not part of the
+  // calendar's offsets; the dispatcher still checks it against the live occurrence before it goes out.
   const keep = JSON.stringify(rows.map((d) => d.key));
   const cancelled = await tx.execute(sql`update notifications set status = 'cancelled'
     where household_id = ${householdId} and kind = 'reminder' and status = 'scheduled'
+      and dedupe_key not like 'price_change:%'
       and dedupe_key <> all (array(select jsonb_array_elements_text(${keep}::jsonb)))`);
   return { created, updated, cancelled: cancelled.rowCount ?? 0 };
 }

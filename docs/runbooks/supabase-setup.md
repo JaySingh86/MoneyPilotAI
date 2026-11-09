@@ -61,7 +61,7 @@ This is separate from Sign in with Google. It's our API reading bills from your 
    - **Authorized redirect URI:** `http://localhost:4000/v1/email-connections/gmail/callback`.
 4. Put its client ID and secret in `.env.local` as `GOOGLE_GMAIL_CLIENT_ID` and `GOOGLE_GMAIL_CLIENT_SECRET`.
 5. Connecting your own inbox is your G2 decision as owner. Only your listed test users can connect while the app is in Testing mode.
-6. Reading bills needs an Anthropic API key (`ANTHROPIC_API_KEY`) for the extraction step (WP-22).
+6. Reading bills needs an Anthropic API key (`ANTHROPIC_API_KEY`) for the extraction step (WP-22). **Before any real mail is read, check the Anthropic organization's data-retention setting** (console: Settings, data retention; ask about zero data retention if it is available to you) and note it in the privacy policy. Message Batches results are kept by Anthropic for about 29 days, so a backfill's results outlive the job. The email text sent is redacted first (account numbers masked to the last 4, no phone numbers, SSNs or other addresses), but it is still your mail. The extraction is capped per household per day; the caps and their defaults are in `.env.example` (`AI_EXTRACT_DAILY_CAP_PER_HOUSEHOLD`, `AI_EXTRACT_DAILY_CAP_NEW_SENDERS`, `AI_BACKFILL_MAX_MESSAGES`, `EMAIL_NEW_SENDER_MIN_SCORE`); set an Anthropic spend limit on the key as well.
 
 ## 6. Storage for bank statements
 1. Go to **Storage → New bucket**. **All four settings are required**: they are the last line of defence if an upload bypasses our API, and nothing in our code can set them for you.

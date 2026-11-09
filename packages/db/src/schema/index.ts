@@ -21,3 +21,4 @@ export {
   sendQuotaEvents,
 } from "./notify";
 export { emailConnections, emailMessages, emailOauthStates } from "./email";
+export { aiRuns } from "./pipeline";

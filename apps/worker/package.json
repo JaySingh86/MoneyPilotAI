@@ -11,14 +11,16 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@mp/billing": "workspace:*",
     "@aws-sdk/client-s3": "^3.1164.0",
     "@js-temporal/polyfill": "^0.5.1",
+    "@mp/ai": "workspace:*",
+    "@mp/billing": "workspace:*",
     "@mp/contracts": "workspace:*",
     "@mp/crypto": "workspace:*",
     "@mp/db": "workspace:*",
     "@mp/detection": "workspace:*",
     "@mp/email": "workspace:*",
+    "@mp/engine": "workspace:*",
     "@mp/format": "workspace:*",
     "@mp/notify": "workspace:*",
     "@mp/observability": "workspace:*",

@@ -1,6 +1,6 @@
 // Drizzle mirror of migrations/202611091300_wp21_email-connections.sql. The SQL migration is the source of truth;
 // test/integration/schema-mirror.test.ts fails if the two drift apart.
-import { boolean, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { households, users } from "./identity";
 import { bytea } from "./types";
 
@@ -69,6 +69,17 @@ export const emailMessages = pgTable("email_messages", {
   truncated: boolean("truncated").notNull().default(false),
   processedAt: timestamp("processed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  /** WP-22: how discovery found it. The first 13-month backfill goes through the Batch API; new mail is a direct call. */
+  intake: text("intake", { enum: ["discover", "backfill"] })
+    .notNull()
+    .default("discover"),
+  /** WP-22: the Batch API batch the message is waiting in. */
+  aiBatchId: text("ai_batch_id"),
+  /** WP-22 cost caps: when the message was charged to the household's daily extraction budget, and whether its sender was new. */
+  extractChargedAt: timestamp("extract_charged_at", { withTimezone: true }),
+  extractNewSender: boolean("extract_new_sender").notNull().default(false),
+  /** WP-22: how often the message was released from a batch unprocessed; the second release fails it. */
+  extractReleases: smallint("extract_releases").notNull().default(0),
 });
 
 export const emailOauthStates = pgTable("email_oauth_states", {

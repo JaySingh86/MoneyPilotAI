@@ -41,6 +41,42 @@ describe("parseAuthenticationResults", () => {
     expect(parseAuthenticationResults("mx.a.test; dmarc=pass", null).dmarcAligned).toBe(false);
   });
 
+  it("a crafted header cannot smuggle a dmarc=pass inside a comment or a quoted string (S1)", () => {
+    const crafted =
+      'mx.google.com; spf=fail (sender "x dmarc=pass"@evil.com is not allowed) smtp.mailfrom="x dmarc=pass"@evil.com; ' +
+      "dkim=none; dmarc=fail (p=reject) header.from=bank.com";
+    const r = parseAuthenticationResults(crafted, "bank.com");
+    expect(r).toMatchObject({ spf: "fail", dkim: "none", dmarc: "fail", dmarcAligned: false });
+    // The same payload with the real verdict missing must read as unknown, not pass.
+    const onlyInjected =
+      'mx.google.com; spf=fail smtp.mailfrom="x dmarc=pass"@evil.com (dmarc=pass header.from=bank.com)';
+    const r2 = parseAuthenticationResults(onlyInjected, "bank.com");
+    expect(r2.dmarc).toBe("unknown");
+    expect(r2.dmarcAligned).toBe(false);
+  });
+
+  it("a method name inside another segment's property is not read as a method", () => {
+    const r = parseAuthenticationResults(
+      "mx.google.com; dkim=fail header.d=dmarc=pass.example; dmarc=none header.from=x.example",
+      "x.example",
+    );
+    expect(r).toMatchObject({ dkim: "fail", dmarc: "none", dmarcAligned: false });
+  });
+
+  it("DMARC pass without a header.from is not aligned (S1)", () => {
+    const r = parseAuthenticationResults("mx.google.com; dmarc=pass", "x.example");
+    expect(r.dmarc).toBe("pass");
+    expect(r.dmarcAligned).toBe(false);
+  });
+
+  it("handles nested comments and escaped parentheses without reading through them", () => {
+    const r = parseAuthenticationResults(
+      "mx.google.com; dmarc=pass (outer (inner) more dmarc=fail \\) still comment) header.from=x.example",
+      "x.example",
+    );
+    expect(r).toMatchObject({ dmarc: "pass", dmarcAligned: true });
+  });
+
   it("garbage yields unknown", () => {
     expect(parseAuthenticationResults("", "x.example")).toMatchObject({
       dmarc: "unknown",
@@ -65,6 +101,32 @@ describe("pickAuthenticationResults", () => {
   });
   it("none present", () => {
     expect(pickAuthenticationResults([], [])).toBeNull();
+  });
+  it("topmostOnly: a trusted-looking header further down (planted by the sender) is not the receiver's (S4)", () => {
+    const planted = [
+      { key: "authentication-results", value: "evil.example; dmarc=fail header.from=a.example" },
+      { key: "authentication-results", value: "mx.moneypilot.test; dmarc=pass header.from=a.example" },
+    ];
+    expect(pickAuthenticationResults(planted, ["mx.moneypilot.test"])).toBe(planted[1]!.value);
+    expect(pickAuthenticationResults(planted, ["mx.moneypilot.test"], { topmostOnly: true })).toBeNull();
+    expect(pickAuthenticationResults(headers, ["mx.moneypilot.test"], { topmostOnly: true })).toBe(
+      headers[0]!.value,
+    );
+  });
+  it("requireTokens: the header must carry what only the receiving system writes (Exchange's compauth)", () => {
+    const own =
+      "spf=pass smtp.mailfrom=a.example; dmarc=pass action=none header.from=a.example;compauth=pass reason=100";
+    const forged = "spf=pass smtp.mailfrom=a.example; dmarc=pass header.from=a.example";
+    const opts = { topmostOnly: true, requireTokens: ["compauth="] };
+    expect(pickAuthenticationResults([{ key: "Authentication-Results", value: own }], [], opts)).toBe(own);
+    expect(
+      pickAuthenticationResults([{ key: "Authentication-Results", value: forged }], [], opts),
+    ).toBeNull();
+    // A token hidden in a comment does not count.
+    const hidden = "spf=pass; dmarc=pass header.from=a.example (compauth=pass)";
+    expect(
+      pickAuthenticationResults([{ key: "Authentication-Results", value: hidden }], [], opts),
+    ).toBeNull();
   });
 });
 

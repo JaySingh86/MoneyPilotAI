@@ -11,6 +11,8 @@ export type AiRunStatus = "ok" | "refusal" | "invalid_output" | "error";
 /** One row for `ai_runs` (BACKEND_PLAN §5): metadata and counts only, never prompt or output text. */
 export interface AiRunRecord {
   readonly householdId: string | null;
+  /** What the call was for (an email message id), so a retried batch collect can record each result once. Never content. */
+  readonly reference: string | null;
   readonly purpose: AiPurpose;
   readonly modelId: string;
   readonly promptVersion: string;
@@ -59,6 +61,7 @@ export interface CompleteInput<T> {
   readonly promptVersion: string;
   readonly request: ModelRequest;
   readonly householdId?: string | null;
+  readonly reference?: string | null;
   /** Turns model text into a value; throw to mark the output `invalid_output`. Runs only after stop_reason is checked. */
   readonly parse: (text: string) => T;
 }
@@ -157,7 +160,10 @@ export class AiClient {
 
   /** Records one metered run. Used directly for batch results. */
   async meter(
-    input: Pick<CompleteInput<unknown>, "purpose" | "promptVersion" | "request" | "householdId">,
+    input: Pick<
+      CompleteInput<unknown>,
+      "purpose" | "promptVersion" | "request" | "householdId" | "reference"
+    >,
     response: ModelResponse | null,
     status: AiRunStatus,
     startedAt: number,
@@ -173,6 +179,7 @@ export class AiClient {
     const cost = priceModel(response?.model ?? input.request.model, usage, batch, input.request.model);
     const record: AiRunRecord = {
       householdId: input.householdId ?? null,
+      reference: input.reference ?? null,
       purpose: input.purpose,
       modelId: response?.model ?? input.request.model,
       promptVersion: input.promptVersion,

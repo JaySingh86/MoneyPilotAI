@@ -215,7 +215,7 @@ export async function deleteRenewal(tx: Tx, itemId: string): Promise<void> {
 
 export async function deleteHistoryPoint(tx: Tx, itemId: string, occurredOn: string): Promise<void> {
   await tx.execute(sql`delete from item_amount_history
-    where item_id = ${itemId} and occurred_on = ${occurredOn}::date and source = 'manual'`);
+    where item_id = ${itemId} and occurred_on = ${occurredOn}::date and source in ('manual','email')`);
 }
 
 /** Names the queued review item an insert is made for, for this transaction only (policy `recurring_items_api_insert_review`). */

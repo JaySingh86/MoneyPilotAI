@@ -3,6 +3,7 @@
 // nothing reads a mailbox on a worker that was not configured for it.
 import type { Job, PgBoss } from "pg-boss";
 import type { Logger } from "@mp/observability";
+import type { AiClient } from "@mp/ai";
 import type { WorkerDb } from "@mp/db";
 import { createKeyProvider, type CryptoDeps, type CryptoEnv, type KeyProvider } from "@mp/crypto";
 import { createProvidersFromEnv, type ProviderEnv } from "@mp/email/providers";
@@ -14,6 +15,8 @@ import {
 } from "../backfill/backfill";
 import { EMAIL_REVOKE_QUEUE, EMAIL_REVOKE_QUEUE_OPTIONS, handleEmailRevoke } from "../watch/revoke";
 import { EMAIL_WATCH_QUEUE, EMAIL_WATCH_QUEUE_OPTIONS, handleEmailWatch } from "../watch/watch";
+import { registerEmailProcessJobs } from "../process/register";
+import type { LimitsEnv } from "../process/limits";
 import type { EmailJobDeps } from "./connection";
 import { EMAIL_DISCOVER_QUEUE, EMAIL_DISCOVER_QUEUE_OPTIONS, handleEmailDiscover } from "./discover";
 import {
@@ -26,7 +29,7 @@ import {
   pollMinutesFrom,
 } from "./sweep";
 
-export interface EmailEnv extends ProviderEnv, CryptoEnv {
+export interface EmailEnv extends ProviderEnv, CryptoEnv, LimitsEnv {
   EMAIL_WEBHOOK_SECRET?: string | undefined;
   EMAIL_POLL_MINUTES?: string | undefined;
 }
@@ -40,6 +43,8 @@ interface Deps {
   connectors?: Pick<EmailJobDeps, "providers" | "keys" | "graphStateSecret">;
   env?: EmailEnv;
   crypto?: CryptoDeps;
+  /** The extraction client (WP-22). Without one the processing pipeline is not started. */
+  ai?: AiClient | null;
 }
 
 /** Stands in for the key provider when none is configured: the token cannot be opened, so the job keeps it and retries. */
@@ -148,4 +153,6 @@ export async function registerEmailJobs(boss: PgBoss, deps: Deps): Promise<void>
   });
   await boss.schedule(EMAIL_SWEEP_QUEUE, EMAIL_SWEEP_CRON, null, { tz: "UTC" });
   await boss.schedule(EMAIL_WATCH_SWEEP_QUEUE, EMAIL_WATCH_SWEEP_CRON, null, { tz: "UTC" });
+  // WP-22: email.process, ai.batch.submit / collect and their sweep (only with an Anthropic key).
+  await registerEmailProcessJobs(boss, deps, jobDeps, deps.ai);
 }

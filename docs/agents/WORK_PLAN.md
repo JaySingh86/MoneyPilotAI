@@ -39,7 +39,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-19 | Email core: MIME/PDF→text, redaction, prefilter, matcher | 3 | WP-01 | M | — | done |
 | WP-20 | Forwarding channel (SES inbound) | 4 | WP-19, WP-09 | M | G2 | todo |
 | WP-21 | Gmail + Outlook connectors, token crypto | 4 | WP-05, WP-19, WP-09 | L | G2 | done (against fakes; real Google/Microsoft is the owner's G2 step; Q-190 blocks deploy) |
-| WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | todo |
+| WP-22 | Email processing pipeline + auto-apply | 4 | WP-11, WP-14, WP-19, (WP-20 or WP-21) | L | G3 | done (auto_apply off until G3; Q-237/Q-239 real-message check before G3) |
 | WP-23 | Web: Email & imports, Members & privacy, setup flow, review UI | 4 | WP-10, WP-14, WP-21 | L | — | done (WP-21/WP-24/WP-20 endpoints still mocked) |
 | WP-24 | Privacy ops: export, leave, delete, retention, activity | 4 | WP-05, WP-21 | M | G2 | todo |
 | WP-25 | Billing + entitlements | 4 | WP-05, WP-08 | M | — | done (real provider pending H-01) |
@@ -342,16 +342,17 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
 - **Owns:** `apps/worker/src/jobs/email/process/**`, `apps/worker/src/jobs/ai/**`
 - **Read first:** BACKEND_PLAN §7.8.2 (all), §7.9; ARCHITECTURE §4.3.
 - **Acceptance:**
-  - [ ] All validation rules are implemented; a value without a verbatim evidence quote never auto-applies.
-  - [ ] The auto-apply policy matches the spec exactly (tested by table); every auto-apply writes `applied_changes` with a 30-day undo.
-  - [ ] Backfill goes through the Batch API with results keyed by `custom_id`.
-  - [ ] The fixture inbox corpus produces the 4 review items and 3 auto-applied changes shown on the Email & imports board.
-  - [ ] `auto_apply` feature flag is off by default.
-  - [ ] Use `@mp/review-rules` (WP-14) for the decide policy and apply planning, through a worker-side items-apply port with the same guards as the API; `applied_by` null, `origin` email, undo window from the shared helper.
-  - [ ] Map the WP-11 snake_case extraction (fields and evidence field names) to the camelCase review contracts explicitly, with tests.
-  - [ ] Run the subject through the WP-19 redactor before writing `extracted_items.message_meta`; `domainMatch` comes only from `isDomainMatch`, and `senderFirstSeen` defaults to true on any error.
-  - [ ] The worker writes `providerDomain: null` in `extracted_items.fields` (a model-supplied domain is never trusted; only a user edit sets it), with a test.
-  - [ ] A detected price change on a monthly subscription creates a one-off reminder through `packages/notify` (DESIGN_SPEC §6 rule 11, Q-134).
+  - [x] All validation rules are implemented; a value without a verbatim evidence quote never auto-applies. (The six rules are WP-11's `validateExtraction`; the worker adds the contract-refused check. `analyze.test.ts` "one signal at a time"; `process.int.test.ts` "validation: a value without a verbatim evidence quote never auto-applies")
+  - [x] The auto-apply policy matches the spec exactly (tested by table); every auto-apply writes `applied_changes` with a 30-day undo. (`analyze.test.ts` table over every signal; `process.int.test.ts` fixture corpus and "estimate replaced by an actual"; the API's own undo reads the worker's rows: `review.int.test.ts` "undoes a change the email pipeline made by itself")
+  - [x] Backfill goes through the Batch API with results keyed by `custom_id`. (`process.int.test.ts` "backfill goes through the Batch API": custom_id = message row id, results answered in reverse order land on their own messages, a refused item re-runs once as a direct call)
+  - [x] The fixture inbox corpus produces the review items and auto-applied changes shown on the Email & imports board, under the owner's Q-238 decision (price changes always go to review, rule 14): 5 queued (the board's four plus the streaming price rise) and 3 applied (Internet and the car insurance as on the board, plus water and trash). The canvas board and sample data will be updated to match. (`process.int.test.ts` "the fixture inbox corpus")
+  - [x] `auto_apply` feature flag is off by default. (`households.auto_apply_enabled default false`, no app role can write it: `packages/db/test/rls/wp22.test.ts`; flag-off run queues all seven: `process.int.test.ts`) Q-231.
+  - [x] Use `@mp/review-rules` (WP-14) for the decide policy and apply planning, through a worker-side items-apply port with the same guards as the API; `applied_by` null, `origin` email, undo window from the shared helper. (`items-port.ts`, `repo.insertAutomaticChange` with `UNDO_WINDOW_DAYS` from `@mp/contracts`; `process.int.test.ts`)
+  - [x] Map the WP-11 snake_case extraction (fields and evidence field names) to the review contracts' camelCase explicitly, with tests. (`map.ts`, `map.test.ts`)
+  - [x] Run the subject through the WP-19 redactor before writing `extracted_items.message_meta`; `domainMatch` comes only from `isDomainMatch`, and `senderFirstSeen` defaults to true on any error. (`message-meta.test.ts`; `analyze.test.ts` "domainMatch comes only from isDomainMatch"; `process.int.test.ts` "senderFirstSeen")
+  - [x] The worker writes `providerDomain: null` in `extracted_items.fields` (a model-supplied domain is never trusted; only a user edit sets it), with a test. (`map.test.ts`; `process.int.test.ts`)
+  - [x] A detected price change on a monthly subscription creates a one-off reminder through `packages/notify` (DESIGN_SPEC §6 rule 11, Q-134). (`reminder.ts` uses `reminderSendAt`, `daysBetween`, `isMonthlySubscription`; `process.int.test.ts` "price change on a monthly subscription", including that the reminders planner leaves it alone)
+- **Notes:** the pipeline needs `ANTHROPIC_API_KEY` and a Gmail or Outlook connection; without a key it is not started (a warning at start). `pnpm ai:eval` was run offline and passes; no prompt changed (`extract.v1`). Real Gmail, real Anthropic, the Batch API against the real service, and the DMARC header of a real message (Q-237) are unverified until the owner's first run. Security review fixes: extraction cost caps, header parsing, fence note, reminder gate, authenticated only from the receiver's own header. Review questions: Q-230 to Q-239.
 - **Gate:** G3 before `auto_apply` is enabled for any household.
 
 ## WP-23 · Web: Email & imports, Members & privacy, setup, review UI
@@ -373,7 +374,7 @@ Mock mode (`NEXT_PUBLIC_MP_MOCK=1`) stays for tests and design review. Live mode
   - [ ] Deletion and retention cover `subscriptions` and `billing_events` (cascade from households; processed events and `webhook_events` purged at 13 months, Q-154).
   - [ ] The retention purge deletes `email_messages` metadata older than 13 months, and deletes revoked `email_connections` rows (masked address and address hash) 30 days after `revoked_at` (WP-21 S6).
   - [ ] Household deletion runs `email.revoke` for every connection and waits until every token is gone (`token_ciphertext` null) before the cascade delete; a connection whose revoke is stuck blocks and alerts instead of dropping the row (WP-21 S6).
-  - [ ] The retention purge deletes `notifications` older than 90 days (deliveries cascade) and `send_quota_events` older than 2 days (WP-15 security review).
+  - [ ] The retention purge deletes `notifications` older than 90 days (deliveries cascade) and `send_quota_events` older than 2 days (WP-15 security review), and `ai_runs` older than 13 months (WP-22 security review N2; counts and costs only, no content).
   - [ ] `GET /households/:hid/activity?limit=` returns `{ id, action, actorName, at }` with server-written action text; `GET/PUT …/sharing` for the three per-member switches; `POST …/members/:uid/reminders { about: "connect_email" | "two_step" }`, at most one per member and topic per day (Q-177).
 - **Gate:** G2.
 

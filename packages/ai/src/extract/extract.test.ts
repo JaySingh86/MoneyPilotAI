@@ -187,6 +187,19 @@ describe("batch helpers", () => {
     expect(results.has("unknown")).toBe(false);
     expect(runs).toHaveLength(2);
     expect(runs.every((r) => r.batch)).toBe(true);
+    // Each batch run names its message (the custom_id), so a retried collect can record it once (N4).
+    expect(runs.map((r) => r.reference).sort()).toEqual(["m-1", "m-3"]);
+  });
+
+  it("a direct call carries the caller's reference into its run record", async () => {
+    const runs: AiRunRecord[] = [];
+    const client = new AiClient({
+      transport: createFakeTransport({ responder: scripted(jsonResponse(good)) }),
+      onRun: (r) => void runs.push(r),
+    });
+    await extractEmail(client, { ...input, reference: "m-9" });
+    await extractEmail(client, input);
+    expect(runs.map((r) => r.reference)).toEqual(["m-9", null]);
   });
 
   it("records non-succeeded batch entries as errors", async () => {

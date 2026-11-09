@@ -139,6 +139,26 @@ function toReviewItem(row: repo.ReviewRow, lenient = false): ReviewItem | null {
   };
 }
 
+/**
+ * The display fields the web reads (`amountCents`, `dueDate`) for a snapshot the WORKER wrote, which keeps them in
+ * `occurrence` (an estimate replaced by an actual) or `display` (a no-op). Only added where absent, and only on the way
+ * out: the stored snapshot, which undo parses and compares, is never changed.
+ */
+function withDisplay(snapshot: Record<string, unknown>): Record<string, unknown> {
+  const parsed = Snapshot.safeParse(snapshot);
+  if (!parsed.success) return snapshot;
+  const { occurrence, display } = parsed.data;
+  const shown: Record<string, unknown> = {};
+  if (occurrence) {
+    shown.amountCents = occurrence.actualAmountCents;
+    shown.dueDate = occurrence.dueDate;
+  } else if (display) {
+    if (display.amountCents !== undefined) shown.amountCents = display.amountCents;
+    if (display.dueDate !== undefined) shown.dueDate = display.dueDate;
+  }
+  return { ...shown, ...snapshot };
+}
+
 function toApplied(row: repo.AppliedRow): AppliedChange {
   return {
     id: row.id,
@@ -146,8 +166,8 @@ function toApplied(row: repo.AppliedRow): AppliedChange {
     entityType: row.entityType,
     entityId: row.entityId,
     entityName: row.entityName,
-    before: row.before,
-    after: row.after,
+    before: row.before === null ? null : withDisplay(row.before),
+    after: withDisplay(row.after),
     appliedBy: row.appliedBy,
     appliedAt: row.appliedAt,
     undoUntil: row.undoUntil,
@@ -213,6 +233,10 @@ const Snapshot = z.strictObject({
   itemId: Uuid.optional(),
   name: z.string().optional(),
   version: z.number().int().optional(),
+  /** What a change shows in the "Applied automatically" list; written by the worker for a no-op. Never restored or compared. */
+  display: z
+    .strictObject({ amountCents: Cents.nullable().optional(), dueDate: IsoDate.nullable().optional() })
+    .optional(),
 });
 type Snapshot = z.infer<typeof Snapshot>;
 
@@ -449,7 +473,9 @@ export async function undo(deps: ReviewDeps, a: Actor, id: string): Promise<Appl
 
     // Whatever was written must still be there, unchanged.
     const current = await currentSnapshot(d, a, row.entityId, after).catch(notFoundAsGone);
-    if (!snapshotMatches(after, current)) throw gone();
+    // `display` is for the list only: it is not a value the change wrote, so it is not compared.
+    const { display: _display, ...written } = after;
+    if (!snapshotMatches(written, current)) throw gone();
 
     if (before === null) {
       // The change created the item: undo removes it (soft delete, like any delete), unless it is in use.

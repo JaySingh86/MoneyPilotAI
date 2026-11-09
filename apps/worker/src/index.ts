@@ -3,6 +3,7 @@ import { createEmailSender, type EmailSender } from "@mp/notify";
 import { createLogger } from "@mp/observability";
 import { MAX_CSV_BYTES } from "@mp/detection";
 import { startJobs } from "./boss";
+import { createExtractionClient } from "./jobs/ai/metering";
 import { loadEmailJobDeps } from "./jobs/email/discover/register";
 import { createS3ImportFileStore, loadS3Config } from "./jobs/imports/s3-storage";
 import { configureImportFileStore } from "./jobs/imports/storage";
@@ -89,6 +90,8 @@ const jobs = await startJobs({
   email,
   appUrl,
   emailConnectors,
+  // WP-22: the extraction client. No ANTHROPIC_API_KEY means no model call is ever made (the pipeline stays off).
+  ai: createExtractionClient(process.env, db, log),
 });
 log.info("worker started");
 

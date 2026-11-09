@@ -15,6 +15,7 @@ import { seedItemsWorld, type ItemsWorldRows } from "./items-world";
 import { seedEmailWorld, type EmailWorldRows } from "./email-world";
 import { seedImportsWorld, type ImportsWorldRows } from "./imports-world";
 import { seedNotifyWorld, type NotifyWorldRows } from "./notify-world";
+import { seedPipelineWorld, type PipelineWorldRows } from "./pipeline-world";
 import { seedReviewWorld, type ReviewWorldRows } from "./review-world";
 
 export interface TestHousehold {
@@ -35,6 +36,8 @@ export interface TestHousehold {
   notify: NotifyWorldRows;
   /** One row in every WP-21 household table. */
   email: EmailWorldRows;
+  /** One row in every WP-22 household table. */
+  pipeline: PipelineWorldRows;
 }
 
 export interface World {
@@ -81,7 +84,8 @@ export async function buildHousehold(db: ApiDb, label: string): Promise<TestHous
   const imports = await seedImportsWorld(db, household);
   const notify = await seedNotifyWorld(db, household);
   const email = await seedEmailWorld(db, household);
-  return { ...household, items, review, billing, imports, notify, email };
+  const pipeline = await seedPipelineWorld(id);
+  return { ...household, items, review, billing, imports, notify, email, pipeline };
 }
 
 export async function buildWorld(db: ApiDb): Promise<World> {

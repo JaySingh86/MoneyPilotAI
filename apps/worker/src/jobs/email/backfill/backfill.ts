@@ -69,7 +69,7 @@ export async function handleEmailBackfill(deps: EmailJobDeps, data: unknown): Pr
       pages++;
       const last = page.nextPageToken === null;
       stored += await deps.db.withJobTx(householdId, async (tx) => {
-        const n = await ingestMessages(tx, conn, page.messages, watched);
+        const n = await ingestMessages(tx, conn, page.messages, watched, "backfill");
         await tx.execute(sql`update email_connections set
             backfill_status = ${last ? "done" : "running"},
             backfill_cursor = ${page.nextPageToken},
