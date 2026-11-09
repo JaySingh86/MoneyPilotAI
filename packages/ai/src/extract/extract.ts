@@ -19,6 +19,8 @@ export interface ExtractInput {
   /** True when the 20k-character cap cut the text. A truncated email can never auto-apply (rule 6). */
   readonly truncated: boolean;
   readonly householdId?: string | null;
+  /** Recorded on the run (for example the message id); never sent to the model. */
+  readonly reference?: string | null;
 }
 
 export type ExtractOutcome =
@@ -142,6 +144,7 @@ export async function extractEmail(client: AiClient, input: ExtractInput): Promi
     promptVersion: EXTRACT_PROMPT_ID,
     request: buildExtractRequest(input),
     householdId: input.householdId ?? null,
+    reference: input.reference ?? null,
     parse: parseExtraction,
   });
   return finishExtraction(completion, input);
@@ -233,6 +236,7 @@ export async function collectExtractionBatch(
         promptVersion: prompt,
         request: buildExtractRequest(item),
         householdId: options.householdId ?? item.householdId ?? null,
+        reference: outcome.customId,
       },
       response,
       completion.status,

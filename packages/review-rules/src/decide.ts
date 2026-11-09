@@ -7,7 +7,9 @@
 //   injectionSuspected the WP-22 pipeline verdict (WP-11 `signals.fenceTampered` plus its own checks)
 //   domainMatch        `isDomainMatch(matchResult)` from @mp/email (a unique match through the provider domain)
 //   matchedItemConfirmed `matchResult.confirmed`
-//   senderFirstSeen    `hasPriorDecidedFromSender(...) === false` (see repo.ts)
+//   senderFirstSeen    the worker's `senderFirstSeen` (apps/worker/src/jobs/email/process/repo.ts, Q-235): false once a
+//                      person CONFIRMED a review item from the sender's domain in this household, or a real
+//                      (non-no-op) automatic change from it was applied. No-op rows never count (N1).
 //   item               the matched item as the engine sees it: its fixed amount or engine estimate, and the next
 //                      expected date (occurrence due date, or the renewal date for renewal notices)
 //

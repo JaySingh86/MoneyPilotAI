@@ -333,6 +333,130 @@ describe("confirm", () => {
     expect((await occ())?.actualAmountCents).toBeNull();
   });
 
+  it("undoes a change the email pipeline made by itself (WP-22): the actual and its `email` history point are removed", async () => {
+    const item = await createBill({
+      name: "Electric (automatic)",
+      kind: "bill",
+      category: "utilities",
+      amountType: "estimated",
+      amountCents: 10000,
+      schedule: { type: "monthly_day", day: 21, dtstart: "2026-11-21" },
+      providerDomain: "auto-power.example",
+    });
+    const occurrenceUrl = `${base()}/occurrences?from=2026-11-21&to=2026-11-21&itemId=${item.id}`;
+    const occ = async () =>
+      (
+        (await t.app.inject({ method: "GET", url: occurrenceUrl, headers: sam })).json().data as {
+          id: string;
+          actualAmountCents: number | null;
+        }[]
+      )[0];
+    const before = await occ();
+    expect(before?.actualAmountCents).toBeNull();
+    // What `apps/worker` writes for an automatic estimate-to-actual change: the same snapshot shape, applied_by null.
+    const changeId = randomUUID();
+    await worker.withJobTx(seeded.householdId, async (tx) => {
+      await tx.execute(sql`update occurrences set actual_amount_cents = 12345 where id = ${before?.id}`);
+      await tx.execute(sql`insert into item_amount_history (household_id, item_id, occurred_on, amount_cents, source)
+        values (${seeded.householdId}, ${item.id}, '2026-11-21', 12345, 'email')`);
+      await tx.execute(sql`insert into applied_changes
+          (id, household_id, origin, entity_type, entity_id, before, after, applied_by, applied_at, undo_until)
+        values (${changeId}, ${seeded.householdId}, 'email', 'item', ${item.id},
+          ${JSON.stringify({ occurrence: { id: before?.id, dueDate: "2026-11-21", actualAmountCents: null } })}::jsonb,
+          ${JSON.stringify({ occurrence: { id: before?.id, dueDate: "2026-11-21", actualAmountCents: 12345 } })}::jsonb,
+          null, '2026-11-03T16:00:00Z', '2026-12-03T16:00:00Z')`);
+    });
+    expect((await occ())?.actualAmountCents).toBe(12345);
+    const res = await call("POST", `/applied-changes/${changeId}/undo`, sam);
+    expect(res.statusCode, res.body).toBe(200);
+    expect((await occ())?.actualAmountCents).toBeNull();
+    const history = await t.admin((c) =>
+      c.query(`select 1 from item_amount_history where item_id = $1 and source = 'email'`, [item.id]),
+    );
+    expect(history.rowCount).toBe(0);
+  });
+
+  it("lists worker-written rows with the display fields the web reads, and they still undo (spec finding 2)", async () => {
+    const item = await createBill({
+      name: "Internet (display)",
+      kind: "bill",
+      category: "utilities",
+      amountType: "fixed",
+      amountCents: 7000,
+      schedule: { type: "monthly_day", day: 5, dtstart: "2026-11-05" },
+    });
+    const est = await createBill({
+      name: "Electric (display)",
+      kind: "bill",
+      category: "utilities",
+      amountType: "estimated",
+      amountCents: 10000,
+      schedule: { type: "monthly_day", day: 22, dtstart: "2026-11-22" },
+    });
+    const occ = (
+      (
+        await t.app.inject({
+          method: "GET",
+          url: `${base()}/occurrences?from=2026-11-22&to=2026-11-22&itemId=${est.id}`,
+          headers: sam,
+        })
+      ).json().data as { id: string }[]
+    )[0];
+    const noopId = randomUUID();
+    const actualId = randomUUID();
+    await worker.withJobTx(seeded.householdId, async (tx) => {
+      // What apps/worker writes: an identical notice (with the confirmed amount and date for display) ...
+      await tx.execute(sql`insert into applied_changes
+          (id, household_id, origin, entity_type, entity_id, before, after, applied_by, applied_at, undo_until)
+        values (${noopId}, ${seeded.householdId}, 'email', 'item', ${item.id}, '{}'::jsonb,
+          ${JSON.stringify({ itemId: item.id, display: { amountCents: 7000, dueDate: "2026-11-05" } })}::jsonb,
+          null, '2026-11-03T15:00:00Z', '2026-12-03T15:00:00Z')`);
+      // ... and an estimate replaced by an actual.
+      await tx.execute(sql`update occurrences set actual_amount_cents = 15137 where id = ${occ?.id}`);
+      await tx.execute(sql`insert into applied_changes
+          (id, household_id, origin, entity_type, entity_id, before, after, applied_by, applied_at, undo_until)
+        values (${actualId}, ${seeded.householdId}, 'email', 'item', ${est.id},
+          ${JSON.stringify({ occurrence: { id: occ?.id, dueDate: "2026-11-22", actualAmountCents: null } })}::jsonb,
+          ${JSON.stringify({ occurrence: { id: occ?.id, dueDate: "2026-11-22", actualAmountCents: 15137 } })}::jsonb,
+          null, '2026-11-03T15:30:00Z', '2026-12-03T15:30:00Z')`);
+    });
+    const list = (await call("GET", "/applied-changes?limit=50", sam)).json().data as {
+      id: string;
+      entityName: string;
+      before: Record<string, unknown> | null;
+      after: Record<string, unknown>;
+    }[];
+    const noop = list.find((c) => c.id === noopId);
+    const actual = list.find((c) => c.id === actualId);
+    // The web builds "Internet (display), $70.00 due Nov 5" from exactly these (review-map.ts `appliedRow`).
+    expect(noop).toMatchObject({
+      entityName: "Internet (display)",
+      after: { amountCents: 7000, dueDate: "2026-11-05" },
+    });
+    expect(actual).toMatchObject({
+      entityName: "Electric (display)",
+      before: { amountCents: null, dueDate: "2026-11-22" },
+      after: { amountCents: 15137, dueDate: "2026-11-22" },
+    });
+    // The stored snapshots are untouched, so undo still reads them.
+    expect((await call("POST", `/applied-changes/${actualId}/undo`, sam)).statusCode).toBe(200);
+    expect((await call("POST", `/applied-changes/${noopId}/undo`, sam)).statusCode).toBe(200);
+  });
+
+  it("undoes an automatic no-op (an identical notice) without touching the item", async () => {
+    const item = await createBill({ name: "Internet (automatic no-op)" });
+    const changeId = randomUUID();
+    await worker.withJobTx(seeded.householdId, (tx) =>
+      tx.execute(sql`insert into applied_changes
+          (id, household_id, origin, entity_type, entity_id, before, after, applied_by, applied_at, undo_until)
+        values (${changeId}, ${seeded.householdId}, 'email', 'item', ${item.id}, '{}'::jsonb,
+          ${JSON.stringify({ itemId: item.id })}::jsonb, null, '2026-11-03T16:00:00Z', '2026-12-03T16:00:00Z')`),
+    );
+    const res = await call("POST", `/applied-changes/${changeId}/undo`, sam);
+    expect(res.statusCode, res.body).toBe(200);
+    expect(await getItem(item.id)).toMatchObject({ amountCents: 14900 });
+  });
+
   it("a decision applies dates only; a duplicate applies nothing", async () => {
     const item = await createBill({ name: "Renters (decision)" });
     const decision = await queue({

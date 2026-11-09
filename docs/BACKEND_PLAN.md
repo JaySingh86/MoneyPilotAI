@@ -1243,7 +1243,7 @@ The first implementation is Plaid (Transactions + Recurring Transactions). Trans
 | `email.backfill` | On connect | Singleton per connection | Resumable by page token |
 | `email.revoke` | After a disconnect or leave (sweep) | Singleton per connection | 8×, alert if the token is still held (never deletes an unrevoked token) |
 | `email.sweep`, `email.watch.sweep` | Every minute; daily 05:00 UTC | One run | Turn the marks the API leaves (push, disconnect, new connection) into the jobs above, because the API cannot enqueue (Q-105); the daily one renews every watch |
-| `email.process` (prefilter → fetch → redact → extract → validate → match → decide) | Per message | Key = message ID; max 5 concurrent per connection | 5×; then `failed` |
+| `email.process` (prefilter → fetch → redact → extract → validate → match → decide) | Per connection (new mail; the backfill goes through `ai.batch.submit` / `ai.batch.collect`) | Singleton key = connection id, messages one after another (a Microsoft refresh rotates the refresh token, Q-230); capped per household per day (`AI_EXTRACT_DAILY_CAP_PER_HOUSEHOLD`) | 5×; then the message in flight is `failed` |
 | `ai.batch.submit` / `ai.batch.collect` | Backfill | Per batch | Collect polls until `ended` |
 | `email.inbound` | SNS (forwarding) | Per S3 object | 5× |
 | `imports.process` | API call | Singleton per import | 3× |

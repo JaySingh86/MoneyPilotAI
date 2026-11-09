@@ -5,6 +5,85 @@ Agents add questions here instead of guessing. The tech lead answers them. If an
 Format (newest first):
 
 ```
+## Q-239 · WP-22 · Capture one real raw message per provider as a fixture before G3
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: security review S4; Q-062; Q-237; `apps/worker/src/jobs/email/process/read.ts` (`AUTHENTICATION_POLICY`)
+- Question: A message now counts as authenticated only when the verdict header is confidently the receiving system's own: for Gmail the TOP-MOST `Authentication-Results` with authserv-id `mx.google.com`; for Outlook the top-most header that carries Exchange's `compauth=` token and no leading authserv-id. Both are from memory, and everything else is treated as unauthenticated (so it goes to review: safe, but nothing auto-applies if the guess is wrong). Before G3 the owner should save ONE real raw message per provider (from a real bill, with the account number, name and amounts replaced by hand; keep every header as it is) as a fixture under `packages/email/testing`, and the policy should be checked against it. Please do that from your own Gmail first (`fetchRaw` bytes), and from Outlook if you connect one.
+- Options considered: (a) as built; (b) trust any `Authentication-Results` (rejected by the security review).
+- Blocking: no for building; yes for enabling `auto_apply` at G3.
+- Answer:
+
+## Q-238 · WP-22 · The Email & imports board shows a price change applied automatically; DESIGN_SPEC §6 rule 14 says it is reviewed
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: canvas "Applied automatically" (Streaming bundle, $19.99 to $22.99), DESIGN_SPEC §5.1 and §6 rule 14, BACKEND_PLAN §7.8.2 (auto-apply: "replacing an estimate within ±50%" or "identical to what we already expect"; "Everything else is queued: ... price increases")
+- Question: The board lists Streaming bundle under "Applied automatically" with a price rise, but rule 14 and §7.8.2 send every price change to review (and the Q-134 reminder). Until the owner decides, rule 14 wins: the corpus puts the streaming message in the review queue (so it shows 5 queued: the board's 4 plus this one) and 3 applied (Internet and the car insurance, as on the board, and water and trash in place of the streaming row). So the fixture inbox does not reproduce "4 to review, 3 applied" exactly; the applied rows' content matches the board where the rule allows. If the owner wants small price increases to auto-apply (for example a rise of at most a few percent on a confirmed item from a known sender), that is a policy change in `@mp/review-rules` and a follow-up WP-22 change; the acceptance count then becomes exact again.
+- Options considered: (a) as built (rule 14); (b) allow a small, bounded increase to auto-apply (it writes the new amount, so it changes `planAutoApply`, undo and the "flagged for review" copy).
+- Blocking: no.
+- Answer: Answered (owner, 2026-11-09): price changes always go to review (rule 14 stays); the canvas board and sample data will be updated to match.
+
+## Q-237 · WP-22 · Which Authentication-Results header does each provider's raw message carry (the DMARC gate has never seen a real one)
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: Q-062 (auto-apply only on DMARC pass aligned with From, from our own receiver); `apps/worker/src/jobs/email/process/read.ts` (`TRUSTED_AUTHSERV_IDS`)
+- Question: The worker reads the verdict from the raw message the provider returns. Built: Gmail trusts a header whose authserv-id is `mx.google.com`; Outlook trusts the top-most header (Exchange Online writes it with no leading authserv-id, so the list is empty). Both are from memory of how those providers write the header, tested only with synthetic messages. If the real header differs (a different id, an `ARC-Authentication-Results` only, or a header the provider does not return from `fetchRaw`), DMARC is "unknown" and every message goes to review. That is the safe failure, but nothing would ever auto-apply. The owner's first real Gmail run should check one message from a large sender: `extracted_items.checks.signals.dmarcAligned` should be true.
+- Options considered: (a) as built; (b) a startup self-check that logs once when none of the first N messages carries a verdict.
+- Blocking: no. Safe by default; it only limits auto-apply.
+- Answer:
+
+## Q-236 · WP-22 · A backfill re-reads each message when its batch is collected (a second fetch per message)
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: BACKEND_PLAN §7.8.2 (`email.cleanup`: "discard text/attachments from memory/S3 temp"), §7.9 (Batch API), hard rule 7
+- Question: A batch finishes hours after it is submitted, and validation needs the redacted text the model saw (every quote must be verbatim in it). We never store a body, so `ai.batch.collect` fetches each message again and re-runs the (deterministic) parse and redaction. That doubles provider reads for a backfill (13 months of bills is a few hundred messages, far inside Gmail and Graph limits) and assumes a message does not change between the two reads. The spec's "S3 temp" would hold the redacted text for the batch's lifetime instead. Keep the re-read, or hold the redacted text (encrypted, deleted when the batch is collected) in the private bucket?
+- Options considered: (a) re-read (built; nothing stored); (b) an encrypted temp object per batch, deleted on collect (one read, but redacted bodies exist at rest for hours, which weighs on the Google Limited Use review).
+- Blocking: no.
+- Answer:
+
+## Q-235 · WP-22 · An identical notice can only auto-apply after a real change from that sender was applied; the no-op still writes an `applied_changes` row
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: BACKEND_PLAN §7.8.2 (auto-apply: "the sender is not first-seen for this item"; "every auto-apply writes `applied_changes`"), `hasPriorDecidedFromSender` (WP-14: only decisions that produced an applied change count), DESIGN_SPEC §5.1 ("Applied automatically")
+- Question: Two consequences of the rules as written. (1) A sender becomes "not first-seen" only once a confirmed or automatic decision for that item produced an applied change; confirming a duplicate or an identical notice produces none. So a household whose bills never change gets no automatic updates from the first 13 months of mail, only from the first real change that someone confirms. That is safe, and probably intended, but it may make "found automatically" look quiet at first. (2) An identical notice (case b) changes nothing, yet the spec says every auto-apply writes `applied_changes` with an undo. Built: it writes the row with `before = {}` and `after = {itemId}` (undo marks it undone and restores nothing), so it appears under "Applied automatically" and counts as the sender's trust history. Is that what the board shows (the canvas lists "Internet" with the same amount before and after), or should a no-op be recorded some other way?
+- Options considered: (a) as built; (b) a separate "seen" record for no-ops, keeping `applied_changes` for real writes (then `hasPriorDecidedFromSender` would read it too).
+- Blocking: no.
+- Answer: Changed (tech lead for owner, 2026-11-09). A sender is "known" (not first-seen) once a person has CONFIRMED (or edited) a review item from that sender domain in that household, or once a real, non-no-op change from it was applied. No-op rows (`applied_changes.before = {}`) do not count (security N1). Built in `senderFirstSeen` (apps/worker, by sender domain, household-wide), with the WP-14 comment in `decide.ts` updated; tested: the first message goes to review, and after the user confirms one an identical later notice auto-applies when the flag is on. The no-op row itself stays (it appears under "Applied automatically" and now carries the confirmed amount and due date for display).
+
+## Q-234 · WP-22 · Who is notified of a new review item, and what "a daily digest if more than 3" means in code
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: BACKEND_PLAN §7.8.2 ("Each queued item fires a `review` notification (a daily digest if more than 3)")
+- Question: Built: the mailbox's owner gets one `review` notification per queued item for the first 3 queued email items of their household-local day, then a single digest notification for the rest of that day (counted over the household's queued items created that day, so it is approximate across partners and mailboxes). The partner is not notified (they see the queue on Email & imports). The text has no names or amounts. Should the partner also be notified, and should the digest be a real daily job (one summary at a fixed hour) instead of a threshold inside the pipeline?
+- Options considered: (a) as built; (b) notify both members; (c) a daily `review.digest` job at 08:00 local.
+- Blocking: no.
+- Answer:
+
+## Q-233 · WP-22 · Items carry no insurance subtype and often no provider name, so two policies from one insurer are ambiguous unless the last 4 is set
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: BACKEND_PLAN §7.8.2 (`email.match`: provider_domain + account_last4, then provider_domain + kind), `recurring_items` (no `insurance_type`; `provider_name` optional), WP-19 `kindOf`
+- Question: The matcher keys on `category:subtype` for insurance. `recurring_items` has only the bare category, so the car and the motorcycle policy from the same insurer share the domain and the kind `insurance`: a message with no last 4 is `ambiguous` (queued as a new item with the ambiguity recorded in `checks.match`, never applied). With the last 4 stored on the item, `domain_last4` resolves it. Provider name falls back to the item name for fuzzy matching. Should items store an insurance subtype (WP-06 schema, a migration), or is "enter the policy last 4" enough?
+- Options considered: (a) as built; (b) `recurring_items.insurance_type`, filled from the first confirmed email and from the manual form.
+- Blocking: no.
+- Answer:
+
+## Q-232 · WP-22 · What happens to a refused or unreadable extraction, and to a receipt with nothing recurring in it
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: `packages/review-rules/src/decide.ts` (`model_refused`, `invalid_output` reasons), BACKEND_PLAN §7.8.2 ("Everything else is queued")
+- Question: The policy has review reasons for a refusal and for invalid output, but those outcomes carry no fields, and a review row must hold a valid `ExtractedFields`. Built: a refused (after the direct-call fallback), schema-invalid or max-tokens message becomes stage `failed` with no card and no retry. A receipt or payment confirmation with no frequency, renewal date, cancel-by, decision date or auto-renew adds nothing to a plan, matched or not: it becomes stage `irrelevant` with no card (a card per receipt would bury the real ones). Both are my reading; say if either should be a card.
+- Options considered: (a) as built; (b) a card with blank fields so a person can look at the message (needs a contract change); (c) queue every receipt as a `duplicate`.
+- Blocking: no.
+- Answer:
+
+## Q-231 · WP-22 · The `auto_apply` flag is a column on `households`, and there is no second "automatic updates" setting
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: ARCHITECTURE §10 (flags in a `feature_flags` table, household-scoped), BACKEND_PLAN §7.8.2 ("The household hasn't turned off automatic updates (setting)"), WORK_PLAN WP-22 ("`auto_apply` feature flag is off by default"), migration `202611091500_wp22_email-pipeline.sql`
+- Question: No `feature_flags` table exists, and no "automatic updates" household setting exists either. Built: `households.auto_apply_enabled boolean not null default false`, writable by no app role (the owner sets it by hand with SQL at G3), read by the worker as both the rollout flag and the household's setting (`autoApplyEnabled` in the policy). A table would also need an operator write path and its own world rows in the RLS suite; a column is one line and fails closed. When a household-facing "turn off automatic updates" switch is built (a Members & privacy or Email & imports control), it needs its own writable setting, separate from this operator flag. OK to defer the table and the switch?
+- Options considered: (a) column (built); (b) `feature_flags` table with a worker-read, operator-write policy; (c) both: the flag and a household switch.
+- Blocking: no.
+- Answer: Accepted (tech lead for owner, 2026-11-09). `households.auto_apply_enabled` is a column with no app-role grant. A household-facing "automatic updates" switch comes with G3.
+
+## Q-230 · WP-22 · `email.process` is one job per connection, not one per message
+- Asked by: wp-builder/wp/22-email-pipeline · 2026-11-09
+- Where: BACKEND_PLAN §9 (`email.process`: key = message ID, max 5 concurrent per connection, 5 attempts)
+- Question: Built: the singleton key is the CONNECTION; a run takes up to 25 waiting messages and handles them one after another on one access token, and the minute sweep queues the next run. Reason: a Microsoft refresh rotates the refresh token, so concurrent per-message jobs for one mailbox would race for the new token and could lose the only valid one (WP-21 already seals each rotation before using it). Cost: no parallelism inside a mailbox (a model call takes a second or two, so a mailbox clears roughly 25 messages a minute), and a failure after the last retry fails the message in flight, not the whole job. Idempotence is by row lock plus stage, so a repeated or overlapping run does nothing twice (tested). Keep this, or share one token across a bounded set of concurrent calls?
+- Options considered: (a) as built; (b) per-message jobs with a per-connection token cache and a mutex.
+- Blocking: no.
+- Answer: Accepted (tech lead for owner, 2026-11-09). The `email.process` singleton key is per connection, because a Microsoft refresh rotates the refresh token. BACKEND_PLAN §9's row is updated to match (cites Q-230).
 ## Q-215 · WP-32 · `revoke all on schema public from public` on a Supabase database
 - Asked by: wp-builder/wp/32-supabase-data · 2026-11-09
 - Where: `packages/db/supabase/bootstrap.sql` section 4; WP-32 acceptance ("revokes anon/authenticated access to our objects")

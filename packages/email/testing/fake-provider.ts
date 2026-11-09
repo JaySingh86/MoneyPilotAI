@@ -53,6 +53,8 @@ export class FakeMailProvider implements MailProvider {
   /** Page tokens handed out by `backfillPage`, to assert resumption. */
   readonly backfillPageTokens: (string | null)[] = [];
   readonly #accounts = new Map<string, Account>();
+  /** Raw RFC 822 bytes handed to `deliver`, by mailbox and message id. Without one, `fetchRaw` makes a stub. */
+  readonly #raw = new Map<string, Uint8Array>();
   readonly #codes = new Map<string, PendingCode>();
   readonly #failures = new Map<string, { error: ProviderError; times: number; after: number }>();
   readonly #now: () => number;
@@ -104,8 +106,8 @@ export class FakeMailProvider implements MailProvider {
     return { code, state };
   }
 
-  /** A new message in the inbox. */
-  deliver(address: string, partial: Partial<MessageMeta> = {}): MessageMeta {
+  /** A new message in the inbox. `raw` is what `fetchRaw` returns for it (a stub body when omitted). */
+  deliver(address: string, partial: Partial<MessageMeta> = {}, raw?: string | Uint8Array): MessageMeta {
     const a = this.account(address);
     const n = ++this.#counter;
     const meta: MessageMeta = {
@@ -117,6 +119,12 @@ export class FakeMailProvider implements MailProvider {
       listId: partial.listId ?? null,
     };
     a.messages.push(meta);
+    if (raw !== undefined) {
+      this.#raw.set(
+        `${a.address}\n${meta.providerMessageId}`,
+        typeof raw === "string" ? Buffer.from(raw) : raw,
+      );
+    }
     return meta;
   }
 
@@ -299,6 +307,8 @@ export class FakeMailProvider implements MailProvider {
     const a = this.#auth(accessToken);
     const m = a.messages.find((x) => x.providerMessageId === providerMessageId);
     if (!m) throw new ProviderError("not_found", "The provider has no such resource.");
+    const stored = this.#raw.get(`${a.address}\n${providerMessageId}`);
+    if (stored) return stored;
     return Buffer.from(
       `From: ${m.from}\r\nSubject: ${m.subject}\r\nDate: ${new Date(m.receivedAt).toUTCString()}\r\n\r\nBody of ${m.providerMessageId}\r\n`,
     );

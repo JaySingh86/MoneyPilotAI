@@ -12,6 +12,7 @@ import {
   handleBillingDrain,
   handleBillingSync,
 } from "./jobs/billing/sync";
+import type { AiClient } from "@mp/ai";
 import type { EmailSender } from "@mp/notify";
 import { guardJob } from "./jobs/guard";
 import { registerEmailJobs } from "./jobs/email/discover/register";
@@ -67,6 +68,8 @@ export interface JobDeps {
    * when no mailbox provider is configured. Tests pass fakes (or `null` to turn the connectors off).
    */
   emailConnectors?: Parameters<typeof registerEmailJobs>[1]["connectors"];
+  /** The extraction client (WP-22). Default none: the email processing pipeline is not started without it. */
+  ai?: AiClient | null;
   /** How often idle workers look for jobs. Default: pg-boss's own (2 s). Tests lower it. */
   pollingIntervalSeconds?: number;
 }
@@ -193,6 +196,7 @@ export async function registerJobs(boss: PgBoss, deps: JobDeps): Promise<void> {
     log: deps.log,
     ...(deps.pollingIntervalSeconds ? { pollingIntervalSeconds: deps.pollingIntervalSeconds } : {}),
     ...(deps.emailConnectors !== undefined ? { connectors: deps.emailConnectors } : {}),
+    ...(deps.ai !== undefined ? { ai: deps.ai } : {}),
   });
   await boss.schedule(REMINDERS_SWEEP_QUEUE, REMINDERS_SWEEP_CRON, null, { tz: "UTC" });
   await boss.schedule(PROPOSALS_EXPIRE_SWEEP_QUEUE, PROPOSALS_EXPIRE_SWEEP_CRON, null, { tz: "UTC" });

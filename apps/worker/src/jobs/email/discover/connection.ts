@@ -220,6 +220,8 @@ export async function ingestMessages(
   c: Connection,
   messages: readonly MessageMeta[],
   watchedDomains: readonly string[],
+  /** `backfill` for the first 13-month scan (extracted through the Batch API, WP-22); `discover` for new mail. */
+  intake: "discover" | "backfill" = "discover",
 ): Promise<number> {
   if (messages.length === 0) return 0;
   // Only a live connection stores anything. FOR NO KEY UPDATE makes a pause or a disconnect that is committing wait for this
@@ -238,10 +240,10 @@ export async function ingestMessages(
     );
     rows.push(sql`(${randomUUID()}, ${c.householdId}, ${c.id}, ${c.provider}, ${m.providerMessageId.slice(0, 512)},
       ${m.receivedAt}::timestamptz, ${parseFromAddress(m.from)?.domain ?? "unknown.invalid"},
-      ${verdict.decision === "out" ? "prefiltered_out" : "discovered"})`);
+      ${verdict.decision === "out" ? "prefiltered_out" : "discovered"}, ${intake})`);
   }
   const res = await tx.execute(sql`insert into email_messages
-      (id, household_id, connection_id, channel, provider_message_id, received_at, from_domain, stage)
+      (id, household_id, connection_id, channel, provider_message_id, received_at, from_domain, stage, intake)
     values ${sql.join(rows, sql`, `)}
     on conflict do nothing`);
   return res.rowCount ?? 0;

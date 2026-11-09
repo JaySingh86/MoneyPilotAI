@@ -160,6 +160,64 @@ describe("applied automatically rows", () => {
   });
 });
 
+describe("worker-written applied rows, as the API list returns them (WP-22)", () => {
+  const row = (over: Partial<AppliedChange>): AppliedChange => ({
+    id: "00000000-0000-4000-8000-000000000001",
+    origin: "email",
+    entityType: "item",
+    entityId: "00000000-0000-4000-8000-000000000002",
+    entityName: "Internet",
+    before: {},
+    after: {},
+    appliedBy: null,
+    appliedAt: "2026-10-21T13:00:00Z",
+    undoUntil: "2026-11-20T13:00:00Z",
+    undoneAt: null,
+    undoneBy: null,
+    undoable: true,
+    ...over,
+  });
+
+  it("an identical notice reads like the board: name, confirmed amount, due date", () => {
+    // `GET …/applied-changes` maps the worker's `display` to amountCents and dueDate (apps/api review.int.test.ts).
+    const r = appliedRow(
+      row({
+        after: {
+          itemId: "x",
+          display: { amountCents: 7000, dueDate: "2026-11-05" },
+          amountCents: 7000,
+          dueDate: "2026-11-05",
+        },
+      }),
+      "2026-10-27",
+      "America/New_York",
+    );
+    expect(r.title).toBe("Internet, $70.00 due Nov 5");
+    expect(r.detail).toBe("Matched something you’d already confirmed · Oct 21");
+  });
+
+  it("an estimate replaced by an actual shows the actual and its date, not a price-change arrow", () => {
+    const r = appliedRow(
+      row({
+        entityName: "Electricity",
+        before: {
+          occurrence: { id: "o", dueDate: "2026-11-03", actualAmountCents: null },
+          amountCents: null,
+          dueDate: "2026-11-03",
+        },
+        after: {
+          occurrence: { id: "o", dueDate: "2026-11-03", actualAmountCents: 15137 },
+          amountCents: 15137,
+          dueDate: "2026-11-03",
+        },
+      }),
+      "2026-10-27",
+      "America/New_York",
+    );
+    expect(r.title).toBe("Electricity, $151.37 due Nov 3");
+  });
+});
+
 describe("mock inbox", () => {
   it("has 4 items to review and the nav badge follows", () => {
     expect(wp23.queue).toHaveLength(4);

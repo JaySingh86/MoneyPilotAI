@@ -43,6 +43,8 @@ export const households = pgTable("households", {
     .notNull()
     .references(() => users.id),
   deletionScheduledFor: timestamp("deletion_scheduled_for", { withTimezone: true }),
+  /** WP-22: the `auto_apply` flag. Off by default; no app role can set it (G3 gates turning it on). */
+  autoApplyEnabled: boolean("auto_apply_enabled").notNull().default(false),
   version: integer("version").notNull().default(1),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

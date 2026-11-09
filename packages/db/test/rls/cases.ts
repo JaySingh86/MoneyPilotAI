@@ -221,4 +221,11 @@ export const householdTableCases: readonly HouseholdTableCase[] = [
       values (${t.householdId}, 'gmail', ${`probe-${randomUUID()}`}, now(), 'probe.example', 'discovered')`,
     update: (t) => sql`update email_messages set stage = 'failed' where household_id = ${t.householdId}`,
   },
+  // ===== WP-22: email pipeline =====
+  {
+    table: "ai_runs",
+    insert: (t) => sql`insert into ai_runs (household_id, purpose, model_id, prompt_version, status)
+      values (${t.householdId}, 'extract', 'probe-model', 'extract.v0', 'ok')`,
+    update: (t) => sql`update ai_runs set status = 'error' where household_id = ${t.householdId}`,
+  },
 ];

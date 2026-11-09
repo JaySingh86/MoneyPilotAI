@@ -42,6 +42,8 @@ export interface PrepareOptions {
    * the top-most header is used. Verdicts are only meaningful when the receiver strips inbound copies.
    */
   trustedAuthservIds?: string[];
+  /** Stricter reading of the header (S4): top-most only, and tokens only the receiving system writes. */
+  authenticationPolicy?: { topmostOnly?: boolean; requireTokens?: string[] };
 }
 
 /** `parse_limit`: the message hit a parsing limit (too many MIME parts, an inflate bomb, time, memory). */
@@ -60,6 +62,8 @@ export type PrepareNote =
   | "pdf_skipped_over_limit"
   | "attachment_ignored"
   | "injection_suspected"
+  /** The body or subject tried to open or close the `<email>` fence around the text; the markers were defused. */
+  | "fence_tampered"
   | "html_truncated";
 
 export interface PreparedEmail {
@@ -181,7 +185,11 @@ export async function prepareEmailInProcess(
 
   const senderDomain = domainOf(parsed.from?.address);
   const forwarded = findOriginalSenderDomain(assembled.slice(0, 60_000), parsed.headers ?? []);
-  const authHeader = pickAuthenticationResults(parsed.headers ?? [], opts.trustedAuthservIds ?? []);
+  const authHeader = pickAuthenticationResults(
+    parsed.headers ?? [],
+    opts.trustedAuthservIds ?? [],
+    opts.authenticationPolicy ?? {},
+  );
   const authentication = authHeader ? parseAuthenticationResults(authHeader, senderDomain) : UNKNOWN_AUTH;
 
   const redactOpts = { senderDomain };
@@ -189,6 +197,9 @@ export async function prepareEmailInProcess(
   const subj = redact(normalizeText((parsed.subject ?? "").slice(0, L.maxSubjectInputChars)), redactOpts);
 
   let text = neutralizeDelimiters(body2.text);
+  // The model call can no longer see that the text tried to close its fence (it is defused here), so say so (S2).
+  const subjectText = neutralizeDelimiters(subj.text);
+  if (text !== body2.text || subjectText !== subj.text) notes.add("fence_tampered");
   if (text.length > L.maxTextChars) {
     text = text.slice(0, L.maxTextChars);
     truncated = true;
@@ -207,7 +218,7 @@ export async function prepareEmailInProcess(
   return {
     ok: true,
     senderDomain,
-    subject: neutralizeDelimiters(subj.text).slice(0, L.maxSubjectChars),
+    subject: subjectText.slice(0, L.maxSubjectChars),
     text,
     truncated,
     redactionCounts: counts,
