@@ -18,7 +18,7 @@
   "dependencies": {
     "html-to-text": "9.0.5",
     "htmlparser2": "8.0.2",
-    "pdfjs-dist": "6.4.299",
+    "pdfjs-dist": "6.5.438",
     "postal-mime": "2.7.6"
   },
   "devDependencies": {
