@@ -35,17 +35,17 @@
     "lint:css": "stylelint \"packages/ui/**/*.css\" \"apps/web/**/*.css\" --max-warnings=0 --allow-empty-input"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@types/node": "^22.10.0",
-    "dependency-cruiser": "^16.8.0",
-    "eslint": "^9.17.0",
-    "globals": "^15.14.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "dependency-cruiser": "^18.7.2",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
     "prettier": "^3.4.0",
-    "stylelint": "^17.16.0",
+    "stylelint": "^18.0.0",
     "tsx": "^4.19.0",
     "turbo": "^2.3.0",
-    "typescript": "^5.7.0",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.18.0",
-    "vitest": "^3.0.0"
+    "vitest": "^5.1.0"
   }
 }
