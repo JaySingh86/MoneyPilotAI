@@ -22,9 +22,9 @@ Every number on screen comes from a deterministic planning engine ([`packages/en
 
 ## Status
 
-Early development; not yet open to users. MVP work packages 1 to 3 are done (engine, database, API, web UI, CSV import, reminders, billing adapter, Gmail and Outlook connectors against test fakes). The project is now moving from mock data to a real Supabase project.
+Early development; not yet open to users. Most of the MVP is built: the planning engine, database, API, web UI, CSV import, reminders, billing adapter, Gmail and Outlook connectors (tested against fakes so far), and the email processing pipeline. The pipeline extracts bill details from email, checks each field against the message, and sends suggested changes to the review queue. Automatic applying of changes stays off until it has been checked against real messages. The project is now moving from mock data to a real Supabase project.
 
-Still to do for the MVP: the email processing pipeline, the forwarding channel, privacy operations (export, delete, retention) and production hardening. Planned after the MVP: AI explanations, "Ask MoneyPilot", realtime updates, a React Native mobile app, and bank connections through Plaid.
+Still to do for the MVP: the forwarding channel, privacy operations (export, delete, retention) and production hardening. Planned after the MVP: AI explanations, "Ask MoneyPilot", realtime updates, a React Native mobile app, and bank connections through Plaid.
 
 Progress is tracked in [`docs/agents/WORK_PLAN.md`](docs/agents/WORK_PLAN.md).
 
