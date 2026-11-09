@@ -1320,7 +1320,7 @@ Format (newest first):
 - Question: GoTrue issues the aal1 session on a correct password and needs it as the bearer to run the TOTP challenge, so `mfa_required` carries that aal1 session (and sets the cookie). It is a complete everyday session by ADR-018; the UI asks for the code at sign-in, but nothing server-side blocks an enrolled user who skips it. Step-up still needs aal2. Should enrolled accounts be held to aal2 for every route instead?
 - Options considered: (a) as implemented; (b) the API refuses aal1 tokens for accounts with a verified factor (needs a per-request factor lookup or a custom claim).
 - Blocking: no.
-- Answer:
+- Answer: Answered (owner, 2026-11-09, G1): accepted. An enrolled account may use an aal1 session for everyday routes; sensitive actions require step-up (aal2 + fresh TOTP).
 
 ## Q-223 · WP-33 · Password reset for an account with an authenticator wastes the emailed code if `mfaCode` is missing
 - Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
@@ -1328,14 +1328,14 @@ Format (newest first):
 - Question: Supabase needs an aal2 session to change the password of an account with a verified factor, and the recovery code is single use. Without `mfaCode` the API answers 403 `mfa_required` after the code is spent, so the user requests a new code. Better UX would be asking for both up front, but the web cannot know before the code is verified (no enumeration). Accept, or add a separate "update password" route that works from the recovery session after the TOTP step?
 - Options considered: (a) as implemented; (b) `mfa_required` returns the recovery session and a second route sets the password.
 - Blocking: no.
-- Answer:
+- Answer: Answered (owner, 2026-11-09, G1): accepted for now. A reset for an account with an authenticator needs the code in the same step; otherwise the recovery session is revoked and a new email is needed.
 
 ## Q-224 · WP-33 · Google sign-in is web only; MFA is not forced after Google
 - Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09
 - Where: ADR-020, `GET /v1/auth/google/start|callback`
 - Question: the callback sets the web refresh cookie and redirects, so it serves web only. Mobile would need a deep-link return and the refresh token in a one-time exchange; that is left until the mobile app exists. After Google the session is aal1 even for an enrolled account (same as Q-222).
 - Blocking: no.
-- Answer:
+- Answer: Answered (owner, 2026-11-09, G1): accepted. Google sign-in is web-only, and a Google session is aal1 until a code is entered.
 
 ## Q-225 · WP-33 · Local Supabase end-to-end test not run
 - Asked by: wp-builder, wp/33-supabase-auth · 2026-11-09

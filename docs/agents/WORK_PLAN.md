@@ -50,7 +50,7 @@ Rules for running WPs: [PLAYBOOK.md](PLAYBOOK.md). Rules for code: [CLAUDE.md](.
 | WP-30 | P1 · Mobile app (React Native CLI) | P1 | WP-08, WP-04 | L | — | todo |
 | WP-31 | P1 · Bank adapter (Plaid) in staging | P1 | WP-16 | M | G2 | todo |
 | WP-32 | Supabase database + storage, live local stack (ADR-020) | R | WP-03, WP-16 | M | G2 | done (real Supabase project, pooler TLS and Storage S3 size enforcement verified by the owner's runbook; Q-210/Q-211 open) |
-| WP-33 | Supabase Auth through the API (ADR-020) | R | WP-05, WP-17 | M | G1 | done (owner G1 sign-off pending: Q-222/Q-223/Q-224/Q-228 and the real-Supabase check, runbook §10; Q-225 open) |
+| WP-33 | Supabase Auth through the API (ADR-020) | R | WP-05, WP-17 | M | G1 | done (G1 approved by owner 2026-11-09 incl. the per-address lockout tradeoff; before other users: the real-Supabase check, runbook §10; Q-225, Q-228 open) |
 
 **Human gates:**
 - **G1:** schema, RLS and auth review, before features build on them.
